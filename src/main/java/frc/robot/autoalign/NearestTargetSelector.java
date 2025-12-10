@@ -2,6 +2,8 @@ package frc.robot.autoalign;
 
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import frc.robot.util.VectorUtil;
 
 import java.util.List;
 
@@ -21,8 +23,7 @@ public record NearestTargetSelector(List<Pose2d> pool, double joystickInfluence)
             double dst = robotPose.getTranslation().getDistance(pose.getTranslation());
 
             // Calculate additional weighting based on joystick angle
-            double addition = LegacyAutoAlign.calculateBestPoseAddition(
-                    pose.minus(robotPose).getTranslation(), context.joystickVector());
+            double addition = calculateBestPoseAddition(pose.minus(robotPose).getTranslation(), context.joystickVector());
 
             // Apply addition and assign new best result if applicable
             double weight = dst + addition * joystickInfluence;
@@ -30,5 +31,16 @@ public record NearestTargetSelector(List<Pose2d> pool, double joystickInfluence)
         }
 
         return bestResult.getFirst();
+    }
+
+    /**
+     * Calculates a value to add to the selection "weight" of each reef pole.
+     * This is determined by the dot product of the robot to reef pole vector and the vector of the
+     * joystick motion. This is to ensure that the robot will prefer to target reef faces that the
+     * driver is moving towards.
+     */
+    public static double calculateBestPoseAddition(Translation2d toReefVector, Translation2d motionVector) {
+        if (motionVector.getNorm() < 0.1) return 0.0;
+        return VectorUtil.dot(VectorUtil.normalize(toReefVector), VectorUtil.normalize(motionVector));
     }
 }

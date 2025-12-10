@@ -1,6 +1,5 @@
 package frc.robot.autoalign;
 
-import choreo.util.ChoreoAllianceFlipUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -14,6 +13,7 @@ import frc.robot.RobotContainer;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.ConstantsUtil;
 import org.littletonrobotics.junction.Logger;
 
@@ -168,7 +168,7 @@ public class AutoAlignCommand extends Command {
 
         // create ChassisSpeeds, convert them to robot-relative, and apply to drivetrain
         ChassisSpeeds speeds = new ChassisSpeeds(vx, vy, omega);
-        Rotation2d gyroAngle = ChoreoAllianceFlipUtil.shouldFlip()
+        Rotation2d gyroAngle = AllianceFlipUtil.shouldFlip()
                 ? drive.getRotation().plus(new Rotation2d(Math.PI))
                 : drive.getRotation();
         drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, gyroAngle));

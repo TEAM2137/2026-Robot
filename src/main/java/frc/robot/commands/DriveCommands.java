@@ -17,11 +17,9 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.RobotContainer;
-import frc.robot.autoalign.LegacyAutoAlign;
-import frc.robot.autoalign.TargetSelector;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.util.FieldConstants;
+import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.VectorUtil;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -30,8 +28,6 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-
-import choreo.util.ChoreoAllianceFlipUtil;
 
 public class DriveCommands {
     public static final double DEADBAND = 0.1;
@@ -86,18 +82,13 @@ public class DriveCommands {
             omega = Math.copySign(omega * omega, omega);
 
             double multiplier = slowMode.getAsBoolean() ? 0.3 : 1.0;
-
-            double elevatorHeight = RobotContainer.getInstance().elevator.getExtensionMeters();
-            double accelScaling = MathUtil.clamp(1 - (elevatorHeight / 1.8), 0.2, 1);
-            double velocityScaling = MathUtil.clamp(1 - (elevatorHeight / 2.5), 0.2, 1);
-
             Translation2d finalVelocity = limitAccelerationFor(
                 drive.getLinearSpeedsVector(),
                 new Translation2d(
                     linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec() * multiplier,
                     linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec() * multiplier
-                ).times(velocityScaling),
-                DRIVE_MAX_ACCELERATION * accelScaling
+                ),
+                DRIVE_MAX_ACCELERATION
             );
 
             finalVelocityPublisher.accept(finalVelocity);
@@ -105,7 +96,7 @@ public class DriveCommands {
             // Convert to field relative speeds & send command
             ChassisSpeeds speeds = new ChassisSpeeds(
                 finalVelocity.getX(), finalVelocity.getY(),
-                omega * drive.getMaxAngularSpeedRadPerSec() * velocityScaling
+                omega * drive.getMaxAngularSpeedRadPerSec()
             );
             boolean isFlipped = DriverStation.getAlliance().isPresent()
                 && DriverStation.getAlliance().get() == Alliance.Red;
@@ -146,26 +137,19 @@ public class DriveCommands {
 
             double multiplier = slowMode.getAsBoolean() ? 0.3 : 1.0;
 
-            double elevatorHeight = RobotContainer.getInstance().elevator.getExtensionMeters();
-            double accelScaling = MathUtil.clamp(1 - (elevatorHeight / 1.8), 0.2, 1);
-            double velocityScaling = MathUtil.clamp(1 - (elevatorHeight / 2.5), 0.2, 1);
-
             Translation2d finalVelocity = limitAccelerationFor(
                 drive.getLinearSpeedsVector(),
                 new Translation2d(
                     linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec() * multiplier,
                     linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec() * multiplier
-                ).times(velocityScaling),
-                DRIVE_MAX_ACCELERATION * accelScaling
+                ),
+                DRIVE_MAX_ACCELERATION
             );
 
             finalVelocityPublisher.accept(finalVelocity);
 
             // Convert to field relative speeds & send command
-            ChassisSpeeds speeds = new ChassisSpeeds(
-                finalVelocity.getX(), finalVelocity.getY(),
-                omega * velocityScaling
-            );
+            ChassisSpeeds speeds = new ChassisSpeeds(finalVelocity.getX(), finalVelocity.getY(), omega);
             boolean isFlipped = DriverStation.getAlliance().isPresent()
                 && DriverStation.getAlliance().get() == Alliance.Red;
             drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, isFlipped
@@ -306,14 +290,6 @@ public class DriveCommands {
         );
     }
 
-    public static Command alignToCoralStation(Drive drive, Supplier<Translation2d> joystickSupplier, BooleanSupplier slowMode) {
-        // Construct command
-        return joystickDriveAtAngle(drive, joystickSupplier, slowMode,
-                () -> (drive.getPose().getY() < 8.19912 / 2.0 == !ChoreoAllianceFlipUtil.shouldFlip())
-                ? TargetSelector.flipIfRed(FieldConstants.CORAL_STATION_BOTTOM).getRotation()
-                : TargetSelector.flipIfRed(FieldConstants.CORAL_STATION_TOP).getRotation());
-    }
-
     private static final StructPublisher<Translation2d> currentVelocityPublisher = NetworkTableInstance.getDefault()
         .getStructTopic("AccelLimiting/CurrentVelocity", Translation2d.struct).publish();
         private static final StructPublisher<Translation2d> finalVelocityPublisher = NetworkTableInstance.getDefault()
@@ -325,10 +301,10 @@ public class DriveCommands {
         currentVelocityPublisher.accept(currentVelocity);
         wantedVelocityPublisher.accept(wantedVelocity);
 
-        Translation2d flippedVelocity = ChoreoAllianceFlipUtil.shouldFlip() ? new Translation2d().minus(currentVelocity) : currentVelocity;
+        Translation2d flippedVelocity = AllianceFlipUtil.shouldFlip() ? new Translation2d().minus(currentVelocity) : currentVelocity;
         Translation2d desiredAccel = wantedVelocity.minus(flippedVelocity);
         if (desiredAccel.getNorm() > maxAcceleration * 0.04)
-            return flippedVelocity.plus(LegacyAutoAlign.normalize(desiredAccel).times(maxAcceleration * 0.04));
+            return flippedVelocity.plus(VectorUtil.normalize(desiredAccel).times(maxAcceleration * 0.04));
         else return wantedVelocity;
     }
 }

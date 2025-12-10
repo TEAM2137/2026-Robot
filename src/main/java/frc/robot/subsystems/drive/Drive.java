@@ -3,12 +3,10 @@ package frc.robot.subsystems.drive;
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.CANBus;
-import choreo.trajectory.SwerveSample;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -22,7 +20,6 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -65,48 +62,40 @@ public class Drive extends SubsystemBase {
     private final SysIdRoutine sysId;
     private final Alert gyroDisconnectedAlert = new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
 
-    private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
+    private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
     private Rotation2d rawGyroRotation = new Rotation2d();
-
-    // Auto trajectory following PIDs
-    private final PIDController autoXController = new PIDController(10.0, 0.0, 0.0);
-    private final PIDController autoYController = new PIDController(10.0, 0.0, 0.0);
-    private final PIDController autoHeadingController = new PIDController(10.0, 0.0, 0.0);
 
     private final Field2d field = new Field2d();
 
     public final FieldObject2d fieldTrajectory = field.getObject("Trajectory");
     public final FieldObject2d fieldStartPose = field.getObject("StartPose");
 
-    private final Sendable swerveDriveSendable = new Sendable() {
-        @Override
-        public void initSendable(SendableBuilder builder) {
-            builder.setSmartDashboardType("SwerveDrive");
+    private final Sendable swerveDriveSendable = builder -> {
+        builder.setSmartDashboardType("SwerveDrive");
 
-            builder.addDoubleProperty("Front Left Angle", () -> modules[0].getAngle().getRadians(), null);
-            builder.addDoubleProperty("Front Left Velocity", () -> modules[0].getVelocityMetersPerSec(), null);
+        builder.addDoubleProperty("Front Left Angle", () -> modules[0].getAngle().getRadians(), null);
+        builder.addDoubleProperty("Front Left Velocity", () -> modules[0].getVelocityMetersPerSec(), null);
 
-            builder.addDoubleProperty("Front Right Angle", () -> modules[1].getAngle().getRadians(), null);
-            builder.addDoubleProperty("Front Right Velocity", () -> modules[1].getVelocityMetersPerSec(), null);
+        builder.addDoubleProperty("Front Right Angle", () -> modules[1].getAngle().getRadians(), null);
+        builder.addDoubleProperty("Front Right Velocity", () -> modules[1].getVelocityMetersPerSec(), null);
 
-            builder.addDoubleProperty("Back Left Angle", () -> modules[2].getAngle().getRadians(), null);
-            builder.addDoubleProperty("Back Left Velocity", () -> modules[2].getVelocityMetersPerSec(), null);
+        builder.addDoubleProperty("Back Left Angle", () -> modules[2].getAngle().getRadians(), null);
+        builder.addDoubleProperty("Back Left Velocity", () -> modules[2].getVelocityMetersPerSec(), null);
 
-            builder.addDoubleProperty("Back Right Angle", () -> modules[3].getAngle().getRadians(), null);
-            builder.addDoubleProperty("Back Right Velocity", () -> modules[3].getVelocityMetersPerSec(), null);
+        builder.addDoubleProperty("Back Right Angle", () -> modules[3].getAngle().getRadians(), null);
+        builder.addDoubleProperty("Back Right Velocity", () -> modules[3].getVelocityMetersPerSec(), null);
 
-            builder.addDoubleProperty("Robot Angle", () -> getRotation().getRadians(), null);
-        }
+        builder.addDoubleProperty("Robot Angle", () -> getRotation().getRadians(), null);
     };
 
-    private SwerveModulePosition[] lastModulePositions = new SwerveModulePosition[] {
+    private final SwerveModulePosition[] lastModulePositions = new SwerveModulePosition[] {
         new SwerveModulePosition(),
         new SwerveModulePosition(),
         new SwerveModulePosition(),
         new SwerveModulePosition()
     };
 
-    private SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
+    private final SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
     public Drive(GyroIO gyroIO, ModuleIO flModuleIO,ModuleIO frModuleIO, ModuleIO blModuleIO, ModuleIO brModuleIO) {
         this.gyroIO = gyroIO;
@@ -121,8 +110,6 @@ public class Drive extends SubsystemBase {
 
         // Start odometry thread
         PhoenixOdometryThread.getInstance().start();
-
-        autoHeadingController.enableContinuousInput(-Math.PI, Math.PI);
 
         // Configure SysId
         sysId = new SysIdRoutine(
@@ -192,11 +179,6 @@ public class Drive extends SubsystemBase {
         // Update gyro alert
         gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
 
-        // Post auto align debug displays in NetworkTables
-        Logger.recordOutput("AutoAlign/TargetPose", LegacyAutoAlign.getTargetPose());
-        Logger.recordOutput("AutoAlign/JoystickVector", createTrajectoryTo(getPose().getTranslation()
-            .minus(RobotContainer.getInstance().joystickMotionSupplier().get().times(1.5))));
-
         // Post dashboard data through SmartDashboard
         field.setRobotPose(getPose());
         if (RobotModeTriggers.disabled().getAsBoolean()) {
@@ -257,7 +239,7 @@ public class Drive extends SubsystemBase {
     }
 
     public Command stopCommand() {
-        return runOnce(() -> stop());
+        return runOnce(this::stop);
     }
 
     /**
@@ -287,7 +269,7 @@ public class Drive extends SubsystemBase {
             .andThen(sysId.dynamic(direction));
     }
 
-    /** Returns the module states (turn angles and drive velocities) for all of the modules. */
+    /** Returns the module states (turn angles and drive velocities) for all the modules. */
     @AutoLogOutput(key = "SwerveStates/Measured")
     private SwerveModuleState[] getModuleStates() {
         SwerveModuleState[] states = new SwerveModuleState[4];
@@ -297,7 +279,7 @@ public class Drive extends SubsystemBase {
         return states;
     }
 
-    /** Returns the module positions (turn angles and drive positions) for all of the modules. */
+    /** Returns the module positions (turn angles and drive positions) for all the modules. */
     private SwerveModulePosition[] getModulePositions() {
         SwerveModulePosition[] states = new SwerveModulePosition[4];
         for (int i = 0; i < 4; i++) {
@@ -389,33 +371,6 @@ public class Drive extends SubsystemBase {
             new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
             new Translation2d(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
         };
-    }
-
-    public void followTrajectory(SwerveSample sample) {
-        // Get the current pose of the robot
-        Pose2d pose = getPose();
-
-        // Publish the autonomous target pose
-        Logger.recordOutput("Autonomous/TargetPose", sample.getPose());
-
-        double vxAddition = autoXController.calculate(pose.getX(), sample.x);
-        double vyAddition = autoYController.calculate(pose.getY(), sample.y);
-
-        Logger.recordOutput("Autonomous/VxAddition", vxAddition);
-        Logger.recordOutput("Autonomous/VyAddition", vyAddition);
-
-        Logger.recordOutput("Autonomous/VxError", autoXController.getError());
-        Logger.recordOutput("Autonomous/VyError", autoYController.getError());
-
-        // Generate the next speeds for the robot
-        ChassisSpeeds speeds = new ChassisSpeeds(
-            sample.vx + vxAddition,
-            sample.vy + vyAddition,
-            sample.omega + autoHeadingController.calculate(pose.getRotation().getRadians(), sample.heading)
-        );
-
-        // Apply the generated speeds
-        runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getRotation()));
     }
 
     public Command setCoastMode(boolean coast) {

@@ -1,10 +1,8 @@
 package frc.robot;
 
-
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-import choreo.util.ChoreoAllianceFlipUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -25,6 +23,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.util.AllianceFlipUtil;
 
 public class RobotContainer {
     private static RobotContainer instance;
@@ -129,8 +128,8 @@ public class RobotContainer {
         resetGyro.onTrue(Commands.runOnce(() ->
                 drive.setPose(new Pose2d(
                         drive.getPose().getTranslation(),
-                        ChoreoAllianceFlipUtil.shouldFlip()
-                            ? ChoreoAllianceFlipUtil.flip(new Rotation2d())
+                        AllianceFlipUtil.shouldFlip()
+                            ? AllianceFlipUtil.flip(new Rotation2d())
                             : new Rotation2d()
                 )), drive)
                 .ignoringDisable(true)
