@@ -8,6 +8,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
 import frc.robot.commands.DriveCommands;
@@ -75,6 +76,7 @@ public class AutoAlignCommand extends Command {
         this.pathLength = getPathLength(targetPose);
 
         Logger.recordOutput("AutoAlign/startPose", startPose);
+        Logger.recordOutput("AutoAlign/targetPose", targetPose);
         Logger.recordOutput("AutoAlign/pathLength", pathLength);
 
         this.angleController.reset(
@@ -167,7 +169,10 @@ public class AutoAlignCommand extends Command {
         if (ignoreRotation || Math.abs(angleController.getPositionError()) < DriveCommands.ANGLE_DEADBAND) omega = 0.0;
 
         // create ChassisSpeeds, convert them to robot-relative, and apply to drivetrain
-        ChassisSpeeds speeds = new ChassisSpeeds(vx, vy, omega);
+        ChassisSpeeds speeds = new ChassisSpeeds(
+                AllianceFlipUtil.shouldFlip() ? -vx : vx,
+                AllianceFlipUtil.shouldFlip() ? -vy : vy,
+                omega);
         Rotation2d gyroAngle = AllianceFlipUtil.shouldFlip()
                 ? drive.getRotation().plus(new Rotation2d(Math.PI))
                 : drive.getRotation();
@@ -199,19 +204,19 @@ public class AutoAlignCommand extends Command {
             switch (marker.type) {
                 case PROGRESS -> {
                     if (progress > marker.value) {
-                        marker.command.schedule();
+                        CommandScheduler.getInstance().schedule(marker.command);
                         it.remove();
                     }
                 }
                 case DISTANCE -> {
                     if (error < marker.value) {
-                        marker.command.schedule();
+                        CommandScheduler.getInstance().schedule(marker.command);
                         it.remove();
                     }
                 }
                 case TIME_AFTER_START -> {
                     if (timer.hasElapsed(marker.value)) {
-                        marker.command.schedule();
+                        CommandScheduler.getInstance().schedule(marker.command);
                         it.remove();
                     }
                 }

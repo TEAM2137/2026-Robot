@@ -73,7 +73,9 @@ public class DriveCommands {
         return Commands.run(() -> {
             // Get linear velocity
             Translation2d movementRaw = movementSupplier.get();
-            Translation2d linearVelocity = getLinearVelocityFromJoysticks(-movementRaw.getX(), -movementRaw.getY());
+            Translation2d linearVelocity = getLinearVelocityFromJoysticks(
+                    AllianceFlipUtil.shouldFlip() ? movementRaw.getX() : -movementRaw.getX(),
+                    AllianceFlipUtil.shouldFlip() ? movementRaw.getY() : -movementRaw.getY());
 
             // Apply rotation deadband
             double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
@@ -98,11 +100,10 @@ public class DriveCommands {
                 finalVelocity.getX(), finalVelocity.getY(),
                 omega * drive.getMaxAngularSpeedRadPerSec()
             );
-            boolean isFlipped = DriverStation.getAlliance().isPresent()
-                && DriverStation.getAlliance().get() == Alliance.Red;
-            drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, isFlipped
-                ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                : drive.getRotation()));
+            drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(speeds,
+                AllianceFlipUtil.shouldFlip()
+                    ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                    : drive.getRotation()));
         }, drive);
     }
 
@@ -129,7 +130,9 @@ public class DriveCommands {
         return Commands.run(() -> {
             // Get linear velocity
             Translation2d movementRaw = movementSupplier.get();
-            Translation2d linearVelocity = getLinearVelocityFromJoysticks(-movementRaw.getX(), -movementRaw.getY());
+            Translation2d linearVelocity = getLinearVelocityFromJoysticks(
+                    AllianceFlipUtil.shouldFlip() ? movementRaw.getX() : -movementRaw.getX(),
+                    AllianceFlipUtil.shouldFlip() ? movementRaw.getY() : -movementRaw.getY());
 
             // Calculate angular speed
             double omega = angleController.calculate(drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
