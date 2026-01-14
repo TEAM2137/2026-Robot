@@ -1,5 +1,6 @@
 package frc.robot;
 
+import java.util.Arrays;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -8,8 +9,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.autoalign.AutoAlignCommand;
 import frc.robot.commands.DriveCommands;
@@ -24,9 +28,13 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
+import frc.robot.util.TestMode;
 
 public class RobotContainer {
     private static RobotContainer instance;
+    
+    // Test modes
+    public final SendableChooser<TestMode> testModeChooser;
 
     // Subsystems
     public final Drive drive;
@@ -105,8 +113,13 @@ public class RobotContainer {
             break;
         }
 
+        // Setup test mode chooser
+        this.testModeChooser = new SendableChooser<>();
+        for (TestMode mode : TestMode.values()) this.testModeChooser.addOption(mode.getName(), mode);
+        SmartDashboard.putData(this.testModeChooser);
+
         // Setup autonomous features
-        autonomous = new Autonomous(this);
+        this.autonomous = new Autonomous(this);
 
         // Configure the controller bindings
         configureControllerBindings();
@@ -126,15 +139,6 @@ public class RobotContainer {
                         slowMode, () -> -driverController.getRightX() * 0.75)
                 .withName("Default Drive"));
 
-        AutoAlignCommand align = new AutoAlignCommand()
-                .withTargetPose(new Pose2d(
-                        new Translation2d(FieldConstants.FIELD_LENGTH / 2.0, FieldConstants.FIELD_WIDTH / 2.0),
-                        new Rotation2d()
-                ))
-                .withSpeedLimit(10.0);
-
-        driverController.a().whileTrue(align);
-
         // Reset gyro to 0°
         resetGyro.onTrue(Commands.runOnce(() ->
                 drive.setPose(new Pose2d(
@@ -145,10 +149,36 @@ public class RobotContainer {
                 )), drive)
                 .ignoringDisable(true)
                 .withName("Reset Gyro"));
+
+        configureTeleopBindings();
+        configureTestBindings();
+    }
+
+    // configure teleop specific bindings here
+    private void configureTeleopBindings() {
+        AutoAlignCommand align = new AutoAlignCommand()
+                .withTargetPose(new Pose2d(
+                        new Translation2d(FieldConstants.FIELD_LENGTH / 2.0, FieldConstants.FIELD_WIDTH / 2.0),
+                        new Rotation2d()
+                ))
+                .withSpeedLimit(10.0);
+
+        driverController.a().and(RobotModeTriggers.teleop()).whileTrue(align);
+    }
+
+    // configure test mode specific bindings here
+    private void configureTestBindings() {
+        // TODO: remove this example command
+        driverController.a().and(TestMode.EXAMPLE.isActive()).onTrue(Commands.waitSeconds(1));
     }
 
     public Supplier<Translation2d> joystickMotionSupplier() {
         return joystickSupplier;
+    }
+
+    public TestMode getTestMode() {
+        if (testModeChooser == null) return TestMode.values()[0];
+        return testModeChooser.getSelected();
     }
 
     public static RobotContainer getInstance() { return instance; }

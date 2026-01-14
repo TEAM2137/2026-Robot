@@ -90,7 +90,6 @@ public class AllianceFlipUtil {
 
     private record YearInfo(Flipper flipper, double fieldLength, double fieldWidth) {}
 
-    // TODO: Update this map for the 2026 field
     private static final HashMap<Integer, YearInfo> flipperMap = new HashMap<>() {
         {
             put(2020, new YearInfo(Flipper.ROTATE_AROUND, 16.5811, 8.19912));
