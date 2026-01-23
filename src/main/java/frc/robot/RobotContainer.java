@@ -1,6 +1,5 @@
 package frc.robot;
 
-import java.util.Arrays;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -24,6 +23,12 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.hopper.Hopper;
+import frc.robot.subsystems.hopper.HopperIO;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.launcher.Launcher;
+import frc.robot.subsystems.launcher.LauncherIO;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.util.AllianceFlipUtil;
@@ -39,6 +44,9 @@ public class RobotContainer {
     // Subsystems
     public final Drive drive;
     public final Vision vision;
+    public final Intake intake;
+    public final Hopper hopper;
+    public final Launcher launcher;
 
     // Auto
     public final Autonomous autonomous;
@@ -74,6 +82,10 @@ public class RobotContainer {
                 new VisionIO() {}
             );
 
+            intake = new Intake(new IntakeIO() {});
+            hopper = new Hopper(new HopperIO() {});
+            launcher = new Launcher(new LauncherIO() {});
+
             break;
 
         case SIM:
@@ -91,6 +103,10 @@ public class RobotContainer {
                 new VisionIO() {},
                 new VisionIO() {}
             );
+
+            intake = new Intake(new IntakeIO() {});
+            hopper = new Hopper(new HopperIO() {});
+            launcher = new Launcher(new LauncherIO() {});
 
             break;
 
@@ -110,13 +126,17 @@ public class RobotContainer {
                 new VisionIO() {}
             );
 
+            intake = new Intake(new IntakeIO() {});
+            hopper = new Hopper(new HopperIO() {});
+            launcher = new Launcher(new LauncherIO() {});
+
             break;
         }
 
         // Setup test mode chooser
         this.testModeChooser = new SendableChooser<>();
         for (TestMode mode : TestMode.values()) this.testModeChooser.addOption(mode.getName(), mode);
-        SmartDashboard.putData(this.testModeChooser);
+        SmartDashboard.putData("Test Mode", this.testModeChooser);
 
         // Setup autonomous features
         this.autonomous = new Autonomous(this);
@@ -168,8 +188,7 @@ public class RobotContainer {
 
     // configure test mode specific bindings here
     private void configureTestBindings() {
-        // TODO: remove this example command
-        driverController.a().and(TestMode.EXAMPLE.isActive()).onTrue(Commands.waitSeconds(1));
+        driverController.a().and(TestMode.INTAKE.isActive()).whileTrue(intake.startIntakeSequence());
     }
 
     public Supplier<Translation2d> joystickMotionSupplier() {

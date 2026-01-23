@@ -6,7 +6,9 @@ import frc.robot.RobotContainer;
 
 // TODO: add actual test modes
 public enum TestMode {
-    EXAMPLE("Example");
+    INTAKE("Intake"),
+    LAUNCHER("Launcher"),
+    HOPPER("Hopper");
 
     private final String name;
     private final Trigger isActive;
