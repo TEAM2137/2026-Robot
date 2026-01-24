@@ -10,8 +10,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import java.util.HashMap;
 
-import static frc.robot.util.FieldConstants.FIELD_LENGTH;
-import static frc.robot.util.FieldConstants.FIELD_WIDTH;
+import static frc.robot.util.FieldConstants.fieldLength;
+import static frc.robot.util.FieldConstants.fieldWidth;
 
 
 /**
@@ -98,7 +98,7 @@ public class AllianceFlipUtil {
             put(2023, new YearInfo(Flipper.MIRRORED, 16.5811, 8.19912));
             put(2024, new YearInfo(Flipper.MIRRORED, 16.5811, 8.19912));
             put(2025, new YearInfo(Flipper.ROTATE_AROUND, 17.548, 8.052));
-            put(2026, new YearInfo(Flipper.ROTATE_AROUND, FIELD_LENGTH, FIELD_WIDTH));
+            put(2026, new YearInfo(Flipper.ROTATE_AROUND, fieldLength, fieldWidth));
         }
     };
 
@@ -231,5 +231,9 @@ public class AllianceFlipUtil {
      */
     public static Pose3d flip(Pose3d pose) {
         return new Pose3d(flip(pose.getTranslation()), flip(pose.getRotation()));
+    }
+
+    public static <T> T either(T blue, T red) {
+        return shouldFlip() ? red : blue;
     }
 }

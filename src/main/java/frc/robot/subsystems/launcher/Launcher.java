@@ -36,6 +36,16 @@ public class Launcher extends SubsystemBase {
         Logger.processInputs("Launcher/Flywheel", this.flywheelInputs);
     }
 
+    public double getRpm(double dst) {
+        // TODO: lookup table stuff
+        return 0;
+    }
+
+    public double getHoodAngle(double dst) {
+        // TODO: lookup table stuff
+        return 0;
+    }
+
     public Command setFlywheelSpeed(double rpm) {
         return runOnce(() -> flywheel.setSpeed(rpm));
     }
@@ -46,5 +56,9 @@ public class Launcher extends SubsystemBase {
 
     public Command setTurretAngle(Rotation2d angle) {
         return runOnce(() -> turret.setAngleFieldRelative(angle));
+    }
+
+    public Command setShotCalculator(ShotCalculator calculator) {
+        return runOnce(() -> turret.setShotCalculator(calculator));
     }
 }
