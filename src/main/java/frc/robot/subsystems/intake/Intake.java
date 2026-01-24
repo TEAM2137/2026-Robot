@@ -4,15 +4,14 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.intake.IntakeIO.IntakeIOInputs;
 
 public class Intake extends SubsystemBase {
     private final IntakeIO io;
-    private final IntakeIOInputs inputs;
+    private final IntakeIOInputsAutoLogged inputs;
 
     public Intake(IntakeIO io) {
         this.io = io;
-        this.inputs = new IntakeIOInputs();
+        this.inputs = new IntakeIOInputsAutoLogged();
         Logger.processInputs("Intake", inputs);
     }
 
