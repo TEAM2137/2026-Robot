@@ -12,9 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.autoalign.AutoAlignCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -34,7 +32,6 @@ import frc.robot.subsystems.launcher.TurretIO;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.util.AllianceFlipUtil;
-import frc.robot.util.FieldConstants;
 import frc.robot.util.TestMode;
 
 public class RobotContainer {
@@ -150,6 +147,7 @@ public class RobotContainer {
 
         // Setup test mode chooser
         this.testModeChooser = new SendableChooser<>();
+        this.testModeChooser.setDefaultOption("All", TestMode.ALL);
         for (TestMode mode : TestMode.values()) this.testModeChooser.addOption(mode.getName(), mode);
         SmartDashboard.putData("Test Mode", this.testModeChooser);
 
@@ -191,19 +189,19 @@ public class RobotContainer {
 
     // configure teleop specific bindings here
     private void configureTeleopBindings() {
-        AutoAlignCommand align = new AutoAlignCommand()
-                .withTargetPose(new Pose2d(
-                        new Translation2d(FieldConstants.FIELD_LENGTH / 2.0, FieldConstants.FIELD_WIDTH / 2.0),
-                        new Rotation2d()
-                ))
-                .withSpeedLimit(10.0);
 
-        driverController.a().and(RobotModeTriggers.teleop()).whileTrue(align);
     }
 
     // configure test mode specific bindings here
     private void configureTestBindings() {
-        driverController.a().and(TestMode.INTAKE.isActive()).whileTrue(intake.startIntakeSequence());
+        driverController.a().and(TestMode.ALL.isActive()).onTrue(intake.startIntakeSequence());
+        driverController.a().and(TestMode.ALL.isActive()).onFalse(intake.stopIntakeSequence());
+
+        driverController.b().and(TestMode.ALL.isActive()).onTrue(launcher.setFlywheelSpeed(1000));
+        driverController.b().and(TestMode.ALL.isActive()).onFalse(launcher.setFlywheelSpeed(0));
+
+        driverController.x().and(TestMode.ALL.isActive()).onTrue(hopper.run());
+        driverController.x().and(TestMode.ALL.isActive()).onFalse(hopper.stop());
     }
 
     public Supplier<Translation2d> joystickMotionSupplier() {

@@ -4,11 +4,10 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
 
-// TODO: add actual test modes
 public enum TestMode {
+    ALL("All"),
     INTAKE("Intake"),
-    LAUNCHER("Launcher"),
-    HOPPER("Hopper");
+    LAUNCHER("Launcher");
 
     private final String name;
     private final Trigger isActive;

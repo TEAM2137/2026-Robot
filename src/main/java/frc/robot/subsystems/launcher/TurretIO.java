@@ -8,8 +8,8 @@ public interface TurretIO {
     @AutoLog
     public static class TurretIOInputs {
         public double angleRaw;
-        public Rotation2d angleRobotRelative;
-        public Rotation2d angleFieldRelative;
+        public Rotation2d angleRobotRelative = new Rotation2d();
+        public Rotation2d angleFieldRelative = new Rotation2d();
         public boolean didZero;
     }
 
