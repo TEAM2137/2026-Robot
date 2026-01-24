@@ -10,10 +10,7 @@ public interface IntakeIO {
     }
 
     default void runRollers(double volts) {}
-
     default void setPosition(double position) {}
 
-    default void deploy() {}
-
-    default void retract() {}
+    default void updateInputs(IntakeIOInputs inputs) {}
 }

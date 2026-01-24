@@ -27,8 +27,10 @@ import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.hopper.HopperIO;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.launcher.FlywheelIO;
+import frc.robot.subsystems.launcher.HoodIO;
 import frc.robot.subsystems.launcher.Launcher;
-import frc.robot.subsystems.launcher.LauncherIO;
+import frc.robot.subsystems.launcher.TurretIO;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.util.AllianceFlipUtil;
@@ -76,15 +78,18 @@ public class RobotContainer {
 
             vision = new Vision(
                 drive::addVisionMeasurement,
-                // new VisionIOLimelight(VisionConstants.cam0, drive::getRotation),
-                // new VisionIOLimelight(VisionConstants.cam1, drive::getRotation)
                 new VisionIO() {},
                 new VisionIO() {}
             );
 
             intake = new Intake(new IntakeIO() {});
             hopper = new Hopper(new HopperIO() {});
-            launcher = new Launcher(new LauncherIO() {});
+
+            launcher = new Launcher(
+                new TurretIO() {},
+                new HoodIO() {},
+                new FlywheelIO() {}
+            );
 
             break;
 
@@ -106,7 +111,12 @@ public class RobotContainer {
 
             intake = new Intake(new IntakeIO() {});
             hopper = new Hopper(new HopperIO() {});
-            launcher = new Launcher(new LauncherIO() {});
+
+            launcher = new Launcher(
+                new TurretIO() {},
+                new HoodIO() {},
+                new FlywheelIO() {}
+            );
 
             break;
 
@@ -128,7 +138,12 @@ public class RobotContainer {
 
             intake = new Intake(new IntakeIO() {});
             hopper = new Hopper(new HopperIO() {});
-            launcher = new Launcher(new LauncherIO() {});
+
+            launcher = new Launcher(
+                new TurretIO() {},
+                new HoodIO() {},
+                new FlywheelIO() {}
+            );
 
             break;
         }

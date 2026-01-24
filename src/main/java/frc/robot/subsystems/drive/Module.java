@@ -1,5 +1,7 @@
 package frc.robot.subsystems.drive;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
@@ -9,11 +11,10 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import frc.robot.subsystems.drive.ModuleIO.ModuleIOInputs;
 
 public class Module {
     private final ModuleIO io;
-    private final ModuleIOInputs inputs = new ModuleIOInputs();
+    private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
     private final int index;
     private final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> constants;
 
@@ -33,7 +34,7 @@ public class Module {
 
     public void periodic() {
         io.updateInputs(inputs);
-        // Logger.processInputs("Drive/Module" + Integer.toString(index), inputs);
+        Logger.processInputs("Drive/Module" + Integer.toString(index), inputs);
 
         // Calculate positions for odometry
         int sampleCount = inputs.odometryTimestamps.length; // All signals are sampled together
