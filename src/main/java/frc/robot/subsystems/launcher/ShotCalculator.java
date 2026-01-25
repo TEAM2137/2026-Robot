@@ -4,15 +4,15 @@ import java.util.Map;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import frc.robot.RobotContainer;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
-import frc.robot.util.LookupTable;
 
 @FunctionalInterface
 public interface ShotCalculator {
-    static final LookupTable FLYWHEEL_RPM_HUB = new LookupTable(Map.of(0.0, 0.0));
-    static final LookupTable HOOD_ANGLE_HUB = new LookupTable(Map.of(0.0, 0.0));
+    static final InterpolatingDoubleTreeMap FLYWHEEL_RPM_HUB = InterpolatingDoubleTreeMap.ofEntries(Map.entry(0.0, 0.0));
+    static final InterpolatingDoubleTreeMap HOOD_ANGLE_HUB = InterpolatingDoubleTreeMap.ofEntries(Map.entry(0.0, 0.0));
 
     static final ShotCalculator HUB = robot -> {
         Translation2d target = AllianceFlipUtil.either(FieldConstants.blueHub, FieldConstants.redHub);
@@ -30,8 +30,8 @@ public interface ShotCalculator {
 
         return new ShotParameters(
             Rotation2d.fromRadians(theAngle),
-            FLYWHEEL_RPM_HUB.lookup(dst),
-            HOOD_ANGLE_HUB.lookup(dst)
+            FLYWHEEL_RPM_HUB.get(dst),
+            HOOD_ANGLE_HUB.get(dst)
         );
     }
 
