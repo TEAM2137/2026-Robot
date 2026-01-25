@@ -40,6 +40,10 @@ public class Launcher extends SubsystemBase {
         return runOnce(() -> flywheel.setSpeed(rpm));
     }
 
+    public Command setFlywheelVoltage(double volts) {
+        return runOnce(() -> flywheel.setVoltage(volts));
+    }
+
     public Command setHoodAngle(double degrees) {
         return runOnce(() -> hood.setAngle(degrees));
     }

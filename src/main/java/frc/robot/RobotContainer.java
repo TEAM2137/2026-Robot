@@ -26,6 +26,7 @@ import frc.robot.subsystems.hopper.HopperIO;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.launcher.FlywheelIO;
+import frc.robot.subsystems.launcher.FlywheelIOTalonFX;
 import frc.robot.subsystems.launcher.HoodIO;
 import frc.robot.subsystems.launcher.Launcher;
 import frc.robot.subsystems.launcher.TurretIO;
@@ -67,10 +68,14 @@ public class RobotContainer {
             // Real robot, instantiate hardware IO implementations
             drive = new Drive(
                 new GyroIOPigeon2(),
-                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight)
+                // new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                // new ModuleIOTalonFX(TunerConstants.FrontRight),
+                // new ModuleIOTalonFX(TunerConstants.BackLeft),
+                // new ModuleIOTalonFX(TunerConstants.BackRight),
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {}
             );
 
             vision = new Vision(
@@ -85,7 +90,7 @@ public class RobotContainer {
             launcher = new Launcher(
                 new TurretIO() {},
                 new HoodIO() {},
-                new FlywheelIO() {}
+                new FlywheelIOTalonFX() {}
             );
 
             break;
@@ -196,12 +201,17 @@ public class RobotContainer {
     private void configureTestBindings() {
         driverController.a().and(TestMode.ALL.isActive()).onTrue(intake.startIntakeSequence());
         driverController.a().and(TestMode.ALL.isActive()).onFalse(intake.stopIntakeSequence());
-
         driverController.b().and(TestMode.ALL.isActive()).onTrue(launcher.setFlywheelSpeed(1000));
         driverController.b().and(TestMode.ALL.isActive()).onFalse(launcher.setFlywheelSpeed(0));
-
         driverController.x().and(TestMode.ALL.isActive()).onTrue(hopper.run());
         driverController.x().and(TestMode.ALL.isActive()).onFalse(hopper.stop());
+
+        driverController.a().and(TestMode.LAUNCHER.isActive()).onTrue(launcher.setFlywheelVoltage(12));
+        driverController.a().and(TestMode.LAUNCHER.isActive()).onFalse(launcher.setFlywheelVoltage(0));
+        driverController.b().and(TestMode.LAUNCHER.isActive()).onTrue(launcher.setFlywheelVoltage(9));
+        driverController.b().and(TestMode.LAUNCHER.isActive()).onFalse(launcher.setFlywheelVoltage(9));
+        driverController.y().and(TestMode.LAUNCHER.isActive()).onTrue(launcher.setFlywheelVoltage(6));
+        driverController.y().and(TestMode.LAUNCHER.isActive()).onFalse(launcher.setFlywheelVoltage(0));
     }
 
     public Supplier<Translation2d> joystickMotionSupplier() {

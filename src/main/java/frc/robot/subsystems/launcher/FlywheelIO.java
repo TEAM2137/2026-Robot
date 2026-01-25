@@ -9,6 +9,7 @@ public interface FlywheelIO {
     }
 
     default void setSpeed(double rpm) {}
+    default void setVoltage(double volts) {}
 
     default void updateInputs(FlywheelIOInputs inputs) {}
 }
