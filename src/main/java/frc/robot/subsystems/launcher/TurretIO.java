@@ -16,7 +16,6 @@ public interface TurretIO {
     default void setAngleRaw(double angle) {}
     default void setAngleRobotRelative(Rotation2d angle) {}
     default void setAngleFieldRelative(Rotation2d angle) {}
-    default void setShotCalculator(ShotCalculator calculator) {}
 
     default void updateInputs(TurretIOInputs inputs) {}
 }

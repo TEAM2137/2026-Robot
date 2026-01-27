@@ -208,9 +208,9 @@ public class RobotContainer {
 
         driverController.a().and(TestMode.LAUNCHER.isActive()).onTrue(launcher.setFlywheelVoltage(12));
         driverController.a().and(TestMode.LAUNCHER.isActive()).onFalse(launcher.setFlywheelVoltage(0));
-        driverController.b().and(TestMode.LAUNCHER.isActive()).onTrue(launcher.setFlywheelVoltage(9));
-        driverController.b().and(TestMode.LAUNCHER.isActive()).onFalse(launcher.setFlywheelVoltage(9));
-        driverController.y().and(TestMode.LAUNCHER.isActive()).onTrue(launcher.setFlywheelVoltage(6));
+        driverController.b().and(TestMode.LAUNCHER.isActive()).onTrue(launcher.setFlywheelVoltage(6));
+        driverController.b().and(TestMode.LAUNCHER.isActive()).onFalse(launcher.setFlywheelVoltage(0));
+        driverController.y().and(TestMode.LAUNCHER.isActive()).onTrue(launcher.setFlywheelVoltage(2));
         driverController.y().and(TestMode.LAUNCHER.isActive()).onFalse(launcher.setFlywheelVoltage(0));
     }
 
