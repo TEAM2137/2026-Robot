@@ -1,9 +1,9 @@
 package frc.robot;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -17,49 +17,61 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.Drive;
 
 public class Autonomous {
-    private final Map<String, Pose2d> startPoses = new HashMap<>();
+    // add new auto programs here
+    public final AutonomousProgram oneMillionFuelAuto = registerAuto(
+        "1 million fuel auto", new Pose2d(),
+        robot -> Commands.none()
+    );
+    public final AutonomousProgram oneBillionFuelAuto = registerAuto(
+        "1 billion fuel auto", new Pose2d(),
+        robot -> Commands.none()
+    );
 
-    private final LoggedDashboardChooser<Command> sysIdCommandChooser;
+    private final HashMap<String, AutonomousProgram> autos = new HashMap<>();
+    private final LoggedDashboardChooser<AutonomousProgram> autoChooser;
+    private final LoggedDashboardChooser<Command> sysIdChooser;
 
     private final RobotContainer robot;
-    private final Drive drive;
 
     public Autonomous(RobotContainer robot) {
         this.robot = robot;
-        this.drive = robot.drive;
+        Drive drive = robot.drive;
+        
+        // Create the auto chooser
+        this.autoChooser = new LoggedDashboardChooser<>("Auto Chooser");
+        this.autoChooser.addDefaultOption("None", null);
+        this.autos.forEach((name, auto) -> autoChooser.addOption(name, auto));
 
         // Create the sysId command chooser
-        this.sysIdCommandChooser = new LoggedDashboardChooser<>("SysID Command Chooser");
-        this.sysIdCommandChooser.addDefaultOption("None", null);
-
-        // Create the auto chooser
-        this.registerAutos();
+        this.sysIdChooser = new LoggedDashboardChooser<>("SysID Command Chooser");
+        this.sysIdChooser.addDefaultOption("None", null);
+        this.sysIdChooser.addOption("Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+        this.sysIdChooser.addOption("Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+        this.sysIdChooser.addOption("Drive SysId (Quasistatic Forward)", drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        this.sysIdChooser.addOption("Drive SysId (Quasistatic Reverse)", drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        this.sysIdChooser.addOption("Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        this.sysIdChooser.addOption("Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
         // Assign auto commands to autonomous trigger
-        RobotModeTriggers.autonomous().whileTrue(getSelectedAuto());
+        RobotModeTriggers.autonomous().whileTrue(this.getAutoCommand());
     }
 
-    /** @return A command to schedule the auto selected on the chooser */
-    public Command getSelectedAuto() {
+    public AutonomousProgram registerAuto(String name, Pose2d startPose, Function<RobotContainer, Command> commandBuilder) {
+        AutonomousProgram auto = new AutonomousProgram(name, startPose, commandBuilder.apply(this.robot));
+        this.autos.put(name, auto);
+        return auto;
+    }
+
+    public Command getAutoCommand() {
         return Commands.defer(() -> {
-            if (sysIdCommandChooser.get() != null) return sysIdCommandChooser.get().asProxy();
-            else return Commands.none();
+            if (autoChooser.get() != null) return autoChooser.get().command().asProxy();
+            if (sysIdChooser.get() != null) return sysIdChooser.get().asProxy();
+            return Commands.none();
         }, Set.of());
     }
 
     public Optional<Pose2d> getStartPose() {
-        return Optional.empty();
-    }
-
-    /** Adds autos to the chooser */
-    public void registerAutos() {
-        // SysId routines
-        sysIdCommandChooser.addOption("Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
-        sysIdCommandChooser.addOption("Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-        sysIdCommandChooser.addOption("Drive SysId (Quasistatic Forward)", drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        sysIdCommandChooser.addOption("Drive SysId (Quasistatic Reverse)", drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-        sysIdCommandChooser.addOption("Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        sysIdCommandChooser.addOption("Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+        return Optional.ofNullable(autoChooser.get().startPose());
     }
 
     public static String getSetupScore(Pose2d pose, Pose2d targetPose) {
@@ -93,4 +105,6 @@ public class Autonomous {
         else if (scoreRounded >= 60) letterGrade = "D-";
         return letterGrade;
     }
+
+    public record AutonomousProgram(String name, Pose2d startPose, Command command) {}
 }
