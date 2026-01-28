@@ -9,12 +9,14 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.util.Alerts;
 
 public class Autonomous {
     private final HashMap<String, AutonomousProgram> autos = new HashMap<>();
@@ -52,6 +54,7 @@ public class Autonomous {
 
         // Assign auto commands to autonomous trigger
         RobotModeTriggers.autonomous().whileTrue(this.getAutoCommand());
+        Alerts.add("No Auto Selected", AlertType.kWarning, this::isNoAutoSelected);
     }
 
     public AutonomousProgram registerAuto(String name, Pose2d startPose, Function<RobotContainer, Command> commandBuilder) {
@@ -66,6 +69,10 @@ public class Autonomous {
             if (sysIdChooser.get() != null) return sysIdChooser.get().asProxy();
             return Commands.none();
         }, Set.of());
+    }
+
+    public boolean isNoAutoSelected() {
+        return autoChooser.get() == null && sysIdChooser.get() == null;
     }
 
     public Optional<Pose2d> getStartPose() {

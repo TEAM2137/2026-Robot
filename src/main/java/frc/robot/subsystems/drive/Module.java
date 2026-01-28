@@ -9,8 +9,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import frc.robot.util.Alerts;
 
 public class Module {
     private final ModuleIO io;
@@ -18,18 +18,17 @@ public class Module {
     private final int index;
     private final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> constants;
 
-    private final Alert driveDisconnectedAlert;
-    private final Alert turnDisconnectedAlert;
-    private final Alert turnEncoderDisconnectedAlert;
     private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
 
     public Module(ModuleIO io, int index, SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> constants) {
         this.io = io;
         this.index = index;
         this.constants = constants;
-        driveDisconnectedAlert = new Alert("Disconnected drive motor on module " + Integer.toString(index) + ".", AlertType.kError);
-        turnDisconnectedAlert = new Alert("Disconnected turn motor on module " + Integer.toString(index) + ".", AlertType.kError);
-        turnEncoderDisconnectedAlert = new Alert("Disconnected turn encoder on module " + Integer.toString(index) + ".", AlertType.kError);
+
+        // register alerts
+        Alerts.add("Drive motor disconnected on module " + index, AlertType.kError, () -> !inputs.driveConnected);
+        Alerts.add("Turn motor disconnected on module " + index, AlertType.kError, () -> !inputs.turnConnected);
+        Alerts.add("Encoder disconnected on module " + index, AlertType.kError, () -> !inputs.turnEncoderConnected);
     }
 
     public void periodic() {
@@ -44,11 +43,6 @@ public class Module {
             Rotation2d angle = inputs.odometryTurnPositions[i];
             odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
         }
-
-        // Update alerts
-        driveDisconnectedAlert.set(!inputs.driveConnected);
-        turnDisconnectedAlert.set(!inputs.turnConnected);
-        turnEncoderDisconnectedAlert.set(!inputs.turnEncoderConnected);
     }
 
     /** Runs the module with the specified setpoint state. Mutates the state to optimize it. */

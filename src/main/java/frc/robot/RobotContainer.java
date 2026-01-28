@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -26,7 +25,6 @@ import frc.robot.subsystems.hopper.HopperIO;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.launcher.FlywheelIO;
-import frc.robot.subsystems.launcher.FlywheelIOTalonFX;
 import frc.robot.subsystems.launcher.HoodIO;
 import frc.robot.subsystems.launcher.Launcher;
 import frc.robot.subsystems.launcher.TurretIO;
@@ -55,9 +53,6 @@ public class RobotContainer {
     private final CommandXboxController driverController = new CommandXboxController(0);
     private final CommandXboxController operatorController = new CommandXboxController(1);
     private final Supplier<Translation2d> joystickSupplier = () -> new Translation2d(driverController.getLeftY(), driverController.getLeftX());
-
-    // Utilities
-    public final Trigger resetGyro = driverController.start();
 
     /** The container for the robot. Contains subsystems, IO devices, and commands. */
     public RobotContainer() {
@@ -174,7 +169,7 @@ public class RobotContainer {
                 .withName("Default Drive"));
 
         // Reset gyro to 0°
-        resetGyro.onTrue(Commands.runOnce(() ->
+        driverController.start().onTrue(Commands.runOnce(() ->
                 drive.setPose(new Pose2d(
                         drive.getPose().getTranslation(),
                         AllianceFlipUtil.shouldFlip()
