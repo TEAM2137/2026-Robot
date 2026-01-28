@@ -18,7 +18,6 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -66,9 +65,7 @@ public class Drive extends SubsystemBase {
     private Rotation2d rawGyroRotation = new Rotation2d();
 
     private final Field2d field = new Field2d();
-
-    public final FieldObject2d fieldTrajectory = field.getObject("Trajectory");
-    public final FieldObject2d fieldStartPose = field.getObject("StartPose");
+    private final FieldObject2d fieldStartPose = field.getObject("StartPose");
 
     private final Sendable swerveDriveSendable = builder -> {
         builder.setSmartDashboardType("SwerveDrive");
@@ -186,7 +183,6 @@ public class Drive extends SubsystemBase {
                 Logger.recordOutput("Autonomous/Setup/Score", Autonomous.getSetupScore(getPose(), pose));
                 fieldStartPose.setPose(pose);
             });
-            fieldTrajectory.setTrajectory(new Trajectory());
         }
 
         SmartDashboard.putData("Field", field);

@@ -17,6 +17,10 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.Drive;
 
 public class Autonomous {
+    private final HashMap<String, AutonomousProgram> autos = new HashMap<>();
+    private final LoggedDashboardChooser<AutonomousProgram> autoChooser = new LoggedDashboardChooser<>("Auto Chooser");
+    private final LoggedDashboardChooser<Command> sysIdChooser = new LoggedDashboardChooser<>("SysID Command Chooser");
+
     // add new auto programs here
     public final AutonomousProgram oneMillionFuelAuto = registerAuto(
         "1 million fuel auto", new Pose2d(),
@@ -27,10 +31,6 @@ public class Autonomous {
         robot -> Commands.none()
     );
 
-    private final HashMap<String, AutonomousProgram> autos = new HashMap<>();
-    private final LoggedDashboardChooser<AutonomousProgram> autoChooser;
-    private final LoggedDashboardChooser<Command> sysIdChooser;
-
     private final RobotContainer robot;
 
     public Autonomous(RobotContainer robot) {
@@ -38,12 +38,10 @@ public class Autonomous {
         Drive drive = robot.drive;
         
         // Create the auto chooser
-        this.autoChooser = new LoggedDashboardChooser<>("Auto Chooser");
         this.autoChooser.addDefaultOption("None", null);
         this.autos.forEach((name, auto) -> autoChooser.addOption(name, auto));
 
         // Create the sysId command chooser
-        this.sysIdChooser = new LoggedDashboardChooser<>("SysID Command Chooser");
         this.sysIdChooser.addDefaultOption("None", null);
         this.sysIdChooser.addOption("Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
         this.sysIdChooser.addOption("Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
@@ -71,7 +69,7 @@ public class Autonomous {
     }
 
     public Optional<Pose2d> getStartPose() {
-        return Optional.ofNullable(autoChooser.get().startPose());
+        return Optional.ofNullable(autoChooser.get()).map(AutonomousProgram::startPose);
     }
 
     public static String getSetupScore(Pose2d pose, Pose2d targetPose) {
