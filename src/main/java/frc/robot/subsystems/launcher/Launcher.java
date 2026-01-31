@@ -39,8 +39,8 @@ public class Launcher extends SubsystemBase {
 
         Translation2d flippedPos = AllianceFlipUtil.flip(robot.drive.getPose().getTranslation());
         if (flippedPos.getX() < FieldConstants.allianceZoneX) this.shotCalculator = ShotCalculator.HUB;
-        else if (flippedPos.getY() < FieldConstants.passingFlipY) this.shotCalculator = ShotCalculator.HUB;
-        else this.shotCalculator = ShotCalculator.HUB;
+        else if (flippedPos.getY() < FieldConstants.passingFlipY) this.shotCalculator = ShotCalculator.PASS_LEFT;
+        else this.shotCalculator = ShotCalculator.PASS_RIGHT;
 
         ShotParameters params = this.shotCalculator.calculate(robot);
         this.turret.setAngleFieldRelative(params.turretAngle());

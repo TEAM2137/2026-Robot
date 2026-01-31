@@ -18,6 +18,15 @@ public interface ShotCalculator {
         Translation2d target = AllianceFlipUtil.either(FieldConstants.blueHub, FieldConstants.redHub);
         return simpleLookupShot(target, robot);
     };
+    static final ShotCalculator PASS_LEFT = robot -> {
+        Translation2d target = AllianceFlipUtil.either(FieldConstants.blueLeftCorner, FieldConstants.redLeftCorner);
+        return simpleLookupShot(target, robot);
+    };
+    static final ShotCalculator PASS_RIGHT = robot -> {
+        Translation2d target = AllianceFlipUtil.either(FieldConstants.blueRightCorner, FieldConstants.redRightCorner);
+        return simpleLookupShot(target, robot);
+    };
+
 
     static ShotParameters simpleLookupShot(Translation2d target, RobotContainer robot) {
         Translation2d robotPos = robot.drive.getPose().getTranslation();
