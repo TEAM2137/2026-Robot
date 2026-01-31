@@ -25,8 +25,9 @@ public class Flywheel {
     }
     
     public boolean canFire() {
-        Translation2d robot = AllianceFlipUtil.flip(RobotContainer.getInstance().drive.getPose().getTranslation());
-        return !FieldConstants.noFireZone1.contains(robot) && !FieldConstants.noFireZone2.contains(robot);
+        Translation2d robotPos = RobotContainer.getInstance().drive.getPose().getTranslation();
+        if (AllianceFlipUtil.shouldFlip()) robotPos = AllianceFlipUtil.flip(robotPos);
+        return !FieldConstants.noFireZone1.contains(robotPos) && !FieldConstants.noFireZone2.contains(robotPos);
     }
 
     public void periodic() {

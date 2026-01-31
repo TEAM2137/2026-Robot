@@ -27,7 +27,6 @@ public interface ShotCalculator {
         return simpleLookupShot(target, robot);
     };
 
-
     static ShotParameters simpleLookupShot(Translation2d target, RobotContainer robot) {
         Translation2d robotPos = robot.drive.getPose().getTranslation();
 
@@ -35,10 +34,10 @@ public interface ShotCalculator {
         double dx = target.getX() - robotPos.getX();
         double dy = target.getY() - robotPos.getY();
         
-        double theAngle = Math.atan2(dy, dx);
+        double theAngle = Math.atan2(dx, dy);
 
         return new ShotParameters(
-            Rotation2d.fromRadians(theAngle),
+            Rotation2d.fromRadians(theAngle).plus(Rotation2d.k180deg),
             FLYWHEEL_RPM_HUB.get(dst),
             HOOD_ANGLE_HUB.get(dst)
         );

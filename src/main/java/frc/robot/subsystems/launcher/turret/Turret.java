@@ -49,6 +49,10 @@ public class Turret {
         io.setAngle(output);
     }
 
+    public Rotation2d getAngle() {
+        return Rotation2d.fromDegrees(io.getAngle());
+    }
+
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Launcher/Turret", inputs);

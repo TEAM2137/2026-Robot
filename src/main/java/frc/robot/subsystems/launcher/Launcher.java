@@ -3,6 +3,8 @@ package frc.robot.subsystems.launcher;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -37,10 +39,11 @@ public class Launcher extends SubsystemBase {
     public void periodic() {
         RobotContainer robot = RobotContainer.getInstance();
 
-        Translation2d flippedPos = AllianceFlipUtil.flip(robot.drive.getPose().getTranslation());
-        if (flippedPos.getX() < FieldConstants.allianceZoneX) this.shotCalculator = ShotCalculator.HUB;
-        else if (flippedPos.getY() < FieldConstants.passingFlipY) this.shotCalculator = ShotCalculator.PASS_LEFT;
-        else this.shotCalculator = ShotCalculator.PASS_RIGHT;
+        Translation2d robotPos = robot.drive.getPose().getTranslation();
+        if (AllianceFlipUtil.shouldFlip()) robotPos = new Translation2d(AllianceFlipUtil.flipX(robotPos.getX()), robotPos.getY());
+        if (robotPos.getX() < FieldConstants.allianceZoneX) this.shotCalculator = ShotCalculator.HUB;
+        else if (robotPos.getY() < FieldConstants.passingFlipY) this.shotCalculator = ShotCalculator.PASS_RIGHT;
+        else this.shotCalculator = ShotCalculator.PASS_LEFT;
 
         ShotParameters params = this.shotCalculator.calculate(robot);
         this.turret.setAngleFieldRelative(params.turretAngle());
@@ -50,6 +53,8 @@ public class Launcher extends SubsystemBase {
         turret.periodic();
         hood.periodic();
         flywheel.periodic();
+
+        Logger.recordOutput("Launcher/Turret/AngleFieldRelative", turret.getAngle().plus(robot.drive.getRotation()));
     }
 
     public Turret getTurret() {
