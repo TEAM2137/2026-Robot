@@ -29,8 +29,8 @@ public class HopperIOSim extends HopperIOTalonFX {
     );
 
     public HopperIOSim() {
-        indexerSimState = super.indexerMotor.getSimState();
-        feederSimState = super.feederMotor.getSimState();
+        this.indexerSimState = this.indexer.getSimState();
+        this.feederSimState = this.feeder.getSimState();
     }
 
     @Override

@@ -9,7 +9,7 @@ public class Intake extends SubsystemBase {
     public static class Constants {
         public static final double homePosition = 0.0;
         public static final double deployPosition = 10.0;
-        public static final double intakeVoltage = 12.0;
+        public static final double intakeVoltage = 6.0;
     }
 
     private final IntakeIO io;
