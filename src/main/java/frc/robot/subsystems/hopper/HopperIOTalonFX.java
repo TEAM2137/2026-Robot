@@ -6,8 +6,8 @@ import com.ctre.phoenix6.signals.InvertedValue;
 
 public class HopperIOTalonFX implements HopperIO {
     public static class Constants {
-        public static final int indexerId = 25;
-        public static final int feederId = 26;
+        public static final int indexerId = 26;
+        public static final int feederId = 25;
         public static final double indexerGearing = 1.0;
         public static final double feederGearing = 1.0;
     }
@@ -22,7 +22,7 @@ public class HopperIOTalonFX implements HopperIO {
         
         this.feeder = new TalonFX(Constants.feederId);
         this.feeder.getConfigurator().apply(new MotorOutputConfigs()
-            .withInverted(InvertedValue.Clockwise_Positive));
+            .withInverted(InvertedValue.CounterClockwise_Positive));
     }
 
     @Override

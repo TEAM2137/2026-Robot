@@ -202,8 +202,8 @@ public class RobotContainer {
         driverController.a().and(RobotModeTriggers.teleop()).onTrue(hopper.run());
         driverController.a().and(RobotModeTriggers.teleop()).onFalse(hopper.stop());
 
-        // driverController.b().and(RobotModeTriggers.teleop()).onTrue(launcher.setFlywheelVoltage(() -> SmartDashboard.getNumber("LauncherVolts", 5)));
-        // driverController.b().and(RobotModeTriggers.teleop()).onFalse(launcher.setFlywheelVoltage(() -> 0));
+        driverController.b().and(RobotModeTriggers.teleop()).onTrue(launcher.setFlywheelVoltage(() -> SmartDashboard.getNumber("LauncherVolts", 5)));
+        driverController.b().and(RobotModeTriggers.teleop()).onFalse(launcher.setFlywheelVoltage(() -> 0));
     }
 
     // configure test mode specific bindings here
