@@ -11,10 +11,10 @@ import com.ctre.phoenix6.signals.InvertedValue;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
-public class TurretIOReal implements TurretIO {
+public class TurretIOTalonFX implements TurretIO {
     protected final TalonFX motor;
 
-    public TurretIOReal() {
+    public TurretIOTalonFX() {
         motor = new TalonFX(50);
 
         motor.getConfigurator().apply(new MotorOutputConfigs()

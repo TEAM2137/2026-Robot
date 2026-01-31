@@ -3,7 +3,6 @@ package frc.robot;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -24,14 +23,18 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.hopper.HopperIO;
+import frc.robot.subsystems.hopper.HopperIOSim;
 import frc.robot.subsystems.hopper.HopperIOTalonFX;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeIOTalonFX;
 import frc.robot.subsystems.launcher.Launcher;
 import frc.robot.subsystems.launcher.flywheel.FlywheelIO;
+import frc.robot.subsystems.launcher.flywheel.FlywheelIOSim;
 import frc.robot.subsystems.launcher.flywheel.FlywheelIOTalonFX;
 import frc.robot.subsystems.launcher.hood.HoodIO;
+import frc.robot.subsystems.launcher.hood.HoodIOSim;
 import frc.robot.subsystems.launcher.turret.TurretIO;
 import frc.robot.subsystems.launcher.turret.TurretIOSim;
 import frc.robot.subsystems.vision.Vision;
@@ -108,13 +111,13 @@ public class RobotContainer {
                 new VisionIO() {}
             );
 
-            intake = new Intake(new IntakeIO() {});
-            hopper = new Hopper(new HopperIO() {});
+            intake = new Intake(new IntakeIOSim() {});
+            hopper = new Hopper(new HopperIOSim() {});
 
             launcher = new Launcher(
                 new TurretIOSim() {},
-                new HoodIO() {},
-                new FlywheelIO() {}
+                new HoodIOSim() {},
+                new FlywheelIOSim() {}
             );
 
             break;

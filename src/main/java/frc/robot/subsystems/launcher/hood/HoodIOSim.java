@@ -1,4 +1,4 @@
-package frc.robot.subsystems.launcher.turret;
+package frc.robot.subsystems.launcher.hood;
 
 import com.ctre.phoenix6.sim.TalonFXSimState;
 
@@ -7,9 +7,8 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
-public class TurretIOSim extends TurretIOTalonFX {
+public class HoodIOSim extends HoodIOTalonFX {
     private TalonFXSimState simState;
-    
     private DCMotorSim sim = new DCMotorSim(
         LinearSystemId.createDCMotorSystem(
             DCMotor.getKrakenX60(1),
@@ -19,21 +18,19 @@ public class TurretIOSim extends TurretIOTalonFX {
         DCMotor.getKrakenX60(1)
     );
 
-    public TurretIOSim() {
+    public HoodIOSim() {
         this.simState = this.motor.getSimState();
-        this.simState.setMotorType(TalonFXSimState.MotorType.KrakenX60);
     }
 
     @Override
-    public void updateInputs(TurretIOInputs inputs) {
+    public void updateInputs(HoodIOInputs inputs) {
         simState.setSupplyVoltage(RobotController.getBatteryVoltage());
-        
+
         sim.setInputVoltage(simState.getMotorVoltage());
         sim.update(0.02);
 
-        simState.setRawRotorPosition(sim.getAngularPosition());
         simState.setRotorVelocity(sim.getAngularVelocity());
-
+        
         super.updateInputs(inputs);
     }
 }
