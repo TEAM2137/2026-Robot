@@ -4,6 +4,7 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.RobotContainer;
+import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 
 public class Flywheel {
@@ -24,7 +25,7 @@ public class Flywheel {
     }
     
     public boolean canFire() {
-        Translation2d robot = RobotContainer.getInstance().drive.getPose().getTranslation();
+        Translation2d robot = AllianceFlipUtil.flip(RobotContainer.getInstance().drive.getPose().getTranslation());
         return !FieldConstants.noFireZone1.contains(robot) && !FieldConstants.noFireZone2.contains(robot);
     }
 

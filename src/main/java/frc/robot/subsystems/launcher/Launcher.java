@@ -15,6 +15,7 @@ import frc.robot.subsystems.launcher.hood.Hood;
 import frc.robot.subsystems.launcher.hood.HoodIO;
 import frc.robot.subsystems.launcher.turret.Turret;
 import frc.robot.subsystems.launcher.turret.TurretIO;
+import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 
 public class Launcher extends SubsystemBase {
@@ -36,9 +37,9 @@ public class Launcher extends SubsystemBase {
     public void periodic() {
         RobotContainer robot = RobotContainer.getInstance();
 
-        Translation2d robotPos = robot.drive.getPose().getTranslation();
-        if (robotPos.getX() < FieldConstants.allianceZoneX) this.shotCalculator = ShotCalculator.HUB;
-        else if (robotPos.getY() < FieldConstants.passingFlipY) this.shotCalculator = ShotCalculator.HUB;
+        Translation2d flippedPos = AllianceFlipUtil.flip(robot.drive.getPose().getTranslation());
+        if (flippedPos.getX() < FieldConstants.allianceZoneX) this.shotCalculator = ShotCalculator.HUB;
+        else if (flippedPos.getY() < FieldConstants.passingFlipY) this.shotCalculator = ShotCalculator.HUB;
         else this.shotCalculator = ShotCalculator.HUB;
 
         ShotParameters params = this.shotCalculator.calculate(robot);
