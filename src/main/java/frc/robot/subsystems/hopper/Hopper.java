@@ -22,8 +22,8 @@ public class Hopper extends SubsystemBase {
 
     public Command run() {
         return runOnce(() -> {
-            io.runIndexer(1.5);
-            io.runFeeder(3);
+            io.runIndexer(3);
+            io.runFeeder(4);
         });
     }
 
