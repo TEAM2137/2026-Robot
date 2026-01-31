@@ -3,46 +3,72 @@ package frc.robot.subsystems.launcher;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
+import frc.robot.subsystems.launcher.ShotCalculator.ShotParameters;
+import frc.robot.subsystems.launcher.flywheel.Flywheel;
+import frc.robot.subsystems.launcher.flywheel.FlywheelIO;
+import frc.robot.subsystems.launcher.hood.Hood;
+import frc.robot.subsystems.launcher.hood.HoodIO;
+import frc.robot.subsystems.launcher.turret.Turret;
+import frc.robot.subsystems.launcher.turret.TurretIO;
+import frc.robot.util.FieldConstants;
 
 public class Launcher extends SubsystemBase {
     private final Turret turret;
-    private final HoodIO hood;
-    private final FlywheelIO flywheel;
+    private final Hood hood;
+    private final Flywheel flywheel;
 
-    private final HoodIOInputsAutoLogged hoodInputs;
-    private final FlywheelIOInputsAutoLogged flywheelInputs;
+    private ShotCalculator shotCalculator;
 
-    public Launcher(TurretIO turretIO, HoodIO hood, FlywheelIO flywheel) {
+    public Launcher(TurretIO turretIO, HoodIO hoodIO, FlywheelIO flywheelIO) {
         this.turret = new Turret(turretIO);
-        this.hood = hood;
-        this.flywheel = flywheel;
+        this.hood = new Hood(hoodIO);
+        this.flywheel = new Flywheel(flywheelIO);
 
-        this.hoodInputs = new HoodIOInputsAutoLogged();
-        this.flywheelInputs = new FlywheelIOInputsAutoLogged();
+        this.shotCalculator = ShotCalculator.HUB;
     }
 
     @Override
     public void periodic() {
-        turret.periodic();
-        hood.updateInputs(this.hoodInputs);
-        flywheel.updateInputs(this.flywheelInputs);
+        RobotContainer robot = RobotContainer.getInstance();
 
-        Logger.processInputs("Launcher/Hood", this.hoodInputs);
-        Logger.processInputs("Launcher/Flywheel", this.flywheelInputs);
+        Translation2d robotPos = robot.drive.getPose().getTranslation();
+        if (robotPos.getX() < FieldConstants.allianceZoneX) this.shotCalculator = ShotCalculator.HUB;
+        else if (robotPos.getY() < FieldConstants.passingFlipY) this.shotCalculator = ShotCalculator.HUB;
+        else this.shotCalculator = ShotCalculator.HUB;
+
+        ShotParameters params = this.shotCalculator.calculate(robot);
+        this.turret.setAngleFieldRelative(params.turretAngle());
+        this.flywheel.setRPM(params.flywheelRpm());
+        this.hood.setAngle(params.hoodAngle());
+
+        turret.periodic();
+        hood.periodic();
+        flywheel.periodic();
+    }
+
+    public Turret getTurret() {
+        return this.turret;
+    }
+
+    public Hood getHood() {
+        return this.hood;
+    }
+
+    public Flywheel getFlywheel() {
+        return this.flywheel;
     }
 
     public Command setFlywheelSpeed(DoubleSupplier rpm) {
-        return runOnce(() -> flywheel.setSpeed(rpm.getAsDouble()));
+        return runOnce(() -> flywheel.setRPM(rpm.getAsDouble()));
     }
 
     public Command setFlywheelSpeed(double rpm) {
-        return runOnce(() -> flywheel.setSpeed(rpm));
+        return runOnce(() -> flywheel.setRPM(rpm));
     }
 
     public Command setFlywheelVoltage(DoubleSupplier volts) {
@@ -67,10 +93,5 @@ public class Launcher extends SubsystemBase {
 
     public Command setTurretAngle(Rotation2d angle) {
         return runOnce(() -> turret.setAngleFieldRelative(angle));
-    }
-
-    public Command setShotCalculator(ShotCalculator calculator) {
-        // TODO move to dedicated turret class
-        return Commands.none();
     }
 }

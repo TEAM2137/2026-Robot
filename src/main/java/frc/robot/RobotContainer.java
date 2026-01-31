@@ -28,12 +28,14 @@ import frc.robot.subsystems.hopper.HopperIOTalonFX;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOTalonFX;
-import frc.robot.subsystems.launcher.FlywheelIO;
-import frc.robot.subsystems.launcher.FlywheelIOTalonFX;
-import frc.robot.subsystems.launcher.HoodIO;
 import frc.robot.subsystems.launcher.Launcher;
-import frc.robot.subsystems.launcher.TurretIO;
-import frc.robot.subsystems.launcher.TurretIOSim;
+import frc.robot.subsystems.launcher.ShotCalculator;
+import frc.robot.subsystems.launcher.flywheel.FlywheelIO;
+import frc.robot.subsystems.launcher.flywheel.FlywheelIOTalonFX;
+import frc.robot.subsystems.launcher.hood.HoodIO;
+import frc.robot.subsystems.launcher.turret.Turret;
+import frc.robot.subsystems.launcher.turret.TurretIO;
+import frc.robot.subsystems.launcher.turret.TurretIOSim;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.util.AllianceFlipUtil;
@@ -201,10 +203,6 @@ public class RobotContainer {
 
         // driverController.b().and(RobotModeTriggers.teleop()).onTrue(launcher.setFlywheelVoltage(() -> SmartDashboard.getNumber("LauncherVolts", 5)));
         // driverController.b().and(RobotModeTriggers.teleop()).onFalse(launcher.setFlywheelVoltage(() -> 0));
-
-        launcher.setDefaultCommand(launcher.setTurretAngle(() -> Rotation2d.fromRadians(Math.atan2(
-                MathUtil.applyDeadband(operatorController.getRightY(), 0.25),
-                MathUtil.applyDeadband(operatorController.getRightX(), 0.25)))));
     }
 
     // configure test mode specific bindings here
