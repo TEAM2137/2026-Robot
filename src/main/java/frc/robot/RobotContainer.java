@@ -172,7 +172,7 @@ public class RobotContainer {
 
         // Default command, normal field-relative drive
         drive.setDefaultCommand(DriveCommands.joystickDrive(drive, joystickSupplier,
-                        slowMode, () -> (driverController.povRight().getAsBoolean() ? 1 : 0) - (driverController.povLeft().getAsBoolean() ? 1 : 0))//-driverController.getRightX() * 0.75)
+                        slowMode, () -> -driverController.getRightX() * 0.75)
                 .withName("Default Drive"));
 
         // Reset gyro to 0°
@@ -203,8 +203,8 @@ public class RobotContainer {
         // driverController.b().and(RobotModeTriggers.teleop()).onFalse(launcher.setFlywheelVoltage(() -> 0));
 
         launcher.setDefaultCommand(launcher.setTurretAngle(() -> Rotation2d.fromRadians(Math.atan2(
-                MathUtil.applyDeadband(driverController.getRightY(), 0.25),
-                MathUtil.applyDeadband(driverController.getRightX(), 0.25)))));
+                MathUtil.applyDeadband(operatorController.getRightY(), 0.25),
+                MathUtil.applyDeadband(operatorController.getRightX(), 0.25)))));
     }
 
     // configure test mode specific bindings here
