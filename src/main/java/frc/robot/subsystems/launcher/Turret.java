@@ -7,8 +7,9 @@ import frc.robot.RobotContainer;
 
 public class Turret {
     public static class Constants {
-        public static final double leftBound = -260;
-        public static final double rightBound = 260;
+        public static final double overlapDegrees = 50;
+        public static final double leftBound = -180 - overlapDegrees / 2.0;
+        public static final double rightBound = 180 + overlapDegrees / 2.0;
     }
 
     private final TurretIO io;
