@@ -50,6 +50,11 @@ public class Launcher extends SubsystemBase {
         this.flywheel.setRPM(params.flywheelRpm());
         this.hood.setAngle(params.hoodAngle());
 
+        // this.turret.setAngleFieldRelative(Rotation2d.fromRadians(Math.atan2(
+        //     robot.operatorController.getRightY(),
+        //     robot.operatorController.getRightX()
+        // )));
+
         turret.periodic();
         hood.periodic();
         flywheel.periodic();

@@ -56,8 +56,8 @@ public class RobotContainer {
     public final Autonomous autonomous;
 
     // Controllers
-    private final CommandXboxController driverController = new CommandXboxController(0);
-    private final CommandXboxController operatorController = new CommandXboxController(1);
+    public final CommandXboxController driverController = new CommandXboxController(0);
+    public final CommandXboxController operatorController = new CommandXboxController(1);
     private final Supplier<Translation2d> joystickSupplier = () -> new Translation2d(driverController.getLeftY(), driverController.getLeftX());
 
     /** The container for the robot. Contains subsystems, IO devices, and commands. */
