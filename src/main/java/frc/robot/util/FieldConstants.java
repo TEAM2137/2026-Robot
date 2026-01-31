@@ -8,6 +8,13 @@ public class FieldConstants {
     public static final double fieldWidth = 16.541;
     public static final double fieldHeight = 8.0692;
 
+    public static final double cornerOffset = 1; /*Adjustable distance from corner*/
+    //Left/right is from Driver POV
+    public static final Translation2d blueLeftCorner = new Translation2d(cornerOffset, fieldHeight - cornerOffset);
+    public static final Translation2d blueRightCorner = new Translation2d(cornerOffset, cornerOffset);
+    public static final Translation2d redLeftCorner = new Translation2d(fieldWidth - cornerOffset, fieldHeight - cornerOffset);
+    public static final Translation2d redRightCorner = new Translation2d(fieldWidth - cornerOffset, cornerOffset);
+
     public static final double hubOffsetX = 3.6449;
     public static final double bumpWidth = 1.12776;
 
