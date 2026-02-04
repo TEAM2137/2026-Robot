@@ -1,6 +1,10 @@
 package frc.robot.util;
 
+import org.littletonrobotics.junction.Logger;
+
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rectangle2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 /** Field constants such as important poses or dimensions can be placed here */
@@ -44,4 +48,10 @@ public class FieldConstants {
     public static final Rectangle2d noFireZone2 = new Rectangle2d(
         new Translation2d(fieldWidth - hubFromLeftX + bumpWidth / 2.0, fieldHeight / 2.0 + noFireZone2Height / 2.0),
         new Translation2d(fieldWidth - hubFromLeftX + bumpWidth / 2.0 + noFireZone2Width, fieldHeight / 2.0 - noFireZone2Height / 2.0));
+
+    static {
+        Logger.recordOutput("Climb/BlueTowerLeftPost", new Pose2d(blueTowerLeftPost, new Rotation2d()));
+        Logger.recordOutput("Climb/BlueTowerRightPost", new Pose2d(blueTowerRightPost, new Rotation2d()));
+
+    }
 }
