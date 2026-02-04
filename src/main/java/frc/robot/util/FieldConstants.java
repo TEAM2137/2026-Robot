@@ -15,6 +15,12 @@ public class FieldConstants {
     public static final Translation2d redLeftCorner = new Translation2d(fieldWidth - cornerOffset, fieldHeight - cornerOffset);
     public static final Translation2d redRightCorner = new Translation2d(fieldWidth - cornerOffset, cornerOffset);
 
+    public static final Translation2d blueTowerLeftPost = new Translation2d(1.016, 4.323824);
+    public static final Translation2d blueTowerRightPost = new Translation2d(1.016, 3.504692);
+    public static final Translation2d redTowerLeftPost = new Translation2d(fieldWidth - 1.016, fieldHeight - 4.323824);
+    public static final Translation2d redTowerRightPost = new Translation2d(fieldWidth - 1.016, fieldHeight - 3.504692);
+
+
     public static final double hubFromCenterX = 3.6449;
     public static final double hubFromLeftX = 4.6256;
     public static final double bumpWidth = 1.12776;
