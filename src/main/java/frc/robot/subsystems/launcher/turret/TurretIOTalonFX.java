@@ -2,8 +2,6 @@ package frc.robot.subsystems.launcher.turret;
 
 import static edu.wpi.first.units.Units.Degrees;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -23,11 +21,11 @@ public class TurretIOTalonFX implements TurretIO {
             .withInverted(InvertedValue.Clockwise_Positive));
 
         motor.getConfigurator().apply(new Slot0Configs()
-            .withKP(6).withKD(1.5));
+            .withKP(5).withKD(1.5));
 
         motor.getConfigurator().apply(new MotionMagicConfigs()
             .withMotionMagicCruiseVelocity(5)
-            .withMotionMagicAcceleration(10));
+            .withMotionMagicAcceleration(15));
     }
 
     @Override
