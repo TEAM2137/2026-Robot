@@ -52,6 +52,5 @@ public class FieldConstants {
     static {
         Logger.recordOutput("Climb/BlueTowerLeftPost", new Pose2d(blueTowerLeftPost, new Rotation2d()));
         Logger.recordOutput("Climb/BlueTowerRightPost", new Pose2d(blueTowerRightPost, new Rotation2d()));
-
     }
 }

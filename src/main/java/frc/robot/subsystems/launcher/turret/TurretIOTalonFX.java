@@ -2,6 +2,8 @@ package frc.robot.subsystems.launcher.turret;
 
 import static edu.wpi.first.units.Units.Degrees;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -35,8 +37,12 @@ public class TurretIOTalonFX implements TurretIO {
 
     @Override
     public void setAngle(double degrees) {
-        // motor.setControl(new PositionVoltage(degrees / 360.0));
         motor.setControl(new MotionMagicVoltage(degrees / 360.0));
+    }
+
+    @Override
+    public boolean isAtTarget() {
+        return Math.abs(motor.getClosedLoopError().getValueAsDouble()) < 0.025;
     }
 
     @Override

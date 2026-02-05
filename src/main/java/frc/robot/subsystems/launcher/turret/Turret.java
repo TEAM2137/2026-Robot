@@ -3,6 +3,7 @@ package frc.robot.subsystems.launcher.turret;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
 
 public class Turret {
@@ -15,9 +16,13 @@ public class Turret {
     private final TurretIO io;
     private final TurretIOInputsAutoLogged inputs;
 
+    private final Trigger isAtTargetTrigger;
+
     public Turret(TurretIO io) {
         this.io = io;
         this.inputs = new TurretIOInputsAutoLogged();
+        
+        this.isAtTargetTrigger = new Trigger(io::isAtTarget);
     }
 
     public void setAngleFieldRelative(Rotation2d angle) {
@@ -51,6 +56,10 @@ public class Turret {
 
     public Rotation2d getAngle() {
         return Rotation2d.fromDegrees(io.getAngle());
+    }
+
+    public Trigger isAtTarget() {
+        return isAtTargetTrigger;
     }
 
     public void periodic() {

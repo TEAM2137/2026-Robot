@@ -9,6 +9,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.launcher.ShotCalculator.ShotParameters;
 import frc.robot.subsystems.launcher.flywheel.Flywheel;
@@ -25,6 +27,9 @@ public class Launcher extends SubsystemBase {
     private final Hood hood;
     private final Flywheel flywheel;
 
+    private final Trigger isLaunchingTrigger;
+    private boolean isLaunching = false;
+
     private ShotCalculator shotCalculator;
 
     public Launcher(TurretIO turretIO, HoodIO hoodIO, FlywheelIO flywheelIO) {
@@ -33,6 +38,19 @@ public class Launcher extends SubsystemBase {
         this.flywheel = new Flywheel(flywheelIO);
 
         this.shotCalculator = ShotCalculator.HUB;
+
+        this.isLaunchingTrigger = new Trigger(() -> this.isLaunching);
+        this.isLaunchingTrigger.onFalse(this.setFlywheelSpeed(0));
+
+        RobotModeTriggers.teleop().onFalse(this.runOnce(() -> this.isLaunching = false));
+    }
+
+    public Trigger isLaunching() {
+        return this.isLaunchingTrigger;
+    }
+
+    public void setIsLaunching(boolean isLaunching) {
+        this.isLaunching = isLaunching;
     }
 
     @Override
@@ -47,8 +65,8 @@ public class Launcher extends SubsystemBase {
 
         ShotParameters params = this.shotCalculator.calculate(robot);
         this.turret.setAngleFieldRelative(params.turretAngle());
-        this.flywheel.setRPM(params.flywheelRpm());
         this.hood.setAngle(params.hoodAngle());
+        if (this.isLaunching) this.flywheel.setRPM(params.flywheelRpm());
 
         // this.turret.setAngleFieldRelative(Rotation2d.fromRadians(Math.atan2(
         //     robot.operatorController.getRightY(),
@@ -60,6 +78,7 @@ public class Launcher extends SubsystemBase {
         flywheel.periodic();
 
         Logger.recordOutput("Launcher/Turret/AngleFieldRelative", turret.getAngle().plus(robot.drive.getRotation()));
+        Logger.recordOutput("Launcher/IsLaunching", this.isLaunching);
     }
 
     public Turret getTurret() {

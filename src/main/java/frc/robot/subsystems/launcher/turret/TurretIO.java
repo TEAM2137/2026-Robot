@@ -14,6 +14,7 @@ public interface TurretIO {
 
     default void setAngle(double degrees) {}
     default double getAngle() { return 0.0; }
+    default boolean isAtTarget() { return true; }
 
     default void updateInputs(TurretIOInputs inputs) {}
 }

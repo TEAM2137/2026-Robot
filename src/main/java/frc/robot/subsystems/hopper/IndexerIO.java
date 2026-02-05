@@ -2,9 +2,9 @@ package frc.robot.subsystems.hopper;
 
 import org.littletonrobotics.junction.AutoLog;
 
-public interface HopperIO {
+public interface IndexerIO {
     @AutoLog
-    public static class HopperIOInputs {
+    public static class IndexerIOInputs {
         public double indexerSpeedVolts;
         public double feedMotorSpeedVolts;
     }
@@ -12,5 +12,5 @@ public interface HopperIO {
     default void runIndexer(double volts) {}
     default void runFeeder(double volts) {}
 
-    default void updateInputs(HopperIOInputs inputs) {}
+    default void updateInputs(IndexerIOInputs inputs) {}
 }

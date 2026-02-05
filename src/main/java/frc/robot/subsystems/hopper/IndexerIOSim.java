@@ -7,7 +7,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
-public class HopperIOSim extends HopperIOTalonFX {
+public class IndexerIOSim extends IndexerIOTalonFX {
     private TalonFXSimState indexerSimState;
     private DCMotorSim indexerSim = new DCMotorSim(
         LinearSystemId.createDCMotorSystem(
@@ -28,13 +28,13 @@ public class HopperIOSim extends HopperIOTalonFX {
         DCMotor.getKrakenX60(1)
     );
 
-    public HopperIOSim() {
+    public IndexerIOSim() {
         this.indexerSimState = this.indexer.getSimState();
         this.feederSimState = this.feeder.getSimState();
     }
 
     @Override
-    public void updateInputs(HopperIOInputs inputs) {
+    public void updateInputs(IndexerIOInputs inputs) {
         indexerSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
         indexerSim.setInputVoltage(indexerSimState.getMotorVoltage());
         indexerSim.update(0.02);
@@ -42,7 +42,7 @@ public class HopperIOSim extends HopperIOTalonFX {
         feederSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
         feederSim.setInputVoltage(indexerSimState.getMotorVoltage());
         feederSim.update(0.02);
-        
+
         super.updateInputs(inputs);
     }
 }

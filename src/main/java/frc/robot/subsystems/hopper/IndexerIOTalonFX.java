@@ -4,7 +4,7 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 
-public class HopperIOTalonFX implements HopperIO {
+public class IndexerIOTalonFX implements IndexerIO {
     public static class Constants {
         public static final int indexerId = 26;
         public static final int feederId = 25;
@@ -15,7 +15,7 @@ public class HopperIOTalonFX implements HopperIO {
     protected final TalonFX indexer;
     protected final TalonFX feeder;
 
-    public HopperIOTalonFX() {
+    public IndexerIOTalonFX() {
         this.indexer = new TalonFX(Constants.indexerId);
         this.indexer.getConfigurator().apply(new MotorOutputConfigs()
             .withInverted(InvertedValue.Clockwise_Positive));
@@ -36,7 +36,7 @@ public class HopperIOTalonFX implements HopperIO {
     }
 
     @Override
-    public void updateInputs(HopperIOInputs inputs) {
+    public void updateInputs(IndexerIOInputs inputs) {
         inputs.indexerSpeedVolts = this.indexer.getMotorVoltage().getValueAsDouble();
         inputs.feedMotorSpeedVolts = this.feeder.getMotorVoltage().getValueAsDouble();
     }

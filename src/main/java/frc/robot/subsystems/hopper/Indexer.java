@@ -5,25 +5,25 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Hopper extends SubsystemBase {
-    private final HopperIO io;
-    private final HopperIOInputsAutoLogged inputs;
+public class Indexer extends SubsystemBase {
+    private final IndexerIO io;
+    private final IndexerIOInputsAutoLogged inputs;
 
-    public Hopper(HopperIO io) {
+    public Indexer(IndexerIO io) {
         this.io = io;
-        this.inputs = new HopperIOInputsAutoLogged();
+        this.inputs = new IndexerIOInputsAutoLogged();
     }
 
     @Override
     public void periodic() {
         io.updateInputs(this.inputs);
-        Logger.processInputs("Hopper", this.inputs);
+        Logger.processInputs("Indexer", this.inputs);
     }
 
     public Command run() {
         return runOnce(() -> {
-            io.runIndexer(3);
-            io.runFeeder(4);
+            io.runIndexer(12);
+            io.runFeeder(3);
         });
     }
 

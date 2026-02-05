@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.commands.DriveCommands;
@@ -21,10 +22,10 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
-import frc.robot.subsystems.hopper.Hopper;
-import frc.robot.subsystems.hopper.HopperIO;
-import frc.robot.subsystems.hopper.HopperIOSim;
-import frc.robot.subsystems.hopper.HopperIOTalonFX;
+import frc.robot.subsystems.hopper.Indexer;
+import frc.robot.subsystems.hopper.IndexerIO;
+import frc.robot.subsystems.hopper.IndexerIOSim;
+import frc.robot.subsystems.hopper.IndexerIOTalonFX;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOSim;
@@ -52,7 +53,7 @@ public class RobotContainer {
     public final Drive drive;
     public final Vision vision;
     public final Intake intake;
-    public final Hopper hopper;
+    public final Indexer indexer;
     public final Launcher launcher;
 
     // Auto
@@ -85,7 +86,7 @@ public class RobotContainer {
             );
 
             intake = new Intake(new IntakeIOTalonFX());
-            hopper = new Hopper(new HopperIOTalonFX() {});
+            indexer = new Indexer(new IndexerIOTalonFX() {});
 
             launcher = new Launcher(
                 new TurretIO() {},
@@ -112,7 +113,7 @@ public class RobotContainer {
             );
 
             intake = new Intake(new IntakeIOSim() {});
-            hopper = new Hopper(new HopperIOSim() {});
+            indexer = new Indexer(new IndexerIOSim() {});
 
             launcher = new Launcher(
                 new TurretIOSim() {},
@@ -139,7 +140,7 @@ public class RobotContainer {
             );
 
             intake = new Intake(new IntakeIO() {});
-            hopper = new Hopper(new HopperIO() {});
+            indexer = new Indexer(new IndexerIO() {});
 
             launcher = new Launcher(
                 new TurretIO() {},
@@ -193,27 +194,37 @@ public class RobotContainer {
         configureTestBindings();
     }
 
-
     // configure teleop specific bindings here
     private void configureTeleopBindings() {
-        driverController.rightBumper().and(RobotModeTriggers.teleop()).onTrue(intake.startIntakeSequence());
-        driverController.rightBumper().and(RobotModeTriggers.teleop()).onFalse(intake.stopIntakeSequence());
+        driverController.rightBumper().and(RobotModeTriggers.teleop()).toggleOnTrue(Commands.runEnd(
+            () -> launcher.setIsLaunching(true),
+            () -> launcher.setIsLaunching(false)
+        ));
 
-        driverController.a().and(RobotModeTriggers.teleop()).onTrue(hopper.run());
-        driverController.a().and(RobotModeTriggers.teleop()).onFalse(hopper.stop());
+        launcher.isLaunching().and(RobotModeTriggers.teleop()).whileTrue(Commands.waitSeconds(0.5)
+            .andThen(new SequentialCommandGroup(
+                indexer.run().repeatedly().onlyWhile(launcher.getTurret().isAtTarget()),
+                indexer.stop()
+            )
+            .repeatedly()
+        ));
 
-        driverController.b().and(RobotModeTriggers.teleop()).onTrue(launcher.setFlywheelVoltage(() -> SmartDashboard.getNumber("LauncherVolts", 5)));
-        driverController.b().and(RobotModeTriggers.teleop()).onFalse(launcher.setFlywheelVoltage(() -> 0));
+        launcher.isLaunching().and(RobotModeTriggers.teleop()).onFalse(indexer.stop());
+
+        driverController.leftBumper().and(RobotModeTriggers.teleop()).onTrue(intake.startIntakeSequence());
+        driverController.leftBumper().and(RobotModeTriggers.teleop()).onFalse(intake.stopIntakeSequence());
     }
 
     // configure test mode specific bindings here
     private void configureTestBindings() {
-        driverController.a().and(TestMode.ALL.isActive()).onTrue(intake.startIntakeSequence());
-        driverController.a().and(TestMode.ALL.isActive()).onFalse(intake.stopIntakeSequence());
-        driverController.b().and(TestMode.ALL.isActive()).onTrue(launcher.setFlywheelSpeed(1000));
-        driverController.b().and(TestMode.ALL.isActive()).onFalse(launcher.setFlywheelSpeed(0));
-        driverController.x().and(TestMode.ALL.isActive()).onTrue(hopper.run());
-        driverController.x().and(TestMode.ALL.isActive()).onFalse(hopper.stop());
+        driverController.rightBumper().and(TestMode.ALL.isActive()).onTrue(intake.startIntakeSequence());
+        driverController.rightBumper().and(TestMode.ALL.isActive()).onFalse(intake.stopIntakeSequence());
+
+        driverController.a().and(TestMode.ALL.isActive()).onTrue(indexer.run());
+        driverController.a().and(TestMode.ALL.isActive()).onFalse(indexer.stop());
+
+        driverController.b().and(TestMode.ALL.isActive()).onTrue(launcher.setFlywheelVoltage(() -> SmartDashboard.getNumber("LauncherVolts", 5)));
+        driverController.b().and(TestMode.ALL.isActive()).onFalse(launcher.setFlywheelVoltage(() -> 0));
     }
 
     public Supplier<Translation2d> joystickMotionSupplier() {
