@@ -211,6 +211,9 @@ public class RobotContainer {
 
         launcher.isLaunching().and(RobotModeTriggers.teleop()).onFalse(indexer.stop());
 
+        driverController.povLeft().onTrue(launcher.getTurret().increaseTurretOffset());
+        driverController.povRight().onTrue(launcher.getTurret().decreaseTurretOffset());
+
         driverController.leftBumper().and(RobotModeTriggers.teleop()).onTrue(intake.startIntakeSequence());
         driverController.leftBumper().and(RobotModeTriggers.teleop()).onFalse(intake.stopIntakeSequence());
     }

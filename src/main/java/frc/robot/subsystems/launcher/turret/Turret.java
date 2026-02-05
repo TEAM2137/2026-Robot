@@ -3,6 +3,8 @@ package frc.robot.subsystems.launcher.turret;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
 
@@ -12,6 +14,8 @@ public class Turret {
         public static final double leftBound = -180 - overlapDegrees / 2.0;
         public static final double rightBound = 180 + overlapDegrees / 2.0;
     }
+    public Rotation2d turretOffset = new Rotation2d(0.0);
+    public static final Rotation2d manualTurretDistance = new Rotation2d(0.5);
 
     private final TurretIO io;
     private final TurretIOInputsAutoLogged inputs;
@@ -31,7 +35,7 @@ public class Turret {
     }
 
     public void setAngleRobotRelative(Rotation2d angle) {
-        Rotation2d target = angle.unaryMinus().plus(Rotation2d.kCW_90deg);
+        Rotation2d target = angle.unaryMinus().plus(Rotation2d.kCW_90deg).plus(turretOffset);
         Rotation2d current = Rotation2d.fromDegrees(io.getAngle());
 
         Logger.recordOutput("Launcher/Turret/TargetAngle", target);
@@ -61,9 +65,16 @@ public class Turret {
     public Trigger isAtTarget() {
         return isAtTargetTrigger;
     }
+    public Command increaseTurretOffset() {
+        return Commands.runOnce(()-> turretOffset = turretOffset.plus(manualTurretDistance));
+    }
+    public Command decreaseTurretOffset() {
+        return Commands.runOnce(()-> turretOffset = turretOffset.minus(manualTurretDistance));
+    }
 
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Launcher/Turret", inputs);
+        Logger.recordOutput("Launcher/TurretOffset", turretOffset);
     }
 }
