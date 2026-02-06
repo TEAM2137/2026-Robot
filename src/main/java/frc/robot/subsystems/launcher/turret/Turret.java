@@ -1,7 +1,5 @@
 package frc.robot.subsystems.launcher.turret;
 
-import static edu.wpi.first.units.Units.Rotation;
-
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Rotation2d;

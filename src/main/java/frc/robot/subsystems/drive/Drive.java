@@ -3,10 +3,13 @@ package frc.robot.subsystems.drive;
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.CANBus;
+
+import choreo.trajectory.SwerveSample;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -380,5 +383,30 @@ public class Drive extends SubsystemBase {
                 this.getPose(),
                 RobotContainer.getInstance().joystickMotionSupplier().get()
         );
+    }
+    
+    // auto trajectory following PIDs
+    private final PIDController autoXController = new PIDController(10.0, 0.0, 0.0);
+    private final PIDController autoYController = new PIDController(10.0, 0.0, 0.0);
+    private final PIDController autoHeadingController = new PIDController(10.0, 0.0, 0.0);
+
+    public void followTrajectory(SwerveSample sample) {
+        Pose2d pose = getPose();
+        double vxAddition = autoXController.calculate(pose.getX(), sample.x);
+        double vyAddition = autoYController.calculate(pose.getY(), sample.y);
+
+        Logger.recordOutput("Autonomous/TargetPose", sample.getPose());
+        Logger.recordOutput("Autonomous/VxAddition", vxAddition);
+        Logger.recordOutput("Autonomous/VyAddition", vyAddition);
+        Logger.recordOutput("Autonomous/VxError", autoXController.getError());
+        Logger.recordOutput("Autonomous/VyError", autoYController.getError());
+
+        ChassisSpeeds speeds = new ChassisSpeeds(
+            sample.vx + vxAddition,
+            sample.vy + vyAddition,
+            sample.omega + autoHeadingController.calculate(pose.getRotation().getRadians(), sample.heading)
+        );
+
+        runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getRotation()));
     }
 }
