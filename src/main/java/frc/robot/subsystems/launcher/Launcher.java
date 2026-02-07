@@ -21,6 +21,7 @@ import frc.robot.subsystems.launcher.turret.Turret;
 import frc.robot.subsystems.launcher.turret.TurretIO;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
+import frc.robot.util.Utils;
 
 public class Launcher extends SubsystemBase {
     private final Turret turret;
@@ -87,6 +88,7 @@ public class Launcher extends SubsystemBase {
 
         Logger.recordOutput("Launcher/Turret/AngleFieldRelative", turret.getAngle().plus(robot.drive.getRotation()));
         Logger.recordOutput("Launcher/IsLaunching", this.isLaunching);
+        Utils.logActiveCommand("Launcher", this);
     }
 
     public Turret getTurret() {

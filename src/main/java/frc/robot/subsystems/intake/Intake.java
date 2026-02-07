@@ -4,6 +4,7 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.Utils;
 
 public class Intake extends SubsystemBase {
     public static class Constants {
@@ -24,6 +25,7 @@ public class Intake extends SubsystemBase {
     public void periodic() {
         io.updateInputs(this.inputs);
         Logger.processInputs("Intake", this.inputs);
+        Utils.logActiveCommand("Intake", this);
     }
 
     public Command runRollers(double volts) {

@@ -3,7 +3,7 @@ package frc.robot.autoalign;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import frc.robot.util.VectorUtil;
+import frc.robot.util.Utils;
 
 import java.util.List;
 
@@ -41,6 +41,6 @@ public record NearestTargetSelector(List<Pose2d> pool, double joystickInfluence)
      */
     public static double calculateBestPoseAddition(Translation2d toReefVector, Translation2d motionVector) {
         if (motionVector.getNorm() < 0.1) return 0.0;
-        return VectorUtil.dot(VectorUtil.normalize(toReefVector), VectorUtil.normalize(motionVector));
+        return Utils.dot(Utils.normalize(toReefVector), Utils.normalize(motionVector));
     }
 }

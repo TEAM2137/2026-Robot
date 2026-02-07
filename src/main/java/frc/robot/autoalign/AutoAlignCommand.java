@@ -15,7 +15,8 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.AllianceFlipUtil;
-import frc.robot.util.ConstantsUtil;
+import frc.robot.util.Utils;
+
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
@@ -101,7 +102,7 @@ public class AutoAlignCommand extends Command {
         // from what I've seen, you want both sides of the velocity trapezoid to have
         // similar steepness for the smoothest results.
         // simulation generally needs a lower dt than the real robot
-        double dt = ConstantsUtil.getRealOrSimConstant(0.11, 0.04);
+        double dt = Utils.getRealOrSimConstant(0.11, 0.04);
 
         // current pose + velocity
         Translation2d robotPos = drive.getPose().getTranslation();

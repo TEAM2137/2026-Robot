@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.AllianceFlipUtil;
-import frc.robot.util.VectorUtil;
+import frc.robot.util.Utils;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -307,7 +307,7 @@ public class DriveCommands {
         Translation2d flippedVelocity = AllianceFlipUtil.shouldFlip() ? new Translation2d().minus(currentVelocity) : currentVelocity;
         Translation2d desiredAccel = wantedVelocity.minus(flippedVelocity);
         if (desiredAccel.getNorm() > maxAcceleration * 0.04)
-            return flippedVelocity.plus(VectorUtil.normalize(desiredAccel).times(maxAcceleration * 0.04));
+            return flippedVelocity.plus(Utils.normalize(desiredAccel).times(maxAcceleration * 0.04));
         else return wantedVelocity;
     }
 }
