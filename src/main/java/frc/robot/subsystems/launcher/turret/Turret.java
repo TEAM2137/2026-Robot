@@ -3,10 +3,12 @@ package frc.robot.subsystems.launcher.turret;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
+import frc.robot.util.Alerts;
 
 public class Turret {
     public static class Constants {
@@ -27,6 +29,9 @@ public class Turret {
         this.inputs = new TurretIOInputsAutoLogged();
         
         this.isAtTargetTrigger = new Trigger(io::isAtTarget);
+
+        Alerts.add("Turret encoder not zeroed", AlertType.kWarning, () -> !inputs.didZero);
+        Alerts.add("Turret motor disconnected", AlertType.kError, () -> !inputs.connected);
     }
 
     public void setAngleFieldRelative(Rotation2d angle) {

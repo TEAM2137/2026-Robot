@@ -3,7 +3,9 @@ package frc.robot.subsystems.launcher.flywheel;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.robot.RobotContainer;
+import frc.robot.util.Alerts;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 
@@ -14,6 +16,8 @@ public class Flywheel {
     public Flywheel(FlywheelIO io) {
         this.io = io;
         this.inputs = new FlywheelIOInputsAutoLogged();
+
+        Alerts.add("Flywheel motors disconnected", AlertType.kError, () -> !inputs.connected);
     }
 
     public void setRPM(double rpm) {

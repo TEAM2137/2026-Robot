@@ -7,6 +7,9 @@ public interface IntakeIO {
     public static class IntakeIOInputs {
         public double intakePosition;
         public double rollerSpeedVolts;
+
+        public boolean pivotConnected;
+        public boolean rollersConnected;
     }
 
     default void runRollers(double volts) {}

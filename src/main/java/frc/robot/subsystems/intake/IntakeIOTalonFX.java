@@ -10,6 +10,7 @@ public class IntakeIOTalonFX implements IntakeIO {
         public static final double gearing = 1.0;
     }
 
+    // TODO: add pivot motor
     protected final TalonFX rollers;
 
     public IntakeIOTalonFX() {
@@ -25,6 +26,10 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     @Override
     public void updateInputs(IntakeIOInputs inputs) {
+        inputs.intakePosition = 0;
         inputs.rollerSpeedVolts = this.rollers.getMotorVoltage().getValueAsDouble();
+
+        inputs.pivotConnected = false;
+        inputs.rollersConnected = this.rollers.isConnected();
     }
 }

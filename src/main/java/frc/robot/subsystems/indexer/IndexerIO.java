@@ -6,7 +6,10 @@ public interface IndexerIO {
     @AutoLog
     public static class IndexerIOInputs {
         public double indexerSpeedVolts;
-        public double feedMotorSpeedVolts;
+        public double feederSpeedVolts;
+
+        public boolean indexerConnected;
+        public boolean feederConnected;
     }
 
     default void runIndexer(double volts) {}

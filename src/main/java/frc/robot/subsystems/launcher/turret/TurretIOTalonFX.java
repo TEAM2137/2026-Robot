@@ -48,5 +48,6 @@ public class TurretIOTalonFX implements TurretIO {
         inputs.angleRaw = motor.getPosition().getValueAsDouble();
         inputs.angle = Rotation2d.fromRotations(inputs.angleRaw);
         inputs.didZero = false;
+        inputs.connected = motor.isConnected();
     }
 }

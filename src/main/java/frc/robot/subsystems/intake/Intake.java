@@ -2,8 +2,10 @@ package frc.robot.subsystems.intake;
 
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.Alerts;
 import frc.robot.util.Utils;
 
 public class Intake extends SubsystemBase {
@@ -19,6 +21,9 @@ public class Intake extends SubsystemBase {
     public Intake(IntakeIO io) {
         this.io = io;
         this.inputs = new IntakeIOInputsAutoLogged();
+
+        Alerts.add("Intake pivot disconnected", AlertType.kError, () -> !inputs.pivotConnected);
+        Alerts.add("Intake rollers disconnected", AlertType.kError, () -> !inputs.rollersConnected);
     }
 
     @Override

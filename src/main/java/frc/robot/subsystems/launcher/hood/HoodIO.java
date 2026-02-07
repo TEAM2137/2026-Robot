@@ -6,6 +6,7 @@ public interface HoodIO {
     @AutoLog
     public static class HoodIOInputs {
         public double angleDegrees;
+        public boolean connected;
     }
 
     default void setAngle(double degrees) {}

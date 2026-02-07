@@ -2,8 +2,10 @@ package frc.robot.subsystems.indexer;
 
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.Alerts;
 import frc.robot.util.Utils;
 
 public class Indexer extends SubsystemBase {
@@ -20,6 +22,9 @@ public class Indexer extends SubsystemBase {
         io.updateInputs(this.inputs);
         Logger.processInputs("Indexer", this.inputs);
         Utils.logActiveCommand("Indexer", this);
+
+        Alerts.add("Indexer motor disconnected", AlertType.kError, () -> !inputs.indexerConnected);
+        Alerts.add("Indexer feeder disconnected", AlertType.kError, () -> !inputs.feederConnected);
     }
 
     public Command run() {

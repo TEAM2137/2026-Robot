@@ -6,6 +6,7 @@ public interface FlywheelIO {
     @AutoLog
     public static class FlywheelIOInputs {
         public double speedRpm;
+        public boolean connected;
     }
 
     default void setRPM(double rpm) {}

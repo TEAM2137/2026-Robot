@@ -10,6 +10,7 @@ public interface TurretIO {
         public double angleRaw;
         public Rotation2d angle;
         public boolean didZero;
+        public boolean connected;
     }
 
     default void setAngle(double degrees) {}
