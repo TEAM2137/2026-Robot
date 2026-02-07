@@ -1,5 +1,7 @@
 package frc.robot;
 
+import java.util.function.Supplier;
+
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
@@ -9,8 +11,7 @@ public class AutoRoutines {
     /** scores 1,000,000 fuel in the opposing alliance's hub, then climbs to L3 */
     public static UnregisteredAuto oneMillionFuelAuto(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
         auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[0].cmd()));
-        // TODO: fix start pose stuff
-        return new UnregisteredAuto(auto, trajectories[0].getInitialPose().orElse(new Pose2d()));
+        return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
     }
 
     /** register all the autos defined above */
@@ -41,5 +42,5 @@ public class AutoRoutines {
     }
 
     /** I just needed something to store an auto and a start pose simultaneously */
-    public record UnregisteredAuto(AutoRoutine routine, Pose2d startPose) {}
+    public record UnregisteredAuto(AutoRoutine routine, Supplier<Pose2d> startPose) {}
 }

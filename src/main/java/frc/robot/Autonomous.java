@@ -3,6 +3,7 @@ package frc.robot;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -22,7 +23,7 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.Alerts;
 
 public class Autonomous {
-    private record RegisteredAuto(String name, Pose2d startPose, AutoRoutine auto) {}
+    private record RegisteredAuto(String name, Supplier<Pose2d> startPose, AutoRoutine auto) {}
 
     private final HashMap<String, RegisteredAuto> autos = new HashMap<>();
     private final LoggedDashboardChooser<RegisteredAuto> autoChooser = new LoggedDashboardChooser<>("Auto Chooser");
@@ -87,13 +88,16 @@ public class Autonomous {
     }
 
     public Optional<Pose2d> getStartPose() {
-        return Optional.ofNullable(autoChooser.get()).map(RegisteredAuto::startPose);
+        RegisteredAuto auto = autoChooser.get();
+        if (auto == null) return Optional.empty();
+        return Optional.ofNullable(auto.startPose.get());
     }
 
     public static String getSetupScore(Pose2d pose, Pose2d targetPose) {
         double positionError = pose.getTranslation().getDistance(targetPose.getTranslation());
         double rotationError = Math.abs(pose.getRotation().minus(targetPose.getRotation()).getDegrees());
 
+        Logger.recordOutput("Autonomous/Setup/Target", targetPose);
         Logger.recordOutput("Autonomous/Setup/PosError", positionError);
         Logger.recordOutput("Autonomous/Setup/RotError", rotationError);
 

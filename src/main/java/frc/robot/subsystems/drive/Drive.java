@@ -181,7 +181,7 @@ public class Drive extends SubsystemBase {
 
         // Post dashboard data through SmartDashboard
         field.setRobotPose(getPose());
-        if (RobotModeTriggers.disabled().getAsBoolean()) {
+        if (RobotModeTriggers.disabled().getAsBoolean() && RobotContainer.getInstance().autonomous != null) {
             RobotContainer.getInstance().autonomous.getStartPose().ifPresent(pose -> {
                 Logger.recordOutput("Autonomous/Setup/Score", Autonomous.getSetupScore(getPose(), pose));
                 fieldStartPose.setPose(pose);

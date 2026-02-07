@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -14,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -56,13 +58,13 @@ public class RobotContainer {
     public final Indexer indexer;
     public final Launcher launcher;
 
-    // Auto
-    public final Autonomous autonomous;
-
     // Controllers
     public final CommandXboxController driverController = new CommandXboxController(0);
     public final CommandXboxController operatorController = new CommandXboxController(1);
     private final Supplier<Translation2d> joystickSupplier = () -> new Translation2d(driverController.getLeftY(), driverController.getLeftX());
+
+    // Auto
+    public Autonomous autonomous;
 
     /** The container for the robot. Contains subsystems, IO devices, and commands. */
     public RobotContainer() {
@@ -160,7 +162,7 @@ public class RobotContainer {
 
         // Setup autonomous features
         this.autonomous = new Autonomous(this);
-
+        
         // Configure the controller bindings
         configureControllerBindings();
     }
