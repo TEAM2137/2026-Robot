@@ -49,6 +49,14 @@ public class Launcher extends SubsystemBase {
         return this.isLaunchingTrigger;
     }
 
+    public Command startLaunching() {
+        return runOnce(() -> this.setIsLaunching(true));
+    }
+
+    public Command stopLaunching() {
+        return runOnce(() -> this.setIsLaunching(false));
+    }
+
     public void setIsLaunching(boolean isLaunching) {
         this.isLaunching = isLaunching;
     }

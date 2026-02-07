@@ -6,17 +6,44 @@ import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 public class AutoRoutines {
-    /** scores 1,000,000 fuel in the opposing alliance's hub, then climbs to L3 */
-    public static UnregisteredAuto oneMillionFuelAuto(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
+    /** starts on the top, drives into the neutral zone fuel, returns to shoot, repeats twice, and climbs */
+    public static UnregisteredAuto twoCycleAuto(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
+        // reset odometry and start first cycle
         auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[0].cmd()));
+
+        // drive to scoring position after intaking
+        trajectories[0].done().onTrue(trajectories[1].cmd());
+
+        // start first scoring sequence
+        trajectories[1].done().onTrue(new SequentialCommandGroup(
+            robot.launcher.startLaunching(), // start launching fuel
+            Commands.waitSeconds(2), // wait for all fuel to be fired
+            robot.launcher.stopLaunching(), // stop launching fuel
+            trajectories[2].cmd().asProxy()  // start second cycle
+        ));
+
+        // drive to scoring position after intaking
+        trajectories[2].done().onTrue(trajectories[3].cmd());
+
+        // start second scoring sequence
+        trajectories[3].done().onTrue(new SequentialCommandGroup(
+            robot.launcher.startLaunching(), // start launching fuel
+            Commands.waitSeconds(2), // wait for all fuel to be fired
+            robot.launcher.stopLaunching(), // stop launching fuel
+            trajectories[4].cmd().asProxy()  // drive to the tower for climb
+        ));
+
+        // return the modified routine and start pose
         return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
     }
 
     /** register all the autos defined above */
     public static void registerAutos(AutoFactory factory, AutoRegistry autos) {
-        autos.add("One Million Fuel Auto", "millionFuel", 1, AutoRoutines::oneMillionFuelAuto);
+        autos.add("Two Cycle", "twoCycle", 5, AutoRoutines::twoCycleAuto);
     }
     
     @FunctionalInterface
