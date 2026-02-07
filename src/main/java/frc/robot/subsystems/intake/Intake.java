@@ -46,10 +46,12 @@ public class Intake extends SubsystemBase {
     }
 
     public Command startIntakeSequence() {
-        return deploy().andThen(runRollers(Constants.intakeVoltage));
+        return deploy().andThen(runRollers(Constants.intakeVoltage))
+            .withName("Intake Deploy Sequence");
     }
 
     public Command stopIntakeSequence() {
-        return retract().andThen(runRollers(0));
+        return retract().andThen(runRollers(0))
+            .withName("Intake Retract Sequence");
     }
 }

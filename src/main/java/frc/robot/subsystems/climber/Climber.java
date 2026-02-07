@@ -54,7 +54,8 @@ public class Climber extends SubsystemBase {
             this.deployUpperHooks(),
             this.retractClimb(),
             this.deployLowerHooks()
-        );
+        )
+        .withName("Climb Sequence");
     }
 
     public Command cancelClimbSequence() {
