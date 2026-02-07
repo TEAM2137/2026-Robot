@@ -6,6 +6,7 @@ import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
@@ -20,9 +21,7 @@ public class AutoRoutines {
 
         // start first scoring sequence
         trajectories[1].done().onTrue(new SequentialCommandGroup(
-            robot.launcher.startLaunching(), // start launching fuel
-            Commands.waitSeconds(2), // wait for all fuel to be fired
-            robot.launcher.stopLaunching(), // stop launching fuel
+            launchAllFuel(robot), // launch all of the robot's fuel
             trajectories[2].cmd().asProxy() // start second cycle
         ));
 
@@ -31,14 +30,20 @@ public class AutoRoutines {
 
         // start second scoring sequence
         trajectories[3].done().onTrue(new SequentialCommandGroup(
-            robot.launcher.startLaunching(), // start launching fuel
-            Commands.waitSeconds(2), // wait for all fuel to be fired
-            robot.launcher.stopLaunching(), // stop launching fuel
+            launchAllFuel(robot), // launch all of the robot's fuel
             trajectories[4].cmd().asProxy() // drive to the tower for climb
         ));
 
         // return the modified routine and start pose
         return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
+    }
+
+    public static Command launchAllFuel(RobotContainer robot) {
+        return new SequentialCommandGroup(
+            robot.launcher.startLaunching().asProxy(), // start launching fuel
+            Commands.waitSeconds(2), // wait for all fuel to be fired
+            robot.launcher.stopLaunching().asProxy() // stop launching fuel
+        );
     }
 
     /** register all the autos defined above */
