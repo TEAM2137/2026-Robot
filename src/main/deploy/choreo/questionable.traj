@@ -30,9 +30,10 @@
  "params":{
   "waypoints":[
     {"x":{"exp":"3.6439902782440186 m", "val":3.6439902782440186}, "y":{"exp":"5.91926383972168 m", "val":5.91926383972168}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":31, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
+    {"x":{"exp":"6.681024074554443 m", "val":6.681024074554443}, "y":{"exp":"5.933455467224121 m", "val":5.933455467224121}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":40, "split":true, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":{"exp":"8.483376502990723 m", "val":8.483376502990723}, "y":{"exp":"5.91926383972168 m", "val":5.91926383972168}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":21, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
-    {"x":{"exp":"6.212696552276611 m", "val":6.212696552276611}, "y":{"exp":"5.905072212219238 m", "val":5.905072212219238}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":12, "split":true, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
-    {"x":{"exp":"6.226888179779053 m", "val":6.226888179779053}, "y":{"exp":"5.152909278869629 m", "val":5.152909278869629}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":15, "split":true, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
+    {"x":{"exp":"6.170121192932129 m", "val":6.170121192932129}, "y":{"exp":"5.990222454071045 m", "val":5.990222454071045}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":12, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
+    {"x":{"exp":"6.198504447937012 m", "val":6.198504447937012}, "y":{"exp":"5.124526023864746 m", "val":5.124526023864746}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":15, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":{"exp":"7.475761890411377 m", "val":7.475761890411377}, "y":{"exp":"5.124526023864746 m", "val":5.124526023864746}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":14, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":{"exp":"8.497568130493164 m", "val":8.497568130493164}, "y":{"exp":"5.1387176513671875 m", "val":5.1387176513671875}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":{"exp":"2.976978063583374 m", "val":2.976978063583374}, "y":{"exp":"5.124526023864746 m", "val":5.124526023864746}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":27, "split":true, "fixTranslation":true, "fixHeading":false, "overrideIntervals":false},
@@ -45,12 +46,12 @@
     {"from":"first", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
     {"from":"last", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
     {"from":"first", "to":"last", "data":{"type":"KeepInRectangle", "props":{"x":{"exp":"0 m", "val":0.0}, "y":{"exp":"0 m", "val":0.0}, "w":{"exp":"16.541 m", "val":16.541}, "h":{"exp":"8.0692 m", "val":8.0692}}}, "enabled":true},
-    {"from":1, "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
-    {"from":3, "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
-    {"from":6, "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
-    {"from":8, "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
+    {"from":2, "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
+    {"from":4, "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
+    {"from":7, "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
     {"from":9, "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
-    {"from":10, "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true}],
+    {"from":10, "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
+    {"from":11, "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true}],
   "targetDt":{
    "exp":"0.05 s",
    "val":0.05

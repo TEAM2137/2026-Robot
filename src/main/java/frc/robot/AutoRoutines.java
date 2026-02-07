@@ -8,7 +8,9 @@ import choreo.auto.AutoTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.subsystems.intake.Intake;
 
 public class AutoRoutines {
     /** starts on the top, drives into the neutral zone fuel, returns to shoot, repeats twice, and climbs */
@@ -38,6 +40,29 @@ public class AutoRoutines {
         return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
     }
 
+    public static UnregisteredAuto questionableAuto(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
+        // reset odometry and start first cycle
+        auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[0].cmd()));
+
+        trajectories[0].done().onTrue(trajectories[1].cmd());
+        //Add intake deploy and run
+
+        trajectories[1].done().onTrue(trajectories[2].cmd());
+        launchAllFuel(robot);
+
+        trajectories[2].done().onTrue(trajectories[3].cmd());
+        //retract and stop intake
+
+        trajectories[3].done().onTrue(trajectories[4].cmd());
+        launchAllFuel(robot);
+
+        trajectories[4].done().onTrue(trajectories[5].cmd());
+        //climb
+
+        // return the modified routine and start pose
+        return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
+    }
+
     public static Command launchAllFuel(RobotContainer robot) {
         return new SequentialCommandGroup(
             robot.launcher.startLaunching().asProxy(), // start launching fuel
@@ -49,8 +74,9 @@ public class AutoRoutines {
     /** register all the autos defined above */
     public static void registerAutos(AutoFactory factory, AutoRegistry autos) {
         autos.add("Two Cycle", "twoCycle", 5, AutoRoutines::twoCycleAuto);
+        autos.add("Questionable (Named by Avery)", "questionable", 6, AutoRoutines::questionableAuto);
     }
-    
+
     @FunctionalInterface
     public interface AutoRegistry {
         /**
