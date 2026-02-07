@@ -2,6 +2,7 @@ package frc.robot.subsystems.launcher.turret;
 
 import static edu.wpi.first.units.Units.Degrees;
 
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -12,6 +13,10 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 public class TurretIOTalonFX implements TurretIO {
+    public static class Constants {
+        public static final double gearing = 1.0;
+    }
+
     protected final TalonFX motor;
 
     public TurretIOTalonFX() {
@@ -19,6 +24,9 @@ public class TurretIOTalonFX implements TurretIO {
 
         motor.getConfigurator().apply(new MotorOutputConfigs()
             .withInverted(InvertedValue.Clockwise_Positive));
+
+        motor.getConfigurator().apply(new FeedbackConfigs()
+            .withSensorToMechanismRatio(Constants.gearing));
 
         motor.getConfigurator().apply(new Slot0Configs()
             .withKP(5).withKD(1.5));
@@ -30,24 +38,24 @@ public class TurretIOTalonFX implements TurretIO {
 
     @Override
     public double getAngle() {
-        return motor.getPosition().getValue().in(Degrees);
+        return this.motor.getPosition().getValue().in(Degrees);
     }
 
     @Override
     public void setAngle(double degrees) {
-        motor.setControl(new MotionMagicVoltage(degrees / 360.0));
+        this.motor.setControl(new MotionMagicVoltage(degrees / 360.0));
     }
 
     @Override
     public boolean isAtTarget() {
-        return Math.abs(motor.getClosedLoopError().getValueAsDouble()) < 0.025;
+        return Math.abs(this.motor.getClosedLoopError().getValueAsDouble()) < 0.025;
     }
 
     @Override
     public void updateInputs(TurretIOInputs inputs) {
-        inputs.angleRaw = motor.getPosition().getValueAsDouble();
+        inputs.angleRaw = this.motor.getPosition().getValueAsDouble();
         inputs.angle = Rotation2d.fromRotations(inputs.angleRaw);
         inputs.didZero = false;
-        inputs.connected = motor.isConnected();
+        inputs.connected = this.motor.isConnected();
     }
 }
