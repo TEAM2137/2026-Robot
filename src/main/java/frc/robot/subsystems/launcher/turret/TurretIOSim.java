@@ -14,7 +14,7 @@ public class TurretIOSim extends TurretIOTalonFX {
         LinearSystemId.createDCMotorSystem(
             DCMotor.getKrakenX60(1),
             0.01,
-            1.0
+            Constants.gearing
         ),
         DCMotor.getKrakenX60(1)
     );
@@ -31,8 +31,8 @@ public class TurretIOSim extends TurretIOTalonFX {
         sim.setInputVoltage(simState.getMotorVoltage());
         sim.update(0.02);
 
-        simState.setRawRotorPosition(sim.getAngularPosition());
-        simState.setRotorVelocity(sim.getAngularVelocity());
+        simState.setRawRotorPosition(sim.getAngularPosition().times(Constants.gearing));
+        simState.setRotorVelocity(sim.getAngularVelocity().times(Constants.gearing));
 
         super.updateInputs(inputs);
     }

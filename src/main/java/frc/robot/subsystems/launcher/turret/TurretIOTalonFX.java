@@ -7,6 +7,7 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 
@@ -19,6 +20,8 @@ public class TurretIOTalonFX implements TurretIO {
 
     protected final TalonFX motor;
 
+    private double target = 0;
+
     public TurretIOTalonFX() {
         motor = new TalonFX(50);
 
@@ -29,11 +32,11 @@ public class TurretIOTalonFX implements TurretIO {
             .withSensorToMechanismRatio(Constants.gearing));
 
         motor.getConfigurator().apply(new Slot0Configs()
-            .withKP(5).withKD(1.5));
+            .withKP(80).withKD(1.5));
 
         motor.getConfigurator().apply(new MotionMagicConfigs()
-            .withMotionMagicCruiseVelocity(5)
-            .withMotionMagicAcceleration(15));
+            .withMotionMagicCruiseVelocity(80)
+            .withMotionMagicAcceleration(250));
     }
 
     @Override
@@ -43,7 +46,9 @@ public class TurretIOTalonFX implements TurretIO {
 
     @Override
     public void setAngle(double degrees) {
-        this.motor.setControl(new MotionMagicVoltage(degrees / 360.0));
+        this.target = degrees / 360.0;
+        this.motor.setControl(new MotionMagicVoltage(this.target));
+        // this.motor.setControl(new PositionVoltage(this.target));
     }
 
     @Override
@@ -53,8 +58,10 @@ public class TurretIOTalonFX implements TurretIO {
 
     @Override
     public void updateInputs(TurretIOInputs inputs) {
-        inputs.angleRaw = this.motor.getPosition().getValueAsDouble();
-        inputs.angle = Rotation2d.fromRotations(inputs.angleRaw);
+        inputs.angleRotations = this.motor.getPosition().getValueAsDouble();
+        inputs.targetAngleRotations = this.target;
+        inputs.velocityRotationsPerSecond = this.motor.getVelocity().getValueAsDouble();
+        inputs.angle = Rotation2d.fromRotations(inputs.angleRotations);
         inputs.didZero = false;
         inputs.connected = this.motor.isConnected();
     }
