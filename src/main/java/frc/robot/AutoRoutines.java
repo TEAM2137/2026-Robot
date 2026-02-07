@@ -23,7 +23,7 @@ public class AutoRoutines {
             robot.launcher.startLaunching(), // start launching fuel
             Commands.waitSeconds(2), // wait for all fuel to be fired
             robot.launcher.stopLaunching(), // stop launching fuel
-            trajectories[2].cmd().asProxy()  // start second cycle
+            trajectories[2].cmd().asProxy() // start second cycle
         ));
 
         // drive to scoring position after intaking
@@ -34,7 +34,7 @@ public class AutoRoutines {
             robot.launcher.startLaunching(), // start launching fuel
             Commands.waitSeconds(2), // wait for all fuel to be fired
             robot.launcher.stopLaunching(), // stop launching fuel
-            trajectories[4].cmd().asProxy()  // drive to the tower for climb
+            trajectories[4].cmd().asProxy() // drive to the tower for climb
         ));
 
         // return the modified routine and start pose
