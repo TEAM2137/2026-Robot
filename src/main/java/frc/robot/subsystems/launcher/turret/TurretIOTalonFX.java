@@ -14,7 +14,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 
 public class TurretIOTalonFX implements TurretIO {
     public static class Constants {
-        public static final double gearing = 1.0;
+        public static final double gearing = 39168.0 / 847.0;
     }
 
     protected final TalonFX motor;

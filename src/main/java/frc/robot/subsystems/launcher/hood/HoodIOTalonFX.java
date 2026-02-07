@@ -8,7 +8,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 public class HoodIOTalonFX implements HoodIO {
     public static class Constants {
-        public static final double gearing = 1.0;
+        public static final double gearing = 43;
     }
 
     protected final TalonFX motor;

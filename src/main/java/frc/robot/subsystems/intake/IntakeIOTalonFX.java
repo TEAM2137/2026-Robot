@@ -9,7 +9,7 @@ public class IntakeIOTalonFX implements IntakeIO {
     public static class Constants {
         public static final int rollersId = 40;
         public static final int pivotId = 40;
-        public static final double pivotGearing = 1.0;
+        public static final double pivotGearing = 3753.0 / 1568.0;
     }
 
     protected final TalonFX pivot;

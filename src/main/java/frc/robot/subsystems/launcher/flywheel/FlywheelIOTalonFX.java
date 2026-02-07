@@ -13,7 +13,7 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         public static final int leaderId = 30;
         public static final int followerId = 31;
         public static final int feederId = 32;
-        public static final double gearing = 1.0;
+        public static final double gearing = 11.0 / 12.0;
     }
 
     protected final TalonFX leader;
