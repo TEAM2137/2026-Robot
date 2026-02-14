@@ -6,8 +6,8 @@ import frc.robot.RobotContainer;
 
 public enum TestMode {
     ALL("All"),
-    INTAKE("Intake"),
-    LAUNCHER("Launcher");
+    TURRET("Turret"),
+    LOOKUP_TABLES("Lookup Tables");
 
     private final String name;
     private final Trigger isActive;

@@ -225,12 +225,15 @@ public class RobotContainer {
     private void configureTestBindings() {
         driverController.rightBumper().and(TestMode.ALL.isActive()).onTrue(intake.startIntakeSequence());
         driverController.rightBumper().and(TestMode.ALL.isActive()).onFalse(intake.stopIntakeSequence());
-
         driverController.a().and(TestMode.ALL.isActive()).onTrue(indexer.run());
         driverController.a().and(TestMode.ALL.isActive()).onFalse(indexer.stop());
-
         driverController.b().and(TestMode.ALL.isActive()).onTrue(launcher.setFlywheelVoltage(() -> SmartDashboard.getNumber("LauncherVolts", 5)));
         driverController.b().and(TestMode.ALL.isActive()).onFalse(launcher.setFlywheelVoltage(() -> 0));
+
+        driverController.povUp().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualHoodAngle(5));
+        driverController.povDown().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualHoodAngle(-5));
+        driverController.povRight().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualFlywheelRPM(800));
+        driverController.povLeft().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualFlywheelRPM(-800));
     }
 
     public Supplier<Translation2d> joystickMotionSupplier() {

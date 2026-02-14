@@ -21,6 +21,7 @@ import frc.robot.subsystems.launcher.turret.Turret;
 import frc.robot.subsystems.launcher.turret.TurretIO;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
+import frc.robot.util.TestMode;
 import frc.robot.util.Utils;
 
 public class Launcher extends SubsystemBase {
@@ -32,6 +33,10 @@ public class Launcher extends SubsystemBase {
     private boolean isLaunching = false;
 
     private ShotCalculator shotCalculator;
+
+    // lookup table tuning values
+    private double manualHoodAngle;
+    private double manualFlywheelRPM;
 
     public Launcher(TurretIO turretIO, HoodIO hoodIO, FlywheelIO flywheelIO) {
         this.turret = new Turret(turretIO);
@@ -73,14 +78,25 @@ public class Launcher extends SubsystemBase {
         else this.shotCalculator = ShotCalculator.PASS_LEFT;
 
         ShotParameters params = this.shotCalculator.calculate(robot);
-        this.turret.setAngleFieldRelative(params.turretAngle());
-        this.hood.setAngle(params.hoodAngle());
-        if (this.isLaunching) this.flywheel.setRPM(params.flywheelRpm());
 
-        // this.turret.setAngleFieldRelative(Rotation2d.fromRadians(Math.atan2(
-        //     robot.operatorController.getRightY(),
-        //     robot.operatorController.getRightX()
-        // )));
+        if (RobotContainer.getInstance().getTestMode() == TestMode.TURRET) {
+            this.turret.setAngleFieldRelative(Rotation2d.fromRadians(Math.atan2(
+                robot.operatorController.getRightY(),
+                robot.operatorController.getRightX()
+            )));
+            this.hood.setAngle(0);
+            this.flywheel.setRPM(0);
+        }
+        else if (RobotContainer.getInstance().getTestMode() == TestMode.LOOKUP_TABLES) {
+            this.turret.setAngleFieldRelative(params.turretAngle());
+            this.hood.setAngle(this.manualHoodAngle);
+            this.flywheel.setRPM(this.manualFlywheelRPM);
+        }
+        else {
+            this.turret.setAngleFieldRelative(params.turretAngle());
+            this.hood.setAngle(params.hoodAngle());
+            if (this.isLaunching) this.flywheel.setRPM(params.flywheelRpm());
+        }
 
         turret.periodic();
         hood.periodic();
@@ -133,5 +149,13 @@ public class Launcher extends SubsystemBase {
 
     public Command setTurretAngle(Rotation2d angle) {
         return runOnce(() -> turret.setAngleFieldRelative(angle));
+    }
+
+    public Command modifyManualHoodAngle(int degreesPerSec) {
+        return run(() -> this.manualHoodAngle += degreesPerSec / 50.0);
+    }
+
+    public Command modifyManualFlywheelRPM(int rpmPerSec) {
+        return run(() -> this.manualFlywheelRPM += rpmPerSec / 50.0);
     }
 }
