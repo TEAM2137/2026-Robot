@@ -2,6 +2,7 @@ package frc.robot.subsystems.intake;
 
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 
@@ -10,6 +11,9 @@ public class IntakeIOTalonFX implements IntakeIO {
         public static final int rollersId = 40;
         public static final int pivotId = 40;
         public static final double pivotGearing = 3753.0 / 1568.0;
+
+        public static final double kP = 1.0;
+        public static final double kD = 0.1;
     }
 
     protected final TalonFX pivot;
@@ -23,6 +27,8 @@ public class IntakeIOTalonFX implements IntakeIO {
         this.pivot = new TalonFX(Constants.pivotId);
         this.pivot.getConfigurator().apply(new FeedbackConfigs()
             .withSensorToMechanismRatio(Constants.pivotGearing));
+        this.pivot.getConfigurator().apply(new Slot0Configs()
+            .withKP(Constants.kP).withKD(Constants.kD));
     }
 
     @Override

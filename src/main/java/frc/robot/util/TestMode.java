@@ -6,7 +6,9 @@ import frc.robot.RobotContainer;
 
 public enum TestMode {
     ALL("All"),
+    INTAKE("Intake"),
     TURRET("Turret"),
+    HOOD("Hood"),
     LOOKUP_TABLES("Lookup Tables");
 
     private final String name;

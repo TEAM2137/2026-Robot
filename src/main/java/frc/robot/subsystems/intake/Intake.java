@@ -11,8 +11,8 @@ import frc.robot.util.Utils;
 public class Intake extends SubsystemBase {
     public static class Constants {
         public static final double homePosition = 0.0;
-        public static final double deployPosition = 10.0;
-        public static final double intakeVoltage = 6.0;
+        public static final double deployPosition = 45.0;
+        public static final double rollerVoltage = 10.0;
     }
 
     private final IntakeIO io;
@@ -46,7 +46,7 @@ public class Intake extends SubsystemBase {
     }
 
     public Command startIntakeSequence() {
-        return deploy().andThen(runRollers(Constants.intakeVoltage))
+        return deploy().andThen(runRollers(Constants.rollerVoltage))
             .withName("Intake Deploy Sequence");
     }
 

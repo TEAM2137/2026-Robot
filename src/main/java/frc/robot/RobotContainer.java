@@ -21,7 +21,6 @@ import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
-import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
@@ -36,6 +35,7 @@ import frc.robot.subsystems.launcher.flywheel.FlywheelIOSim;
 import frc.robot.subsystems.launcher.flywheel.FlywheelIOTalonFX;
 import frc.robot.subsystems.launcher.hood.HoodIO;
 import frc.robot.subsystems.launcher.hood.HoodIOSim;
+import frc.robot.subsystems.launcher.hood.HoodIOTalonFX;
 import frc.robot.subsystems.launcher.turret.TurretIO;
 import frc.robot.subsystems.launcher.turret.TurretIOSim;
 import frc.robot.subsystems.vision.Vision;
@@ -75,10 +75,14 @@ public class RobotContainer {
             // Real robot, instantiate hardware IO implementations
             drive = new Drive(
                 new GyroIOPigeon2(),
-                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight)
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {}
+                // new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                // new ModuleIOTalonFX(TunerConstants.FrontRight),
+                // new ModuleIOTalonFX(TunerConstants.BackLeft),
+                // new ModuleIOTalonFX(TunerConstants.BackRight)
             );
 
             vision = new Vision(
@@ -92,7 +96,7 @@ public class RobotContainer {
 
             launcher = new Launcher(
                 new TurretIO() {},
-                new HoodIO() {},
+                new HoodIOTalonFX() {},
                 new FlywheelIOTalonFX() {}
             );
 
@@ -198,10 +202,8 @@ public class RobotContainer {
 
     // configure teleop specific bindings here
     private void configureTeleopBindings() {
-        driverController.rightBumper().and(RobotModeTriggers.teleop()).toggleOnTrue(Commands.runEnd(
-            () -> launcher.setIsLaunching(true),
-            () -> launcher.setIsLaunching(false)
-        ));
+        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onTrue(launcher.startLaunching());
+        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onFalse(launcher.stopLaunching());
 
         launcher.isLaunching().and(RobotModeTriggers.teleop()).whileTrue(Commands.waitSeconds(0.5)
             .andThen(new SequentialCommandGroup(
@@ -223,17 +225,26 @@ public class RobotContainer {
 
     // configure test mode specific bindings here
     private void configureTestBindings() {
-        driverController.rightBumper().and(TestMode.ALL.isActive()).onTrue(intake.startIntakeSequence());
-        driverController.rightBumper().and(TestMode.ALL.isActive()).onFalse(intake.stopIntakeSequence());
+        driverController.leftBumper().and(TestMode.ALL.isActive()).onTrue(intake.startIntakeSequence());
+        driverController.leftBumper().and(TestMode.ALL.isActive()).onFalse(intake.stopIntakeSequence());
         driverController.a().and(TestMode.ALL.isActive()).onTrue(indexer.run());
         driverController.a().and(TestMode.ALL.isActive()).onFalse(indexer.stop());
         driverController.b().and(TestMode.ALL.isActive()).onTrue(launcher.setFlywheelVoltage(() -> SmartDashboard.getNumber("LauncherVolts", 5)));
         driverController.b().and(TestMode.ALL.isActive()).onFalse(launcher.setFlywheelVoltage(() -> 0));
 
+        driverController.leftBumper().and(TestMode.INTAKE.isActive()).onTrue(intake.deploy());
+        driverController.leftBumper().and(TestMode.INTAKE.isActive()).onFalse(intake.retract());
+        driverController.b().and(TestMode.INTAKE.isActive()).onTrue(intake.runRollers(Intake.Constants.rollerVoltage));
+        driverController.b().and(TestMode.INTAKE.isActive()).onFalse(intake.runRollers(0));
+
+        driverController.b().and(TestMode.HOOD.isActive()).onTrue(launcher.setHoodAngle(30));
+        driverController.b().and(TestMode.HOOD.isActive()).onFalse(launcher.setHoodAngle(0));
+        
         driverController.povUp().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualHoodAngle(5));
         driverController.povDown().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualHoodAngle(-5));
         driverController.povRight().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualFlywheelRPM(800));
         driverController.povLeft().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualFlywheelRPM(-800));
+
     }
 
     public Supplier<Translation2d> joystickMotionSupplier() {

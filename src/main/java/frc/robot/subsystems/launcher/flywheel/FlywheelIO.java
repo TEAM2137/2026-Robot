@@ -5,7 +5,8 @@ import org.littletonrobotics.junction.AutoLog;
 public interface FlywheelIO {
     @AutoLog
     public static class FlywheelIOInputs {
-        public double speedRpm;
+        public double velocityRpm;
+        public double targetVelocityRpm;
         public boolean flywheelConnected;
         public boolean feederConnected;
     }

@@ -78,8 +78,9 @@ public class Launcher extends SubsystemBase {
         else this.shotCalculator = ShotCalculator.PASS_LEFT;
 
         ShotParameters params = this.shotCalculator.calculate(robot);
+        TestMode testMode = RobotContainer.getInstance().getTestMode();
 
-        if (RobotContainer.getInstance().getTestMode() == TestMode.TURRET) {
+        if (testMode == TestMode.TURRET) {
             this.turret.setAngleFieldRelative(Rotation2d.fromRadians(Math.atan2(
                 robot.operatorController.getRightY(),
                 robot.operatorController.getRightX()
@@ -87,14 +88,14 @@ public class Launcher extends SubsystemBase {
             this.hood.setAngle(0);
             this.flywheel.setRPM(0);
         }
-        else if (RobotContainer.getInstance().getTestMode() == TestMode.LOOKUP_TABLES) {
+        else if (testMode == TestMode.LOOKUP_TABLES) {
             this.turret.setAngleFieldRelative(params.turretAngle());
             this.hood.setAngle(this.manualHoodAngle);
             this.flywheel.setRPM(this.manualFlywheelRPM);
         }
         else {
             this.turret.setAngleFieldRelative(params.turretAngle());
-            this.hood.setAngle(params.hoodAngle());
+            if (testMode != TestMode.HOOD) this.hood.setAngle(params.hoodAngle());
             if (this.isLaunching) this.flywheel.setRPM(params.flywheelRpm());
         }
 
