@@ -102,7 +102,6 @@ public class Launcher extends SubsystemBase {
         hood.periodic();
         flywheel.periodic();
 
-        Logger.recordOutput("Launcher/Turret/AngleFieldRelative", turret.getAngle().plus(robot.drive.getRotation()));
         Logger.recordOutput("Launcher/IsLaunching", this.isLaunching);
         Utils.logActiveCommand("Launcher", this);
     }

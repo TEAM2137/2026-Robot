@@ -2,7 +2,9 @@ package frc.robot.subsystems.launcher.turret;
 
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -15,6 +17,9 @@ public class Turret {
         public static final double overlapDegrees = 50;
         public static final double leftBound = -180 - overlapDegrees / 2.0;
         public static final double rightBound = 180 + overlapDegrees / 2.0;
+
+        public static final double offsetX = 6.375; // inches, positive towards robot right
+        public static final double offsetY = -5.875; // inches, positive towards robot front
     }
 
     public double turretOffset = 0.0;
@@ -89,5 +94,19 @@ public class Turret {
         io.updateInputs(inputs);
         Logger.processInputs("Launcher/Turret", inputs);
         Logger.recordOutput("Launcher/TurretOffset", turretOffset);
+        Logger.recordOutput("Launcher/FieldSpacePose", this.getFieldSpacePose(RobotContainer.getInstance()));
+    }
+
+    public Pose2d getFieldSpacePose(RobotContainer robot) {
+        Pose2d robotPose = robot.drive.getPose();
+        Transform2d transform = new Transform2d(
+            Constants.offsetY / 39.37,
+            -Constants.offsetX / 39.37,
+            robotPose.getRotation()
+        );
+        return new Pose2d(
+            robotPose.transformBy(transform).getTranslation(),
+            this.getAngle().plus(robot.drive.getRotation())
+        );
     }
 }

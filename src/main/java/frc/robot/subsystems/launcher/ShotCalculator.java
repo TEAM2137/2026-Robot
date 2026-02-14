@@ -28,11 +28,11 @@ public interface ShotCalculator {
     };
 
     static ShotParameters simpleLookupShot(Translation2d target, RobotContainer robot) {
-        Translation2d robotPos = robot.drive.getPose().getTranslation();
+        Translation2d turretPos = robot.launcher.getTurret().getFieldSpacePose(robot).getTranslation();
 
-        double dst = target.getDistance(robotPos);
-        double dx = target.getX() - robotPos.getX();
-        double dy = target.getY() - robotPos.getY();
+        double dst = target.getDistance(turretPos);
+        double dx = target.getX() - turretPos.getX();
+        double dy = target.getY() - turretPos.getY();
         
         double theAngle = Math.atan2(dx, dy);
 
