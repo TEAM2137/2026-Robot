@@ -1,6 +1,13 @@
 package frc.robot;
 
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -8,11 +15,17 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DriverStation.MatchType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -66,6 +79,7 @@ public class Autonomous {
 
         // Assign auto commands to autonomous trigger
         RobotModeTriggers.autonomous().whileTrue(this.getAutoCommand());
+        RobotModeTriggers.autonomous().onTrue(Commands.runOnce(() -> this.saveSetupScore(robot)));
         Alerts.add("No Auto Selected", AlertType.kWarning, this::isNoAutoSelected);
     }
 
@@ -93,7 +107,62 @@ public class Autonomous {
         return Optional.ofNullable(auto.startPose.get());
     }
 
-    public static String getSetupScore(Pose2d pose, Pose2d targetPose) {
+    public record SetupScore(String letterGrade, double score, double gpa, int matchNumber, MatchType matchType, String eventID) {}
+
+    public void saveSetupScore(RobotContainer robot) {
+        // only log the score if the selected auto has a valid start pose
+        Pose2d startPose = getStartPose().orElse(null);
+        if (startPose == null) return;
+        
+        // only log the score if we are in a real match
+        boolean isOfficial = DriverStation.isFMSAttached()
+                && DriverStation.getMatchType() != MatchType.Practice
+                && DriverStation.getMatchType() != MatchType.None;
+        if (!isOfficial) return;
+
+        // grab setup score, grade, and gpa
+        double score = getRawSetupScore(robot.drive.getPose(), startPose);
+        int scoreRounded = (int) Math.round(score);
+        String letterGrade = getLetterGradeFor(scoreRounded);
+        double gpa = getGPAFor(scoreRounded);
+
+        // grab FMS data
+        int matchNumber = DriverStation.getMatchNumber();
+        MatchType matchType = DriverStation.getMatchType();
+        String eventID = DriverStation.getEventName();
+
+        // create gson instance
+        String filePath = "scores.json";
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+        // create score list and add current setup score
+        ArrayList<SetupScore> setupScores = new ArrayList<>();
+        setupScores.add(new SetupScore(letterGrade, score, gpa, matchNumber, matchType, eventID));
+
+        // read previous scores and add them to the list
+        try (FileReader reader = new FileReader(filePath)) {
+            Type listType = new TypeToken<List<SetupScore>>(){}.getType();
+            List<SetupScore> previousScores = gson.fromJson(reader, listType);
+            setupScores.addAll(previousScores);
+        }
+        catch (IOException e) { e.printStackTrace(); }
+
+        // write the accumulated list to the file
+        try (Writer writer = new FileWriter(filePath)) {
+            gson.toJson(setupScores, writer);
+            System.out.println("Successfully wrote scores list to " + filePath);
+        }
+        catch (IOException e) { e.printStackTrace(); }
+
+        // calculate average GPA based on previous scores
+        double average = setupScores.stream()
+                .filter(ss -> ss.matchType == MatchType.Elimination)
+                .mapToDouble(SetupScore::gpa)
+                .average().orElse(0);
+        Logger.recordOutput("Autonomous/Setup/AverageGPA", average);
+    }
+
+    private static double getRawSetupScore(Pose2d pose, Pose2d targetPose) {
         double positionError = pose.getTranslation().getDistance(targetPose.getTranslation());
         double rotationError = Math.abs(pose.getRotation().minus(targetPose.getRotation()).getDegrees());
 
@@ -101,7 +170,11 @@ public class Autonomous {
         Logger.recordOutput("Autonomous/Setup/PosError", positionError);
         Logger.recordOutput("Autonomous/Setup/RotError", rotationError);
 
-        double rawScore = 100 * Math.exp(-(positionError + 0.008 * rotationError));
+        return 100 * Math.exp(-(positionError + 0.008 * rotationError));
+    }
+
+    public static String getSetupScore(Pose2d pose, Pose2d targetPose) {
+        double rawScore = getRawSetupScore(pose, targetPose);
         int scoreRounded = (int) Math.round(rawScore);
         double scoreNearestHundredth = ((int) (rawScore * 10.0)) / 10.0;
 
@@ -124,5 +197,23 @@ public class Autonomous {
         else if (scoreRounded >= 63) letterGrade = "D";
         else if (scoreRounded >= 60) letterGrade = "D-";
         return letterGrade;
+    }
+
+    private static double getGPAFor(int scoreRounded) {
+        return switch (getLetterGradeFor(scoreRounded)) {
+            case "A+" -> 4.0;
+            case "A" -> 4.0;
+            case "A-" -> 3.7;
+            case "B+" -> 3.3;
+            case "B" -> 3.0;
+            case "B-" -> 2.7;
+            case "C+" -> 2.3;
+            case "C" -> 2.0;
+            case "C-" -> 1.7;
+            case "D+" -> 1.3;
+            case "D" -> 1.0;
+            case "D-" -> 0.7;
+            default -> 0.0;
+        };
     }
 }
