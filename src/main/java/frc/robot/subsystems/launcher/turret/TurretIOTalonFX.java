@@ -3,10 +3,9 @@ package frc.robot.subsystems.launcher.turret;
 import static edu.wpi.first.units.Units.Degrees;
 
 import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 
@@ -31,11 +30,7 @@ public class TurretIOTalonFX implements TurretIO {
             .withSensorToMechanismRatio(Constants.gearing));
 
         motor.getConfigurator().apply(new Slot0Configs()
-            .withKP(80).withKD(1.5));
-
-        motor.getConfigurator().apply(new MotionMagicConfigs()
-            .withMotionMagicCruiseVelocity(80)
-            .withMotionMagicAcceleration(250));
+            .withKP(80).withKD(1.5).withKV(8)); //5.52
     }
 
     @Override
@@ -44,10 +39,15 @@ public class TurretIOTalonFX implements TurretIO {
     }
 
     @Override
-    public void setAngle(double degrees) {
-        this.target = degrees / 360.0;
-        this.motor.setControl(new MotionMagicVoltage(this.target));
-        // this.motor.setControl(new PositionVoltage(this.target));
+    public void setAngle(double position) {
+        this.target = position;
+        this.motor.setControl(new PositionVoltage(position));
+    }
+
+    @Override
+    public void setAngleAndVelocity(double position, double velocity) {
+        this.target = position;
+        this.motor.setControl(new PositionVoltage(position).withVelocity(velocity));
     }
 
     @Override

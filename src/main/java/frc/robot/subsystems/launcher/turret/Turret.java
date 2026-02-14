@@ -61,7 +61,8 @@ public class Turret {
         Logger.recordOutput("Launcher/Turret/Difference", difference);
         Logger.recordOutput("Launcher/Turret/Output", output);
 
-        io.setAngle(output);
+        double robotRadsPerSec = RobotContainer.getInstance().drive.getAngularSpeedRadsPerSec();
+        io.setAngleAndVelocity(output / 360.0, -robotRadsPerSec / (2 * Math.PI));
     }
 
     public Rotation2d getAngle() {
