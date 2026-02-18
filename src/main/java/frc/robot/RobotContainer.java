@@ -96,8 +96,8 @@ public class RobotContainer {
 
             launcher = new Launcher(
                 new TurretIO() {},
-                new HoodIOTalonFX() {},
-                new FlywheelIOTalonFX() {}
+                new HoodIOTalonFX(),
+                new FlywheelIOTalonFX()
             );
 
             break;

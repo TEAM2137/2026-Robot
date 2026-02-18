@@ -11,6 +11,8 @@ import com.ctre.phoenix6.signals.InvertedValue;
 
 public class HoodIOTalonFX implements HoodIO {
     public static class Constants {
+        public static final int id = 35;
+        
         public static final double gearing = 43;
 
         public static final double kP = 8.0;
@@ -20,7 +22,7 @@ public class HoodIOTalonFX implements HoodIO {
     protected final TalonFX motor;
 
     public HoodIOTalonFX() {
-        this.motor = new TalonFX(35);
+        this.motor = new TalonFX(Constants.id);
 
         this.motor.getConfigurator().apply(new MotorOutputConfigs()
             .withInverted(InvertedValue.CounterClockwise_Positive));
