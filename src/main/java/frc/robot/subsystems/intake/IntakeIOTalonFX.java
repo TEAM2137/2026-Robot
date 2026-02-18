@@ -9,7 +9,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 public class IntakeIOTalonFX implements IntakeIO {
     public static class Constants {
         public static final int rollersId = 40;
-        public static final int pivotId = 40;
+        public static final int pivotId = 41;
         public static final double pivotGearing = 3753.0 / 1568.0;
 
         public static final double kP = 1.0;
