@@ -15,6 +15,9 @@ public class Indexer extends SubsystemBase {
     public Indexer(IndexerIO io) {
         this.io = io;
         this.inputs = new IndexerIOInputsAutoLogged();
+
+        Alerts.add("Indexer motor disconnected", AlertType.kError, () -> !inputs.indexerConnected);
+        Alerts.add("Indexer feeder disconnected", AlertType.kError, () -> !inputs.feederConnected);
     }
 
     @Override
@@ -22,15 +25,12 @@ public class Indexer extends SubsystemBase {
         io.updateInputs(this.inputs);
         Logger.processInputs("Indexer", this.inputs);
         Utils.logActiveCommand("Indexer", this);
-
-        Alerts.add("Indexer motor disconnected", AlertType.kError, () -> !inputs.indexerConnected);
-        Alerts.add("Indexer feeder disconnected", AlertType.kError, () -> !inputs.feederConnected);
     }
 
     public Command run() {
         return runOnce(() -> {
             io.runIndexer(12);
-            io.runFeeder(3);
+            io.runFeeder(12);
         });
     }
 

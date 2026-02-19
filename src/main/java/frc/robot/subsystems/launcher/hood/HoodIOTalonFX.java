@@ -15,14 +15,14 @@ public class HoodIOTalonFX implements HoodIO {
         
         public static final double gearing = 43;
 
-        public static final double kP = 8.0;
-        public static final double kD = 0.1;
+        public static final double kP = 160.0;
+        public static final double kD = 0.0;
     }
 
     protected final TalonFX motor;
 
     public HoodIOTalonFX() {
-        this.motor = new TalonFX(Constants.id);
+        this.motor = new TalonFX(Constants.id, "turret");
 
         this.motor.getConfigurator().apply(new MotorOutputConfigs()
             .withInverted(InvertedValue.CounterClockwise_Positive));
@@ -31,7 +31,10 @@ public class HoodIOTalonFX implements HoodIO {
             .withSensorToMechanismRatio(Constants.gearing));
 
         this.motor.getConfigurator().apply(new Slot0Configs()
-            .withKP(Constants.kP).withKD(Constants.kD));
+            .withKP(Constants.kP)
+            .withKD(Constants.kD));
+
+        this.motor.setPosition(0.0);
     }
 
     @Override

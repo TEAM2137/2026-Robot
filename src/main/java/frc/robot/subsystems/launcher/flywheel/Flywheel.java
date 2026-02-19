@@ -18,7 +18,7 @@ public class Flywheel {
         this.inputs = new FlywheelIOInputsAutoLogged();
 
         Alerts.add("Flywheel motors disconnected", AlertType.kError, () -> !inputs.flywheelConnected);
-        Alerts.add("Flywheel feeder disconnected", AlertType.kError, () -> !inputs.feederConnected);
+        // Alerts.add("Flywheel feeder disconnected", AlertType.kError, () -> !inputs.feederConnected);
     }
 
     public void setRPM(double rpm) {

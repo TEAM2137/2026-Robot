@@ -12,7 +12,7 @@ public class FlywheelIOTalonFX implements FlywheelIO {
     public static class Constants {
         public static final int leaderId = 30;
         public static final int followerId = 31;
-        public static final int feederId = 32;
+        // public static final int feederId = 32;
         public static final double gearing = 11.0 / 12.0;
 
         public static final double kP = 0.2;
@@ -22,20 +22,20 @@ public class FlywheelIOTalonFX implements FlywheelIO {
 
     protected final TalonFX leader;
     protected final TalonFX follower;
-    protected final TalonFX feeder;
+    // protected final TalonFX feeder;
 
     private double targetVelocityRpm = 0.0;
 
     public FlywheelIOTalonFX() {
-        this.leader = new TalonFX(Constants.leaderId);
+        this.leader = new TalonFX(Constants.leaderId, "turret");
         this.leader.getConfigurator().apply(new Slot0Configs()
             .withKP(Constants.kP).withKS(Constants.kS).withKV(Constants.kV));
 
-        this.follower = new TalonFX(Constants.followerId);
-        this.feeder = new TalonFX(Constants.feederId);
+        this.follower = new TalonFX(Constants.followerId, "turret");
+        // this.feeder = new TalonFX(Constants.feederId, "turret");
         
         this.follower.setControl(new Follower(this.leader.getDeviceID(), MotorAlignmentValue.Opposed));
-        this.feeder.setControl(new Follower(this.leader.getDeviceID(), MotorAlignmentValue.Opposed));
+        // this.feeder.setControl(new Follower(this.leader.getDeviceID(), MotorAlignmentValue.Opposed));
     }
 
     @Override
@@ -55,6 +55,6 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         inputs.velocityRpm = this.leader.getVelocity().getValue().in(RPM);
         inputs.targetVelocityRpm = this.targetVelocityRpm;
         inputs.flywheelConnected = this.leader.isConnected() && this.follower.isConnected();
-        inputs.feederConnected = this.feeder.isConnected();
+        // inputs.feederConnected = this.feeder.isConnected();
     }
 }

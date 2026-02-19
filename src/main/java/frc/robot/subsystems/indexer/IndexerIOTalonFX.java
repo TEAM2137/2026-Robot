@@ -16,11 +16,11 @@ public class IndexerIOTalonFX implements IndexerIO {
     protected final TalonFX feeder;
 
     public IndexerIOTalonFX() {
-        this.indexer = new TalonFX(Constants.indexerId);
+        this.indexer = new TalonFX(Constants.indexerId, "turret");
         this.indexer.getConfigurator().apply(new MotorOutputConfigs()
             .withInverted(InvertedValue.Clockwise_Positive));
         
-        this.feeder = new TalonFX(Constants.feederId);
+        this.feeder = new TalonFX(Constants.feederId, "turret");
         this.feeder.getConfigurator().apply(new MotorOutputConfigs()
             .withInverted(InvertedValue.CounterClockwise_Positive));
     }
@@ -39,5 +39,7 @@ public class IndexerIOTalonFX implements IndexerIO {
     public void updateInputs(IndexerIOInputs inputs) {
         inputs.indexerSpeedVolts = this.indexer.getMotorVoltage().getValueAsDouble();
         inputs.feederSpeedVolts = this.feeder.getMotorVoltage().getValueAsDouble();
+        inputs.indexerConnected = this.indexer.isConnected();
+        inputs.feederConnected = this.feeder.isConnected();
     }
 }

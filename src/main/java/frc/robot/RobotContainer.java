@@ -21,6 +21,7 @@ import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
+import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
@@ -75,14 +76,14 @@ public class RobotContainer {
             // Real robot, instantiate hardware IO implementations
             drive = new Drive(
                 new GyroIOPigeon2(),
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {}
-                // new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                // new ModuleIOTalonFX(TunerConstants.FrontRight),
-                // new ModuleIOTalonFX(TunerConstants.BackLeft),
-                // new ModuleIOTalonFX(TunerConstants.BackRight)
+                // new ModuleIO() {},
+                // new ModuleIO() {},
+                // new ModuleIO() {},
+                // new ModuleIO() {}
+                new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                new ModuleIOTalonFX(TunerConstants.FrontRight),
+                new ModuleIOTalonFX(TunerConstants.BackLeft),
+                new ModuleIOTalonFX(TunerConstants.BackRight)
             );
 
             vision = new Vision(
@@ -231,13 +232,15 @@ public class RobotContainer {
         driverController.a().and(TestMode.ALL.isActive()).onFalse(indexer.stop());
         driverController.b().and(TestMode.ALL.isActive()).onTrue(launcher.setFlywheelVoltage(() -> SmartDashboard.getNumber("LauncherVolts", 5)));
         driverController.b().and(TestMode.ALL.isActive()).onFalse(launcher.setFlywheelVoltage(() -> 0));
+        driverController.y().and(TestMode.ALL.isActive()).onTrue(launcher.setHoodAngle(18));
+        driverController.x().and(TestMode.ALL.isActive()).onTrue(launcher.setHoodAngle(0));
 
         driverController.leftBumper().and(TestMode.INTAKE.isActive()).onTrue(intake.deploy());
         driverController.leftBumper().and(TestMode.INTAKE.isActive()).onFalse(intake.retract());
         driverController.b().and(TestMode.INTAKE.isActive()).onTrue(intake.runRollers(Intake.Constants.rollerVoltage));
         driverController.b().and(TestMode.INTAKE.isActive()).onFalse(intake.runRollers(0));
 
-        driverController.b().and(TestMode.HOOD.isActive()).onTrue(launcher.setHoodAngle(30));
+        driverController.b().and(TestMode.HOOD.isActive()).onTrue(launcher.setHoodAngle(18));
         driverController.b().and(TestMode.HOOD.isActive()).onFalse(launcher.setHoodAngle(0));
         
         driverController.povUp().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualHoodAngle(5));

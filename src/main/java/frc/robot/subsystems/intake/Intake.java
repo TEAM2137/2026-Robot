@@ -11,8 +11,8 @@ import frc.robot.util.Utils;
 public class Intake extends SubsystemBase {
     public static class Constants {
         public static final double homePosition = 0.0;
-        public static final double deployPosition = 45.0;
-        public static final double rollerVoltage = 10.0;
+        public static final double deployPosition = 1.995;
+        public static final double rollerVoltage = 7.0;
     }
 
     private final IntakeIO io;

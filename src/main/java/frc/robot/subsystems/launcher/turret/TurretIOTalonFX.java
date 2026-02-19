@@ -21,7 +21,7 @@ public class TurretIOTalonFX implements TurretIO {
     private double target = 0;
 
     public TurretIOTalonFX() {
-        motor = new TalonFX(50);
+        motor = new TalonFX(50, "turret");
 
         motor.getConfigurator().apply(new MotorOutputConfigs()
             .withInverted(InvertedValue.Clockwise_Positive));
