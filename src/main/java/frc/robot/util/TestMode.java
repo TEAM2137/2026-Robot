@@ -9,6 +9,7 @@ public enum TestMode {
     INTAKE("Intake"),
     TURRET("Turret"),
     HOOD("Hood"),
+    FLYWHEEL("Flywheel"),
     LOOKUP_TABLES("Lookup Tables");
 
     private final String name;

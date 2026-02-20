@@ -163,7 +163,7 @@ public class RobotContainer {
         this.testModeChooser.setDefaultOption("All", TestMode.ALL);
         for (TestMode mode : TestMode.values()) this.testModeChooser.addOption(mode.getName(), mode);
         SmartDashboard.putData("Test Mode", this.testModeChooser);
-        SmartDashboard.putNumber("LauncherVolts", 5);
+        SmartDashboard.putNumber("LauncherRPM", 3000);
 
         // Setup autonomous features
         this.autonomous = new Autonomous(this);
@@ -230,7 +230,7 @@ public class RobotContainer {
         driverController.leftBumper().and(TestMode.ALL.isActive()).onFalse(intake.stopIntakeSequence());
         driverController.a().and(TestMode.ALL.isActive()).onTrue(indexer.run());
         driverController.a().and(TestMode.ALL.isActive()).onFalse(indexer.stop());
-        driverController.b().and(TestMode.ALL.isActive()).onTrue(launcher.setFlywheelVoltage(() -> SmartDashboard.getNumber("LauncherVolts", 5)));
+        driverController.b().and(TestMode.ALL.isActive()).onTrue(launcher.setFlywheelSpeed(() -> SmartDashboard.getNumber("LauncherRPM", 3000)));
         driverController.b().and(TestMode.ALL.isActive()).onFalse(launcher.setFlywheelVoltage(() -> 0));
         driverController.y().and(TestMode.ALL.isActive()).onTrue(launcher.setHoodAngle(18));
         driverController.x().and(TestMode.ALL.isActive()).onTrue(launcher.setHoodAngle(0));
@@ -242,6 +242,9 @@ public class RobotContainer {
 
         driverController.b().and(TestMode.HOOD.isActive()).onTrue(launcher.setHoodAngle(18));
         driverController.b().and(TestMode.HOOD.isActive()).onFalse(launcher.setHoodAngle(0));
+
+        driverController.b().and(TestMode.FLYWHEEL.isActive()).onTrue(launcher.setFlywheelSpeed(() -> SmartDashboard.getNumber("LauncherRPM", 3000)));
+        driverController.b().and(TestMode.FLYWHEEL.isActive()).onFalse(launcher.setFlywheelVoltage(0));
         
         driverController.povUp().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualHoodAngle(5));
         driverController.povDown().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualHoodAngle(-5));

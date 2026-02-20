@@ -7,6 +7,7 @@ public interface FlywheelIO {
     public static class FlywheelIOInputs {
         public double velocityRpm;
         public double targetVelocityRpm;
+        public double appliedVolts;
         public boolean flywheelConnected;
         public boolean feederConnected;
     }

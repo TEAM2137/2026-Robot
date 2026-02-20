@@ -15,7 +15,8 @@ public class HoodIOTalonFX implements HoodIO {
         
         public static final double gearing = 43;
 
-        public static final double kP = 160.0;
+        public static final double kP = 125.0;
+        public static final double kI = 300.0;
         public static final double kD = 0.0;
     }
 
@@ -31,8 +32,7 @@ public class HoodIOTalonFX implements HoodIO {
             .withSensorToMechanismRatio(Constants.gearing));
 
         this.motor.getConfigurator().apply(new Slot0Configs()
-            .withKP(Constants.kP)
-            .withKD(Constants.kD));
+            .withKP(Constants.kP).withKI(Constants.kI).withKD(Constants.kD));
 
         this.motor.setPosition(0.0);
     }
