@@ -14,6 +14,7 @@ public interface IntakeIO {
 
     default void runRollers(double volts) {}
     default void setPosition(double position) {}
+    default void holdCurrentPosition() {}
 
     default void updateInputs(IntakeIOInputs inputs) {}
 }

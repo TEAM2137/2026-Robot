@@ -163,7 +163,7 @@ public class RobotContainer {
         this.testModeChooser.setDefaultOption("All", TestMode.ALL);
         for (TestMode mode : TestMode.values()) this.testModeChooser.addOption(mode.getName(), mode);
         SmartDashboard.putData("Test Mode", this.testModeChooser);
-        SmartDashboard.putNumber("LauncherRPM", 3000);
+        SmartDashboard.putNumber("LauncherRPM", 1000);
 
         // Setup autonomous features
         this.autonomous = new Autonomous(this);
@@ -222,15 +222,18 @@ public class RobotContainer {
 
         driverController.leftBumper().and(RobotModeTriggers.teleop()).onTrue(intake.startIntakeSequence());
         driverController.leftBumper().and(RobotModeTriggers.teleop()).onFalse(intake.stopIntakeSequence());
+
+        operatorController.b().onTrue(intake.runRollers(-12).andThen(indexer.reverse()));
+        operatorController.b().onFalse(intake.runRollers(0).andThen(indexer.stop()));
     }
 
     // configure test mode specific bindings here
     private void configureTestBindings() {
         driverController.leftBumper().and(TestMode.ALL.isActive()).onTrue(intake.startIntakeSequence());
         driverController.leftBumper().and(TestMode.ALL.isActive()).onFalse(intake.stopIntakeSequence());
-        driverController.a().and(TestMode.ALL.isActive()).onTrue(indexer.run());
-        driverController.a().and(TestMode.ALL.isActive()).onFalse(indexer.stop());
-        driverController.b().and(TestMode.ALL.isActive()).onTrue(launcher.setFlywheelSpeed(() -> SmartDashboard.getNumber("LauncherRPM", 3000)));
+        driverController.a().and(TestMode.ALL.isActive()).onTrue(indexer.run().andThen(intake.agitate()));
+        driverController.a().and(TestMode.ALL.isActive()).onFalse(indexer.stop().andThen(intake.retract().andThen(intake.runRollers(0))));
+        driverController.b().and(TestMode.ALL.isActive()).onTrue(launcher.setFlywheelSpeed(() -> SmartDashboard.getNumber("LauncherRPM", 1000)));
         driverController.b().and(TestMode.ALL.isActive()).onFalse(launcher.setFlywheelVoltage(() -> 0));
         driverController.y().and(TestMode.ALL.isActive()).onTrue(launcher.setHoodAngle(18));
         driverController.x().and(TestMode.ALL.isActive()).onTrue(launcher.setHoodAngle(0));
@@ -243,7 +246,7 @@ public class RobotContainer {
         driverController.b().and(TestMode.HOOD.isActive()).onTrue(launcher.setHoodAngle(18));
         driverController.b().and(TestMode.HOOD.isActive()).onFalse(launcher.setHoodAngle(0));
 
-        driverController.b().and(TestMode.FLYWHEEL.isActive()).onTrue(launcher.setFlywheelSpeed(() -> SmartDashboard.getNumber("LauncherRPM", 3000)));
+        driverController.b().and(TestMode.FLYWHEEL.isActive()).onTrue(launcher.setFlywheelSpeed(() -> SmartDashboard.getNumber("LauncherRPM", 1000)));
         driverController.b().and(TestMode.FLYWHEEL.isActive()).onFalse(launcher.setFlywheelVoltage(0));
         
         driverController.povUp().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualHoodAngle(5));

@@ -7,6 +7,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class IntakeIOTalonFX implements IntakeIO {
     public static class Constants {
@@ -27,6 +28,7 @@ public class IntakeIOTalonFX implements IntakeIO {
     public IntakeIOTalonFX() {
         this.rollers = new TalonFX(Constants.rollersId);
         this.rollers.getConfigurator().apply(new MotorOutputConfigs()
+            .withNeutralMode(NeutralModeValue.Brake)
             .withInverted(InvertedValue.CounterClockwise_Positive));
 
         this.pivot = new TalonFX(Constants.pivotId);
@@ -51,6 +53,12 @@ public class IntakeIOTalonFX implements IntakeIO {
     @Override
     public void setPosition(double position) {
         this.pivot.setControl(new MotionMagicVoltage(position));
+    }
+
+    @Override
+    public void holdCurrentPosition() {
+        this.pivot.setVoltage(0);
+        // this.setPosition(this.pivot.getPosition().getValueAsDouble());
     }
 
     @Override

@@ -34,6 +34,13 @@ public class Indexer extends SubsystemBase {
         });
     }
 
+    public Command reverse() {
+        return runOnce(() -> {
+            io.runIndexer(-12);
+            io.runFeeder(-6);
+        });
+    }
+
     public Command stop() {
         return runOnce(() -> {
             io.runIndexer(0);

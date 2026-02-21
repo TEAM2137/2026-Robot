@@ -4,6 +4,8 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.Alerts;
 import frc.robot.util.Utils;
@@ -11,8 +13,9 @@ import frc.robot.util.Utils;
 public class Intake extends SubsystemBase {
     public static class Constants {
         public static final double homePosition = 0.0;
+        public static final double halfwayPosition = 1.0;
         public static final double deployPosition = 1.995;
-        public static final double rollerVoltage = 7.0;
+        public static final double rollerVoltage = 9.0;
     }
 
     private final IntakeIO io;
@@ -37,12 +40,24 @@ public class Intake extends SubsystemBase {
         return runOnce(() -> io.runRollers(volts));
     }
 
+    public Command agitate() {
+        return runRollers(Constants.rollerVoltage)
+            .andThen(new SequentialCommandGroup(
+                runOnce(() -> io.setPosition(Constants.halfwayPosition)),
+                Commands.waitSeconds(0.4),
+                runOnce(() -> io.setPosition(Constants.homePosition)),
+                Commands.waitSeconds(0.4)
+            ).repeatedly());
+    }
+
     public Command deploy() {
         return runOnce(() -> io.setPosition(Constants.deployPosition));
     }
 
     public Command retract() {
         return runOnce(() -> io.setPosition(Constants.homePosition));
+            // .andThen(Commands.waitSeconds(1))
+            // .andThen(runOnce(() -> io.holdCurrentPosition()));
     }
 
     public Command startIntakeSequence() {
@@ -51,7 +66,7 @@ public class Intake extends SubsystemBase {
     }
 
     public Command stopIntakeSequence() {
-        return retract().andThen(runRollers(0))
+        return Commands.waitSeconds(1).andThen(runRollers(0))
             .withName("Intake Retract Sequence");
     }
 }
