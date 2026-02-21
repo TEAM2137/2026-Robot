@@ -34,6 +34,7 @@ import frc.robot.subsystems.launcher.Launcher;
 import frc.robot.subsystems.launcher.flywheel.FlywheelIO;
 import frc.robot.subsystems.launcher.flywheel.FlywheelIOSim;
 import frc.robot.subsystems.launcher.flywheel.FlywheelIOTalonFX;
+import frc.robot.subsystems.launcher.flywheel.FlywheelIO.FlywheelIOInputs;
 import frc.robot.subsystems.launcher.hood.HoodIO;
 import frc.robot.subsystems.launcher.hood.HoodIOSim;
 import frc.robot.subsystems.launcher.hood.HoodIOTalonFX;
@@ -203,10 +204,11 @@ public class RobotContainer {
 
     // configure teleop specific bindings here
     private void configureTeleopBindings() {
-        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onTrue(launcher.startLaunching());
-        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onFalse(launcher.stopLaunching());
+        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onTrue(launcher.startLaunching().andThen(intake.agitate()));
+        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onFalse(launcher.stopLaunching().andThen(intake.retract()).andThen(intake.runRollers(0)));
 
         launcher.isLaunching().and(RobotModeTriggers.teleop()).whileTrue(Commands.waitSeconds(0.5)
+        //TODO change this to activating while flywheel is within 5% of target instead of waiting a set time
             .andThen(new SequentialCommandGroup(
                 indexer.run().repeatedly().onlyWhile(launcher.getTurret().isAtTarget()),
                 indexer.stop()
@@ -222,6 +224,7 @@ public class RobotContainer {
 
         driverController.leftBumper().and(RobotModeTriggers.teleop()).onTrue(intake.startIntakeSequence());
         driverController.leftBumper().and(RobotModeTriggers.teleop()).onFalse(intake.stopIntakeSequence());
+        driverController.x().onTrue(intake.retract());
 
         operatorController.b().onTrue(intake.runRollers(-12).andThen(indexer.reverse()));
         operatorController.b().onFalse(intake.runRollers(0).andThen(indexer.stop()));
