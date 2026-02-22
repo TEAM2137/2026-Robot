@@ -84,6 +84,24 @@ public class AutoRoutines {
         return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
     }
 
+    public static UnregisteredAuto depotHubClimb(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
+        // reset odometry, start intaking, and start first path
+        auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[1].cmd()));
+        //go toward bump and launch fuel, stop intake
+        trajectories[1].done().onTrue(trajectories[2].cmd());
+        launchAllFuel(robot);
+        //auto align over bump
+        trajectories[2].done().onTrue(trajectories[3].cmd());
+        //enable intake and start collecting again
+        trajectories[3].done().onTrue(trajectories[4].cmd());
+        //stop intake and move toward bump
+        trajectories[4].done().onTrue(trajectories[5].cmd());
+        //auto align over bump and launch
+
+        // return the modified routine and start pose
+        return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
+    }
+
     public static Command launchAllFuel(RobotContainer robot) {
         return new SequentialCommandGroup(
             robot.launcher.startLaunching().asProxy(), // start launching fuel
@@ -97,6 +115,7 @@ public class AutoRoutines {
         autos.add("Two Cycle", "twoCycle", 5, AutoRoutines::twoCycleAuto);
         autos.add("Questionable (Named by Avery)", "questionable", 6, AutoRoutines::questionableAuto);
         autos.add("Second Cycle Near", "secondCycleNear", 9, AutoRoutines::secondCycleNear);
+        autos.add("Depot, Hub, Climb", "depotHubClimb", 6, AutoRoutines::depotHubClimb);
     }
 
     @FunctionalInterface
