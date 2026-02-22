@@ -1,5 +1,7 @@
 package frc.robot.subsystems.climber;
 
+import java.util.function.DoubleSupplier;
+
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -23,6 +25,8 @@ public class Climber extends SubsystemBase {
     public Climber(ClimberIO io) {
         this.io = io;
         this.inputs = new ClimberIOInputsAutoLogged();
+
+        Alerts.add("Climb motor disconnected", AlertType.kError, () -> !inputs.connected);
     }
 
     @Override
@@ -30,8 +34,14 @@ public class Climber extends SubsystemBase {
         io.updateInputs(this.inputs);
         Logger.processInputs("Climber", this.inputs);
         Utils.logActiveCommand("Climber", this);
+    }
 
-        Alerts.add("Climb motor disconnected", AlertType.kError, () -> !inputs.connected);
+    public Command setVoltage(DoubleSupplier volts) {
+        return runOnce(() -> this.io.setVoltage(volts.getAsDouble()));
+    }
+
+    public Command setVoltage(double volts) {
+        return runOnce(() -> this.io.setVoltage(volts));
     }
 
     // TODO: this is VERY unrealistic

@@ -7,6 +7,7 @@ import frc.robot.RobotContainer;
 public enum TestMode {
     ALL("All"),
     INTAKE("Intake"),
+    CLIMBER("Climber"),
     TURRET("Turret"),
     HOOD("Hood"),
     FLYWHEEL("Flywheel"),

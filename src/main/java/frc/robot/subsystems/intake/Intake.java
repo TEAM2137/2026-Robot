@@ -66,7 +66,7 @@ public class Intake extends SubsystemBase {
     }
 
     public Command stopIntakeSequence() {
-        return Commands.waitSeconds(1).andThen(runRollers(0))
+        return Commands.waitSeconds(0.5).andThen(runRollers(0))
             .withName("Intake Retract Sequence");
     }
 }

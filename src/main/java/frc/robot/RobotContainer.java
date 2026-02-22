@@ -16,6 +16,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberIOTalonFX;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -41,7 +44,6 @@ import frc.robot.subsystems.launcher.turret.TurretIO;
 import frc.robot.subsystems.launcher.turret.TurretIOSim;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.TestMode;
 import frc.robot.util.Utils;
 import frc.robot.util.Utils.MatchEvent;
@@ -58,6 +60,7 @@ public class RobotContainer {
     public final Intake intake;
     public final Indexer indexer;
     public final Launcher launcher;
+    public final Climber climber;
 
     // Controllers
     public final CommandXboxController driverController = new CommandXboxController(0);
@@ -101,6 +104,8 @@ public class RobotContainer {
                 new FlywheelIOTalonFX()
             );
 
+            climber = new Climber(new ClimberIOTalonFX());
+
             break;
 
         case SIM:
@@ -127,6 +132,8 @@ public class RobotContainer {
                 new HoodIOSim() {},
                 new FlywheelIOSim() {}
             );
+
+            climber = new Climber(new ClimberIO() {});
 
             break;
 
@@ -155,6 +162,8 @@ public class RobotContainer {
                 new FlywheelIO() {}
             );
 
+            climber = new Climber(new ClimberIO() {});
+
             break;
         }
 
@@ -164,6 +173,7 @@ public class RobotContainer {
         for (TestMode mode : TestMode.values()) this.testModeChooser.addOption(mode.getName(), mode);
         SmartDashboard.putData("Test Mode", this.testModeChooser);
         SmartDashboard.putNumber("LauncherRPM", 1000);
+        SmartDashboard.putNumber("ClimberVolts", 2);
 
         // Setup autonomous features
         this.autonomous = new Autonomous(this);
@@ -190,15 +200,16 @@ public class RobotContainer {
         driverController.start().onTrue(Commands.runOnce(() ->
                 drive.setPose(new Pose2d(
                         drive.getPose().getTranslation(),
-                        AllianceFlipUtil.shouldFlip()
-                            ? AllianceFlipUtil.flip(new Rotation2d())
-                            : new Rotation2d()
+                        new Rotation2d()
+                        // AllianceFlipUtil.shouldFlip()
+                        //     ? AllianceFlipUtil.flip(new Rotation2d())
+                        //     : new Rotation2d()
                 )), drive)
                 .ignoringDisable(true)
                 .withName("Reset Gyro"));
 
-        configureTeleopBindings();
-        configureTestBindings();
+        this.configureTeleopBindings();
+        this.configureTestBindings();
     }
 
     // configure teleop specific bindings here
@@ -225,8 +236,8 @@ public class RobotContainer {
         driverController.leftBumper().and(RobotModeTriggers.teleop()).onFalse(intake.stopIntakeSequence());
         driverController.x().and(RobotModeTriggers.teleop()).onTrue(intake.retract());
 
-        operatorController.b().onTrue(intake.runRollers(-12).andThen(indexer.reverse()));
-        operatorController.b().onFalse(intake.runRollers(0).andThen(indexer.stop()));
+        operatorController.b().onTrue(intake.deploy().andThen(intake.runRollers(-12)));
+        operatorController.b().onFalse(intake.retract().andThen(intake.runRollers(0)));
     }
 
     // configure test mode specific bindings here
@@ -244,6 +255,11 @@ public class RobotContainer {
         driverController.leftBumper().and(TestMode.INTAKE.isActive()).onFalse(intake.retract());
         driverController.b().and(TestMode.INTAKE.isActive()).onTrue(intake.runRollers(Intake.Constants.rollerVoltage));
         driverController.b().and(TestMode.INTAKE.isActive()).onFalse(intake.runRollers(0));
+        
+        driverController.povUp().and(TestMode.CLIMBER.isActive()).onTrue(climber.setVoltage(() -> SmartDashboard.getNumber("ClimberVolts", 0)));
+        driverController.povUp().and(TestMode.CLIMBER.isActive()).onFalse(climber.setVoltage(0));
+        driverController.povDown().and(TestMode.CLIMBER.isActive()).onTrue(climber.setVoltage(() -> SmartDashboard.getNumber("ClimberVolts", 0)));
+        driverController.povDown().and(TestMode.CLIMBER.isActive()).onFalse(climber.setVoltage(0));
 
         driverController.b().and(TestMode.HOOD.isActive()).onTrue(launcher.setHoodAngle(18));
         driverController.b().and(TestMode.HOOD.isActive()).onFalse(launcher.setHoodAngle(0));
