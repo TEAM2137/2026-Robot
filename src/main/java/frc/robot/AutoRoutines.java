@@ -48,7 +48,7 @@ public class AutoRoutines {
         //Add intake deploy and run
 
         trajectories[1].done().onTrue(trajectories[2].cmd());
-        launchAllFuel(robot);
+        launchAllFuel(robot); // TODO: fix all of these command constructions
 
         trajectories[2].done().onTrue(trajectories[3].cmd());
         //retract and stop intake
