@@ -68,24 +68,27 @@ public class AutoRoutines {
         auto.active().onTrue(trajectories[0].resetOdometry().andThen(new AutoAlignCommand(/*align to position across bump */)).andThen(trajectories[1].cmd()));
         //before running 2, start intaking
         trajectories[1].done().onTrue(trajectories[2].cmd());
-        launchAllFuel(robot);
+
         trajectories[2].done().onTrue(trajectories[3].cmd());
+        //stop intaking
         trajectories[3].done().onTrue(trajectories[4].cmd());
-        launchAllFuel(robot);
-        trajectories[4].done().onTrue(trajectories[5].cmd());
-        trajectories[5].done().onTrue(trajectories[6].cmd());
+
+        //auto align over bump, stop, launch (replaces split 5)
+
+        //auto align back to NZ, start intake (replaces split 6)
+
         trajectories[6].done().onTrue(trajectories[7].cmd());
-        trajectories[7].done().onTrue(trajectories[8].cmd());
-        trajectories[8].done().onTrue(trajectories[9].cmd());
-        // trajectories[9].done().onTrue(trajectories[10].cmd());
-        // trajectories[10].done().onTrue(trajectories[11].cmd());
+        //stop intake
+
+        //auto align over bump, launch (replaces split 8)
+
 
         // return the modified routine and start pose
         return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
     }
 
     public static UnregisteredAuto depotHubClimb(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
-        // reset odometry, start intaking, and start first path
+        // reset odometry, auto align over bump instead or path 0, start intaking, and start path 1
         auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[1].cmd()));
         //go toward bump and launch fuel, stop intake
         trajectories[1].done().onTrue(trajectories[2].cmd());
