@@ -10,7 +10,9 @@ public interface TurretIO {
         public double angleRotations;
         public double targetAngleRotations;
         public double velocityRotationsPerSecond;
+        
         public Rotation2d angle;
+
         public boolean didZero;
         public boolean connected;
     }

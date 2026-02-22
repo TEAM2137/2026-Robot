@@ -25,6 +25,8 @@ public class IntakeIOTalonFX implements IntakeIO {
     protected final TalonFX pivot;
     protected final TalonFX rollers;
 
+    protected double targetPositionRotations;
+
     public IntakeIOTalonFX() {
         this.rollers = new TalonFX(Constants.rollersId);
         this.rollers.getConfigurator().apply(new MotorOutputConfigs()
@@ -52,18 +54,14 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     @Override
     public void setPosition(double position) {
+        this.targetPositionRotations = position;
         this.pivot.setControl(new MotionMagicVoltage(position));
     }
 
     @Override
-    public void holdCurrentPosition() {
-        this.pivot.setVoltage(0);
-        // this.setPosition(this.pivot.getPosition().getValueAsDouble());
-    }
-
-    @Override
     public void updateInputs(IntakeIOInputs inputs) {
-        inputs.intakePosition = this.pivot.getPosition().getValueAsDouble();
+        inputs.positionRotations = this.pivot.getPosition().getValueAsDouble();
+        inputs.targetPositionRotations = this.targetPositionRotations;
         inputs.rollerSpeedVolts = this.rollers.getMotorVoltage().getValueAsDouble();
 
         inputs.pivotConnected = this.pivot.isConnected();

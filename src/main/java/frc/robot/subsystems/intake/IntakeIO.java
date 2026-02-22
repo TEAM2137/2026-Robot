@@ -5,7 +5,8 @@ import org.littletonrobotics.junction.AutoLog;
 public interface IntakeIO {
     @AutoLog
     public static class IntakeIOInputs {
-        public double intakePosition;
+        public double positionRotations;
+        public double targetPositionRotations;
         public double rollerSpeedVolts;
 
         public boolean pivotConnected;
@@ -14,7 +15,6 @@ public interface IntakeIO {
 
     default void runRollers(double volts) {}
     default void setPosition(double position) {}
-    default void holdCurrentPosition() {}
 
     default void updateInputs(IntakeIOInputs inputs) {}
 }

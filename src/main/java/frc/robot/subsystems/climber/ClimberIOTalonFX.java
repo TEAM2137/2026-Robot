@@ -15,6 +15,7 @@ public class ClimberIOTalonFX implements ClimberIO {
 
         public static final double kP = 0.0;
         public static final double kD = 0.0;
+        public static final double kG = 0.0;
     }
 
     protected final TalonFX motor;
@@ -31,7 +32,7 @@ public class ClimberIOTalonFX implements ClimberIO {
             .withSensorToMechanismRatio(Constants.gearing));
 
         this.motor.getConfigurator().apply(new Slot0Configs()
-            .withKP(Constants.kP).withKD(Constants.kD));
+            .withKP(Constants.kP).withKD(Constants.kD).withKG(Constants.kG));
 
         this.motor.setPosition(0.0);
     }

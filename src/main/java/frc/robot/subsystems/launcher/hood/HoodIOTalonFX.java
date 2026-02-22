@@ -22,6 +22,8 @@ public class HoodIOTalonFX implements HoodIO {
 
     protected final TalonFX motor;
 
+    protected double targetAngleDegrees;
+
     public HoodIOTalonFX() {
         this.motor = new TalonFX(Constants.id, "turret");
 
@@ -39,12 +41,14 @@ public class HoodIOTalonFX implements HoodIO {
 
     @Override
     public void setAngle(double degrees) {
+        this.targetAngleDegrees = degrees;
         this.motor.setControl(new PositionVoltage(degrees / 360.0));
     }
 
     @Override
     public void updateInputs(HoodIOInputs inputs) {
         inputs.angleDegrees = this.motor.getPosition().getValue().in(Degrees);
+        inputs.targetAngleDegrees = this.targetAngleDegrees;
         inputs.connected = this.motor.isConnected();
     }
 }
