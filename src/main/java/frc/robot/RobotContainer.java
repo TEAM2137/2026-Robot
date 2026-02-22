@@ -34,7 +34,6 @@ import frc.robot.subsystems.launcher.Launcher;
 import frc.robot.subsystems.launcher.flywheel.FlywheelIO;
 import frc.robot.subsystems.launcher.flywheel.FlywheelIOSim;
 import frc.robot.subsystems.launcher.flywheel.FlywheelIOTalonFX;
-import frc.robot.subsystems.launcher.flywheel.FlywheelIO.FlywheelIOInputs;
 import frc.robot.subsystems.launcher.hood.HoodIO;
 import frc.robot.subsystems.launcher.hood.HoodIOSim;
 import frc.robot.subsystems.launcher.hood.HoodIOTalonFX;
