@@ -7,6 +7,7 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -78,9 +79,10 @@ public class Launcher extends SubsystemBase {
         else this.shotCalculator = ShotCalculator.PASS_LEFT;
 
         ShotParameters params = this.shotCalculator.calculate(robot);
+        boolean isTest = DriverStation.isTest();
         TestMode testMode = RobotContainer.getInstance().getTestMode();
 
-        if (testMode == TestMode.TURRET) {
+        if (isTest && testMode == TestMode.TURRET) {
             this.turret.setAngleFieldRelative(Rotation2d.fromRadians(Math.atan2(
                 robot.operatorController.getRightY(),
                 robot.operatorController.getRightX()
@@ -88,14 +90,14 @@ public class Launcher extends SubsystemBase {
             this.hood.setAngle(0);
             this.flywheel.setRPM(0);
         }
-        else if (testMode == TestMode.LOOKUP_TABLES) {
+        else if (isTest && testMode == TestMode.LOOKUP_TABLES) {
             this.turret.setAngleFieldRelative(params.turretAngle());
             this.hood.setAngle(this.manualHoodAngle);
             this.flywheel.setRPM(this.manualFlywheelRPM);
         }
-        else {
+        else if (!isTest) {
             this.turret.setAngleFieldRelative(params.turretAngle());
-            if (testMode != TestMode.HOOD && testMode != TestMode.ALL) this.hood.setAngle(params.hoodAngle());
+            this.hood.setAngle(params.hoodAngle());
             if (this.isLaunching) this.flywheel.setRPM(params.flywheelRpm());
         }
 
