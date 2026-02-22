@@ -1,11 +1,12 @@
 package frc.robot.subsystems.climber;
 
-import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.CommutationConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.hardware.TalonFXS;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorArrangementValue;
 
 public class ClimberIOTalonFX implements ClimberIO {
     public static class Constants {
@@ -18,18 +19,18 @@ public class ClimberIOTalonFX implements ClimberIO {
         public static final double kG = 0.0;
     }
 
-    protected final TalonFX motor;
+    protected final TalonFXS motor;
 
     protected double targetPositionInches;
 
     public ClimberIOTalonFX() {
-        this.motor = new TalonFX(Constants.id);
+        this.motor = new TalonFXS(Constants.id);
 
         this.motor.getConfigurator().apply(new MotorOutputConfigs()
-            .withInverted(InvertedValue.CounterClockwise_Positive));
+            .withInverted(InvertedValue.Clockwise_Positive));
 
-        this.motor.getConfigurator().apply(new FeedbackConfigs()
-            .withSensorToMechanismRatio(Constants.gearing));
+        this.motor.getConfigurator().apply(new CommutationConfigs()
+            .withMotorArrangement(MotorArrangementValue.NEO_JST));
 
         this.motor.getConfigurator().apply(new Slot0Configs()
             .withKP(Constants.kP).withKD(Constants.kD).withKG(Constants.kG));

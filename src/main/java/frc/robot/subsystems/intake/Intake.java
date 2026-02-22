@@ -1,5 +1,7 @@
 package frc.robot.subsystems.intake;
 
+import java.util.function.DoubleSupplier;
+
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -14,8 +16,8 @@ public class Intake extends SubsystemBase {
     public static class Constants {
         public static final double homePosition = 0.0;
         public static final double halfwayPosition = 1.0;
-        public static final double deployPosition = 1.995;
-        public static final double rollerVoltage = 9.0;
+        public static final double deployPosition = 2.2;//1.995;
+        public static final double rollerVoltage = 12.0;
     }
 
     private final IntakeIO io;
@@ -34,6 +36,10 @@ public class Intake extends SubsystemBase {
         io.updateInputs(this.inputs);
         Logger.processInputs("Intake", this.inputs);
         Utils.logActiveCommand("Intake", this);
+    }
+
+    public Command runRollers(DoubleSupplier volts) {
+        return runOnce(() -> io.runRollers(volts.getAsDouble()));
     }
 
     public Command runRollers(double volts) {

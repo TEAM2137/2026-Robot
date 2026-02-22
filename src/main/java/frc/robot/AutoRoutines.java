@@ -77,8 +77,8 @@ public class AutoRoutines {
         trajectories[6].done().onTrue(trajectories[7].cmd());
         trajectories[7].done().onTrue(trajectories[8].cmd());
         trajectories[8].done().onTrue(trajectories[9].cmd());
-        trajectories[9].done().onTrue(trajectories[10].cmd());
-        trajectories[10].done().onTrue(trajectories[11].cmd());
+        // trajectories[9].done().onTrue(trajectories[10].cmd());
+        // trajectories[10].done().onTrue(trajectories[11].cmd());
 
         // return the modified routine and start pose
         return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
@@ -113,9 +113,9 @@ public class AutoRoutines {
     /** register all the autos defined above */
     public static void registerAutos(AutoFactory factory, AutoRegistry autos) {
         autos.add("Two Cycle", "twoCycle", 5, AutoRoutines::twoCycleAuto);
-        autos.add("Questionable (Named by Avery)", "questionable", 6, AutoRoutines::questionableAuto);
-        autos.add("Second Cycle Near", "secondCycleNear", 9, AutoRoutines::secondCycleNear);
-        autos.add("Depot, Hub, Climb", "depotHubClimb", 6, AutoRoutines::depotHubClimb);
+        // autos.add("Questionable", "questionable", 6, AutoRoutines::questionableAuto);
+        // autos.add("Second Cycle Near", "secondCycleNear", 9, AutoRoutines::secondCycleNear);
+        // autos.add("Depot, Hub, Climb", "depotHubClimb", 6, AutoRoutines::depotHubClimb);
     }
 
     @FunctionalInterface

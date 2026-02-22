@@ -18,7 +18,6 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberIO;
-import frc.robot.subsystems.climber.ClimberIOTalonFX;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -104,7 +103,7 @@ public class RobotContainer {
                 new FlywheelIOTalonFX()
             );
 
-            climber = new Climber(new ClimberIOTalonFX());
+            climber = new Climber(new ClimberIO() {});
 
             break;
 
@@ -218,7 +217,8 @@ public class RobotContainer {
         driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onFalse(launcher.stopLaunching().andThen(intake.retract()).andThen(intake.runRollers(0)));
 
         launcher.isLaunching().and(RobotModeTriggers.teleop()).whileTrue(
-            Commands.waitUntil(launcher.getFlywheel().isWithinTarget(60))
+            // Commands.waitUntil(launcher.getFlywheel().isWithinTarget(60))
+            Commands.waitSeconds(0.2)
             .andThen(new SequentialCommandGroup(
                 indexer.run().repeatedly().onlyWhile(launcher.getTurret().isAtTarget()),
                 indexer.stop()
@@ -226,15 +226,16 @@ public class RobotContainer {
             .repeatedly()
         ));
 
-        launcher.isLaunching().and(RobotModeTriggers.teleop()).onFalse(indexer.stop());
+        launcher.isLaunching().and(RobotModeTriggers.teleop()).onFalse(indexer.stop().andThen(intake.retract().andThen(intake.runRollers(0))));
 
         driverController.povLeft().whileTrue(launcher.getTurret().increaseTurretOffset());
         driverController.povRight().whileTrue(launcher.getTurret().decreaseTurretOffset());
         driverController.povDown().onTrue(launcher.getTurret().resetTurretOffset());
 
-        driverController.leftBumper().and(RobotModeTriggers.teleop()).onTrue(intake.startIntakeSequence());
+        driverController.leftBumper().and(RobotModeTriggers.teleop()).whileTrue(intake.deploy().andThen(
+            intake.runRollers(() -> Math.min(Intake.Constants.rollerVoltage + drive.getLinearSpeedMetersPerSec(), 12)).repeatedly()));
         driverController.leftBumper().and(RobotModeTriggers.teleop()).onFalse(intake.stopIntakeSequence());
-        driverController.x().and(RobotModeTriggers.teleop()).onTrue(intake.retract());
+        driverController.x().and(RobotModeTriggers.teleop()).onTrue(intake.retract().andThen(intake.runRollers(0)));
 
         operatorController.b().onTrue(intake.deploy().andThen(intake.runRollers(-12)));
         operatorController.b().onFalse(intake.retract().andThen(intake.runRollers(0)));
@@ -256,9 +257,9 @@ public class RobotContainer {
         driverController.b().and(TestMode.INTAKE.isActive()).onTrue(intake.runRollers(Intake.Constants.rollerVoltage));
         driverController.b().and(TestMode.INTAKE.isActive()).onFalse(intake.runRollers(0));
         
-        driverController.povUp().and(TestMode.CLIMBER.isActive()).onTrue(climber.setVoltage(() -> SmartDashboard.getNumber("ClimberVolts", 0)));
+        driverController.povUp().and(TestMode.CLIMBER.isActive()).onTrue(climber.setVoltage(() -> 12));
         driverController.povUp().and(TestMode.CLIMBER.isActive()).onFalse(climber.setVoltage(0));
-        driverController.povDown().and(TestMode.CLIMBER.isActive()).onTrue(climber.setVoltage(() -> SmartDashboard.getNumber("ClimberVolts", 0)));
+        driverController.povDown().and(TestMode.CLIMBER.isActive()).onTrue(climber.setVoltage(() -> -12));
         driverController.povDown().and(TestMode.CLIMBER.isActive()).onFalse(climber.setVoltage(0));
 
         driverController.b().and(TestMode.HOOD.isActive()).onTrue(launcher.setHoodAngle(18));

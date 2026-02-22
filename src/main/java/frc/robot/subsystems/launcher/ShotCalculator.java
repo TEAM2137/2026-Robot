@@ -11,8 +11,8 @@ import frc.robot.util.FieldConstants;
 
 @FunctionalInterface
 public interface ShotCalculator {
-    static final InterpolatingDoubleTreeMap FLYWHEEL_RPM_HUB = InterpolatingDoubleTreeMap.ofEntries(Map.entry(0.0, 1000.0));
-    static final InterpolatingDoubleTreeMap HOOD_ANGLE_HUB = InterpolatingDoubleTreeMap.ofEntries(Map.entry(0.0, 0.0));
+    static final InterpolatingDoubleTreeMap FLYWHEEL_RPM_HUB = InterpolatingDoubleTreeMap.ofEntries(Map.entry(0.0, 1300.0));
+    static final InterpolatingDoubleTreeMap HOOD_ANGLE_HUB = InterpolatingDoubleTreeMap.ofEntries(Map.entry(0.0, 15.0));
 
     static final ShotCalculator HUB = robot -> {
         Translation2d target = AllianceFlipUtil.either(FieldConstants.blueHub, FieldConstants.redHub);
