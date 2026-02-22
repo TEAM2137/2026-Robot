@@ -1,5 +1,7 @@
 package frc.robot.subsystems.launcher.flywheel;
 
+import java.util.function.BooleanSupplier;
+
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -32,6 +34,10 @@ public class Flywheel {
         Translation2d robotPos = RobotContainer.getInstance().drive.getPose().getTranslation();
         if (AllianceFlipUtil.shouldFlip()) robotPos = AllianceFlipUtil.flip(robotPos);
         return !FieldConstants.noFireZone1.contains(robotPos) && !FieldConstants.noFireZone2.contains(robotPos);
+    }
+
+    public BooleanSupplier isWithinTarget(double range) {
+        return () -> this.io.isWithinTarget(range);
     }
 
     public void periodic() {

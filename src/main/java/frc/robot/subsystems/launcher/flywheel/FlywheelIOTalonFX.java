@@ -52,6 +52,11 @@ public class FlywheelIOTalonFX implements FlywheelIO {
     }
 
     @Override
+    public boolean isWithinTarget(double range) {
+        return Math.abs(this.leader.getVelocity().getValue().in(RPM) - this.targetVelocityRpm) < range;
+    }
+
+    @Override
     public void updateInputs(FlywheelIOInputs inputs) {
         inputs.velocityRpm = this.leader.getVelocity().getValue().in(RPM);
         inputs.targetVelocityRpm = this.targetVelocityRpm;

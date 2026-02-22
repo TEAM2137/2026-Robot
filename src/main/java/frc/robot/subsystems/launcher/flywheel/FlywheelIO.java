@@ -14,6 +14,7 @@ public interface FlywheelIO {
 
     default void setRPM(double rpm) {}
     default void setVoltage(double volts) {}
+    default boolean isWithinTarget(double range) { return false; }
 
     default void updateInputs(FlywheelIOInputs inputs) {}
 }

@@ -207,8 +207,8 @@ public class RobotContainer {
         driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onTrue(launcher.startLaunching().andThen(intake.agitate()));
         driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onFalse(launcher.stopLaunching().andThen(intake.retract()).andThen(intake.runRollers(0)));
 
-        launcher.isLaunching().and(RobotModeTriggers.teleop()).whileTrue(Commands.waitSeconds(0.5)
-        //TODO change this to activating while flywheel is within 5% of target instead of waiting a set time
+        launcher.isLaunching().and(RobotModeTriggers.teleop()).whileTrue(
+            Commands.waitUntil(launcher.getFlywheel().isWithinTarget(60))
             .andThen(new SequentialCommandGroup(
                 indexer.run().repeatedly().onlyWhile(launcher.getTurret().isAtTarget()),
                 indexer.stop()
@@ -224,7 +224,7 @@ public class RobotContainer {
 
         driverController.leftBumper().and(RobotModeTriggers.teleop()).onTrue(intake.startIntakeSequence());
         driverController.leftBumper().and(RobotModeTriggers.teleop()).onFalse(intake.stopIntakeSequence());
-        driverController.x().onTrue(intake.retract());
+        driverController.x().and(RobotModeTriggers.teleop()).onTrue(intake.retract());
 
         operatorController.b().onTrue(intake.runRollers(-12).andThen(indexer.reverse()));
         operatorController.b().onFalse(intake.runRollers(0).andThen(indexer.stop()));
@@ -256,7 +256,6 @@ public class RobotContainer {
         driverController.povDown().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualHoodAngle(-5));
         driverController.povRight().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualFlywheelRPM(800));
         driverController.povLeft().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualFlywheelRPM(-800));
-
     }
 
     public Supplier<Translation2d> joystickMotionSupplier() {
