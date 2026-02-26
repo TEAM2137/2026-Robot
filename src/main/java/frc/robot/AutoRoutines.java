@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.autoalign.AutoAlignCommand;
+import frc.robot.subsystems.intake.Intake;
 
 
 public class AutoRoutines {
@@ -88,19 +89,23 @@ public class AutoRoutines {
     }
 
     public static UnregisteredAuto depotHubClimb(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
-        // reset odometry, auto align over bump instead or path 0, start intaking, and start path 1
-        auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[1].cmd()));
+        // reset odometry, auto align over bump instead of path 0, start intaking, and start path 1
+        auto.active().onTrue(trajectories[0].resetOdometry().andThen(robot.intake.startIntakeSequence()).andThen(trajectories[1].cmd()));
         //go toward bump and launch fuel, stop intake
         trajectories[1].done().onTrue(trajectories[2].cmd());
-        launchAllFuel(robot);
+        robot.intake.runRollers(0).andThen(launchAllFuel(robot));
         //auto align over bump
         trajectories[2].done().onTrue(trajectories[3].cmd());
         //enable intake and start collecting again
+        robot.intake.runRollers(Intake.Constants.rollerVoltage);
         trajectories[3].done().onTrue(trajectories[4].cmd());
         //stop intake and move toward bump
+        robot.intake.runRollers(0);
         trajectories[4].done().onTrue(trajectories[5].cmd());
-        //auto align over bump and launch
-
+        //Auto align over bump
+        launchAllFuel(robot);
+        Commands.waitSeconds(3); //give robot time to launch before climbing
+        startAutoClimbSequence(robot);
         // return the modified routine and start pose
         return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
     }
@@ -110,6 +115,13 @@ public class AutoRoutines {
             robot.launcher.startLaunching().asProxy(), // start launching fuel
             Commands.waitSeconds(2), // wait for all fuel to be fired
             robot.launcher.stopLaunching().asProxy() // stop launching fuel
+        );
+    }
+    public static Command startAutoClimbSequence(RobotContainer robot) {
+        return new SequentialCommandGroup(
+            robot.climber.extendClimb(),
+            robot.climber.deployUpperHooks(),
+            robot.climber.retractClimb()
         );
     }
 
