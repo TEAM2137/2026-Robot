@@ -72,6 +72,14 @@ public class Climber extends SubsystemBase {
         return runOnce(() -> this.getCurrentCommand().cancel());
     }
 
+    public Command dismountFromAutoClimb() {
+        return new SequentialCommandGroup(
+            this.extendClimb(),
+            this.retractUpperHooks()
+        )
+        .withName("Dismount From L1 Climb");
+    }
+
     public Command extendClimb() {
         return runOnce(() -> io.setPosition(Constants.extendHeight));
     }

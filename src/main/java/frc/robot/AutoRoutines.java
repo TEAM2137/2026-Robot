@@ -141,7 +141,7 @@ public class AutoRoutines {
 
     /** register all the autos defined above */
     public static void registerAutos(AutoFactory factory, AutoRegistry autos) {
-        autos.add("Two Cycle", "twoCycle", 5, AutoRoutines::twoCycleAuto);
+        autos.add("Two Cycle", "twoCycle", 5, false, AutoRoutines::twoCycleAuto);
         // autos.add("Questionable", "questionable", 6, AutoRoutines::questionableAuto);
         // autos.add("Second Cycle Near", "secondCycleNear", 9, AutoRoutines::secondCycleNear);
         // autos.add("Depot, Hub, Climb", "depotHubClimb", 6, AutoRoutines::depotHubClimb);
@@ -155,7 +155,7 @@ public class AutoRoutines {
          * @param startPose The robot's starting pose for the auto
          * @param builder A function that creates the auto given an AutoRoutine and RobotContainer instance
          */
-        public void add(String name, String id, int splits, AutoBuilder builder);
+        public void add(String name, String id, int splits, boolean doesClimb, AutoBuilder builder);
     }
     
     @FunctionalInterface

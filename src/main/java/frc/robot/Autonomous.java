@@ -36,7 +36,7 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.Alerts;
 
 public class Autonomous {
-    private record RegisteredAuto(String name, Supplier<Pose2d> startPose, AutoRoutine auto) {}
+    private record RegisteredAuto(String name, Supplier<Pose2d> startPose, AutoRoutine auto, boolean doesClimb) {}
 
     private final HashMap<String, RegisteredAuto> autos = new HashMap<>();
     private final LoggedDashboardChooser<RegisteredAuto> autoChooser = new LoggedDashboardChooser<>("Auto Chooser");
@@ -57,10 +57,10 @@ public class Autonomous {
         );
 
         // Register autos from AutoRoutines
-        AutoRoutines.registerAutos(this.factory, (name, id, splits, builder) -> {
+        AutoRoutines.registerAutos(this.factory, (name, id, splits, doesClimb, builder) -> {
             AutoRoutine routine = this.factory.newRoutine(name);
             UnregisteredAuto unregistered = builder.build(routine, this.loadTrajectories(routine, id, splits), robot);
-            RegisteredAuto auto = new RegisteredAuto(name, unregistered.startPose(), unregistered.routine());
+            RegisteredAuto auto = new RegisteredAuto(name, unregistered.startPose(), unregistered.routine(), doesClimb);
             this.autos.put(name, auto);
         });
         
@@ -105,6 +105,12 @@ public class Autonomous {
         RegisteredAuto auto = autoChooser.get();
         if (auto == null) return Optional.empty();
         return Optional.ofNullable(auto.startPose.get());
+    }
+
+    public boolean didClimbInAuto() {
+        RegisteredAuto auto = autoChooser.get();
+        if (auto == null) return false;
+        return auto.doesClimb;
     }
 
     public record SetupScore(String letterGrade, double score, double gpa, int matchNumber, MatchType matchType, String eventID) {}
