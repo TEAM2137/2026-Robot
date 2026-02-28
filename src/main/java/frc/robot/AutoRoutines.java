@@ -91,38 +91,35 @@ public class AutoRoutines {
     }
 
     public static UnregisteredAuto depotHubClimb(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
-        // reset odometry, auto align over bump instead of path 0, start intaking, and start path 1
-        auto.active().onTrue(trajectories[0].resetOdometry().andThen(robot.intake.startIntakeSequence()).andThen(trajectories[1].cmd()));
+        // reset odometry, start intaking, and start path 1
+        auto.active().onTrue(robot.intake.startIntakeSequence().andThen(trajectories[0].resetOdometry()).andThen(trajectories[1].cmd()));
         //go toward bump and launch fuel, stop intake
         trajectories[1].done().onTrue(new ParallelCommandGroup(
             robot.intake.runRollers(0),
             new SequentialCommandGroup(
             launchAllFuel(robot),
-            trajectories[2].cmd()
+            Commands.waitSeconds(5),
+
+            new AutoAlignCommand()
+            .withTargetPose(new Pose2d(5.71598, 5.60704, new Rotation2d(-Math.PI / 4)))
+            .withAccelerationLimit(3)
+            .withSpeedLimit(5),
+            robot.intake.runRollers(Intake.Constants.rollerVoltage),
+            trajectories[3].cmd()
             )));
+            
+        //Auto align over bump, launch, go to tower, climb
+        trajectories[3].done().onTrue
+        (new SequentialCommandGroup(
+            robot.intake.runRollers(0),
+            new AutoAlignCommand()
+            .withTargetPose(new Pose2d(3.16147, 2.45647, new Rotation2d(-Math.PI * 3 / 4)))
+            .withAccelerationLimit(3)
+            .withSpeedLimit(5),
+            launchAllFuel(robot),
+            trajectories[5].cmd(),
+            startAutoClimbSequence(robot)));
 
-        //auto align over bump
-        new AutoAlignCommand()
-        .withTargetPose(new Pose2d(5.71598, 5.60704, new Rotation2d(-Math.PI / 4)))
-        .withAccelerationLimit(3)
-        .withSpeedLimit(5);
-        
-        //enable intake and start collecting again
-        robot.intake.runRollers(Intake.Constants.rollerVoltage);
-        trajectories[3].done().onTrue(trajectories[4].cmd());
-        //new AutoAlignCommand().withTargetPose(new Pose2d(0.0, 0.0, new Rotation2d(0.0))).withAccelerationLimit(5);
-        //stop intake and move toward bump
-        robot.intake.runRollers(0);
-
-        new AutoAlignCommand()
-        .withTargetPose(new Pose2d(5.71598, 5.60704, new Rotation2d(-Math.PI / 4)))
-        .withAccelerationLimit(3)
-        .withSpeedLimit(5);   
-             
-        //Auto align over bump
-        launchAllFuel(robot);
-        Commands.waitSeconds(3); //give robot time to launch before climbing
-        startAutoClimbSequence(robot);
         // return the modified routine and start pose
         return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
     }
