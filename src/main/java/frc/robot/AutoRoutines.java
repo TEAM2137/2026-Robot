@@ -47,19 +47,19 @@ public class AutoRoutines {
         // reset odometry and start first cycle
         auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[0].cmd()));
 
-        trajectories[0].done().onTrue(trajectories[1].cmd());
-        //Add intake deploy and run
+        trajectories[0].done().onTrue(robot.intake.startIntakeSequence().andThen(trajectories[1].cmd()));
+        
 
         trajectories[1].done().onTrue(trajectories[2].cmd());
         launchAllFuel(robot); // TODO: fix all of these command constructions
 
-        trajectories[2].done().onTrue(trajectories[3].cmd());
+        trajectories[2].done().onTrue(robot.intake.runRollers(0).andThen(robot.intake.retract()).andThen(trajectories[3].cmd()));
         //retract and stop intake
 
-        trajectories[3].done().onTrue(trajectories[4].cmd());
-        launchAllFuel(robot);
+        trajectories[3].done().onTrue(trajectories[4].cmd().andThen(launchAllFuel(robot)));
+        //launch fuel
 
-        trajectories[4].done().onTrue(trajectories[5].cmd());
+        trajectories[4].done().onTrue(trajectories[5].cmd().andThen(startAutoClimbSequence(robot)));
         //climb
 
         // return the modified routine and start pose
@@ -68,13 +68,17 @@ public class AutoRoutines {
 
     public static UnregisteredAuto secondCycleNear(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
         // reset odometry and start first cycle
-        auto.active().onTrue(trajectories[0].resetOdometry().andThen(new AutoAlignCommand(/*align to position across bump */)).andThen(trajectories[1].cmd()));
-        //before running 2, start intaking
+        auto.active().onTrue(trajectories[0].resetOdometry()
+        .andThen(new AutoAlignCommand()
+        .withTargetPose(new Pose2d(5.81532, 5.90507, new Rotation2d(-Math.PI / 4)))
+        .withSpeedLimit(5))
+        .andThen(trajectories[1].cmd())
+        .andThen(robot.intake.startIntakeSequence()));
         trajectories[1].done().onTrue(trajectories[2].cmd());
+        trajectories[2].done().onTrue(trajectories[3].cmd().andThen(robot.intake.runRollers(0)));
+        trajectories[3].done().onTrue(trajectories[4].cmd().andThen(new AutoAlignCommand()
 
-        trajectories[2].done().onTrue(trajectories[3].cmd());
-        //stop intaking
-        trajectories[3].done().onTrue(trajectories[4].cmd());
+        ));
 
         //auto align over bump, stop, launch (replaces split 5)
 
@@ -107,7 +111,7 @@ public class AutoRoutines {
             robot.intake.runRollers(Intake.Constants.rollerVoltage),
             trajectories[3].cmd()
             )));
-            
+
         //Auto align over bump, launch, go to tower, climb
         trajectories[3].done().onTrue
         (new SequentialCommandGroup(
