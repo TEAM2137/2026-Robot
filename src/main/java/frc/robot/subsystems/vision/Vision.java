@@ -35,7 +35,7 @@ public class Vision extends SubsystemBase {
         // Initialize disconnected alerts
         this.disconnectedAlerts = new Alert[io.length];
         for (int i = 0; i < inputs.length; i++) {
-            disconnectedAlerts[i] = new Alert("Vision camera " + Integer.toString(i) + " is disconnected", AlertType.kWarning);
+            disconnectedAlerts[i] = new Alert("Vision camera " + Integer.toString(i) + " disconnected", AlertType.kWarning);
         }
     }
 
@@ -90,8 +90,7 @@ public class Vision extends SubsystemBase {
                                 || observation.pose().getX() <= 0.0
                                 || observation.pose().getX() > aprilTagLayout.getFieldLength()
                                 || observation.pose().getY() <= 0.0
-                                || observation.pose().getY() > aprilTagLayout.getFieldWidth()
-                                || observation.type() == PoseObservationType.MEGATAG_2;
+                                || observation.pose().getY() > aprilTagLayout.getFieldWidth();
 
                 // Add pose to log
                 robotPoses.add(observation.pose());

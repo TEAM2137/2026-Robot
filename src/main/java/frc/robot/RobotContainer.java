@@ -22,8 +22,8 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
-import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
@@ -41,8 +41,12 @@ import frc.robot.subsystems.launcher.hood.HoodIOSim;
 import frc.robot.subsystems.launcher.hood.HoodIOTalonFX;
 import frc.robot.subsystems.launcher.turret.TurretIO;
 import frc.robot.subsystems.launcher.turret.TurretIOSim;
+import frc.robot.subsystems.launcher.turret.TurretIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.TestMode;
 import frc.robot.util.Utils;
 import frc.robot.util.Utils.MatchEvent;
@@ -64,7 +68,7 @@ public class RobotContainer {
     // Controllers
     public final CommandXboxController driverController = new CommandXboxController(0);
     public final CommandXboxController operatorController = new CommandXboxController(1);
-    private final Supplier<Translation2d> joystickSupplier = () -> new Translation2d(driverController.getLeftY(), driverController.getLeftX());
+    private final Supplier<Translation2d> joystickSupplier = () -> new Translation2d(-driverController.getLeftY(), -driverController.getLeftX());
 
     // Auto
     public Autonomous autonomous;
@@ -90,15 +94,17 @@ public class RobotContainer {
 
             vision = new Vision(
                 drive::addVisionMeasurement,
-                new VisionIO() {},
-                new VisionIO() {}
+                new VisionIOPhotonVision("Camera0", VisionConstants.robotToCamera0),
+                new VisionIOPhotonVision("Camera1", VisionConstants.robotToCamera1),
+                new VisionIOPhotonVision("Camera2", VisionConstants.robotToCamera2),
+                new VisionIOPhotonVision("Camera3", VisionConstants.robotToCamera3)
             );
 
             intake = new Intake(new IntakeIOTalonFX());
             indexer = new Indexer(new IndexerIOTalonFX() {});
 
             launcher = new Launcher(
-                new TurretIO() {},
+                new TurretIOTalonFX(),
                 new HoodIOTalonFX(),
                 new FlywheelIOTalonFX()
             );
@@ -119,6 +125,8 @@ public class RobotContainer {
 
             vision = new Vision(
                 drive::addVisionMeasurement,
+                new VisionIO() {},
+                new VisionIO() {},
                 new VisionIO() {},
                 new VisionIO() {}
             );
@@ -149,6 +157,8 @@ public class RobotContainer {
             vision = new Vision(
                 drive::addVisionMeasurement,
                 new VisionIO() {},
+                new VisionIO() {},
+                new VisionIO() {},
                 new VisionIO() {}
             );
 
@@ -171,7 +181,7 @@ public class RobotContainer {
         this.testModeChooser.setDefaultOption("All", TestMode.ALL);
         for (TestMode mode : TestMode.values()) this.testModeChooser.addOption(mode.getName(), mode);
         SmartDashboard.putData("Test Mode", this.testModeChooser);
-        SmartDashboard.putNumber("LauncherRPM", 1000);
+        if (!SmartDashboard.containsKey("LauncherRPM")) SmartDashboard.putNumber("LauncherRPM", 1000);
         SmartDashboard.putNumber("ClimberVolts", 2);
 
         // Setup autonomous features
@@ -199,10 +209,9 @@ public class RobotContainer {
         driverController.start().onTrue(Commands.runOnce(() ->
                 drive.setPose(new Pose2d(
                         drive.getPose().getTranslation(),
-                        new Rotation2d()
-                        // AllianceFlipUtil.shouldFlip()
-                        //     ? AllianceFlipUtil.flip(new Rotation2d())
-                        //     : new Rotation2d()
+                        AllianceFlipUtil.shouldFlip()
+                            ? AllianceFlipUtil.flip(new Rotation2d())
+                            : new Rotation2d()
                 )), drive)
                 .ignoringDisable(true)
                 .withName("Reset Gyro"));

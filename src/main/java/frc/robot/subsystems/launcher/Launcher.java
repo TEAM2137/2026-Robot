@@ -8,6 +8,7 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -85,7 +86,7 @@ public class Launcher extends SubsystemBase {
         if (isTest && testMode == TestMode.TURRET) {
             this.turret.setAngleFieldRelative(Rotation2d.fromRadians(Math.atan2(
                 robot.operatorController.getRightY(),
-                robot.operatorController.getRightX()
+                -robot.operatorController.getRightX()
             )));
             this.hood.setAngle(0);
             this.flywheel.setRPM(0);
@@ -98,7 +99,7 @@ public class Launcher extends SubsystemBase {
         else if (!isTest) {
             this.turret.setAngleFieldRelative(params.turretAngle());
             this.hood.setAngle(params.hoodAngle());
-            if (this.isLaunching) this.flywheel.setRPM(params.flywheelRpm());
+            if (this.isLaunching) this.flywheel.setRPM(SmartDashboard.getNumber("LauncherRPM", 1000));//params.flywheelRpm());
         }
 
         turret.periodic();

@@ -8,6 +8,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 
 public class HoodIOTalonFX implements HoodIO {
     public static class Constants {
@@ -18,6 +19,7 @@ public class HoodIOTalonFX implements HoodIO {
         public static final double kP = 125.0;
         public static final double kI = 300.0;
         public static final double kD = 0.0;
+        public static final double kS = 0.0;
     }
 
     protected final TalonFX motor;
@@ -34,7 +36,9 @@ public class HoodIOTalonFX implements HoodIO {
             .withSensorToMechanismRatio(Constants.gearing));
 
         this.motor.getConfigurator().apply(new Slot0Configs()
-            .withKP(Constants.kP).withKI(Constants.kI).withKD(Constants.kD));
+            .withKP(Constants.kP).withKI(Constants.kI)
+            .withKD(Constants.kD).withKS(Constants.kS)
+            .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign));
 
         this.motor.setPosition(0.0);
     }

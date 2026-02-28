@@ -8,12 +8,19 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
 public class TurretIOTalonFX implements TurretIO {
     public static class Constants {
-        public static final double gearing = 39168.0 / 847.0;
+        public static final int id = 50;
+        public static final double gearing = 4352.0 / 77.0;
+
+        public static final double kP = 60.0;
+        public static final double kD = 1.5;
+        public static final double kV = 0.0; //8 in sim, 5.52 calculated
+        public static final double kS = 0.0; 
     }
 
     protected final TalonFX motor;
@@ -21,16 +28,20 @@ public class TurretIOTalonFX implements TurretIO {
     private double target = 0;
 
     public TurretIOTalonFX() {
-        motor = new TalonFX(50, "turret");
+        this.motor = new TalonFX(Constants.id, "turret");
 
-        motor.getConfigurator().apply(new MotorOutputConfigs()
+        this.motor.getConfigurator().apply(new MotorOutputConfigs()
             .withInverted(InvertedValue.Clockwise_Positive));
 
-        motor.getConfigurator().apply(new FeedbackConfigs()
+        this.motor.getConfigurator().apply(new FeedbackConfigs()
             .withSensorToMechanismRatio(Constants.gearing));
 
-        motor.getConfigurator().apply(new Slot0Configs()
-            .withKP(80).withKD(1.5).withKV(8)); //5.52
+        this.motor.getConfigurator().apply(new Slot0Configs()
+            .withKP(Constants.kP).withKD(Constants.kD)
+            .withKV(Constants.kV).withKS(Constants.kS)
+            .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign));
+
+        this.motor.setPosition(0.0);
     }
 
     @Override
@@ -47,7 +58,7 @@ public class TurretIOTalonFX implements TurretIO {
     @Override
     public void setAngleAndVelocity(double position, double velocity) {
         this.target = position;
-        this.motor.setControl(new PositionVoltage(position).withVelocity(velocity));
+        this.motor.setControl(new PositionVoltage(position));
     }
 
     @Override
@@ -60,6 +71,7 @@ public class TurretIOTalonFX implements TurretIO {
         inputs.angleRotations = this.motor.getPosition().getValueAsDouble();
         inputs.targetAngleRotations = this.target;
         inputs.velocityRotationsPerSecond = this.motor.getVelocity().getValueAsDouble();
+        inputs.appliedVolts = this.motor.getMotorVoltage().getValueAsDouble();
         inputs.angle = Rotation2d.fromRotations(inputs.angleRotations);
         inputs.didZero = false;
         inputs.connected = this.motor.isConnected();

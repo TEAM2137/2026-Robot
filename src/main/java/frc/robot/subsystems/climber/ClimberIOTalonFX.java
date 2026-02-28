@@ -11,7 +11,7 @@ import com.ctre.phoenix6.signals.MotorArrangementValue;
 public class ClimberIOTalonFX implements ClimberIO {
     public static class Constants {
         public static final int id = 45;
-        public static final double gearing = 9.0;
+        public static final double gearing = 25.0;
         public static final double spoolDiameter = 0.75; // in
 
         public static final double kP = 0.0;
