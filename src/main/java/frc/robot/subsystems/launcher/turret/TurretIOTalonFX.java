@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 public class TurretIOTalonFX implements TurretIO {
     public static class Constants {
         public static final int id = 50;
+        
         public static final double gearing = 4352.0 / 77.0;
 
         public static final double kP = 60.0;
