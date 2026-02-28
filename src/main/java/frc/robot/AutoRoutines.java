@@ -6,8 +6,10 @@ import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.autoalign.AutoAlignCommand;
 import frc.robot.subsystems.intake.Intake;
@@ -92,16 +94,31 @@ public class AutoRoutines {
         // reset odometry, auto align over bump instead of path 0, start intaking, and start path 1
         auto.active().onTrue(trajectories[0].resetOdometry().andThen(robot.intake.startIntakeSequence()).andThen(trajectories[1].cmd()));
         //go toward bump and launch fuel, stop intake
-        trajectories[1].done().onTrue(trajectories[2].cmd());
-        robot.intake.runRollers(0).andThen(launchAllFuel(robot));
+        trajectories[1].done().onTrue(new ParallelCommandGroup(
+            robot.intake.runRollers(0),
+            new SequentialCommandGroup(
+            launchAllFuel(robot),
+            trajectories[2].cmd()
+            )));
+
         //auto align over bump
-        trajectories[2].done().onTrue(trajectories[3].cmd());
+        new AutoAlignCommand()
+        .withTargetPose(new Pose2d(5.71598, 5.60704, new Rotation2d(-Math.PI / 4)))
+        .withAccelerationLimit(3)
+        .withSpeedLimit(5);
+        
         //enable intake and start collecting again
         robot.intake.runRollers(Intake.Constants.rollerVoltage);
         trajectories[3].done().onTrue(trajectories[4].cmd());
+        //new AutoAlignCommand().withTargetPose(new Pose2d(0.0, 0.0, new Rotation2d(0.0))).withAccelerationLimit(5);
         //stop intake and move toward bump
         robot.intake.runRollers(0);
-        trajectories[4].done().onTrue(trajectories[5].cmd());
+
+        new AutoAlignCommand()
+        .withTargetPose(new Pose2d(5.71598, 5.60704, new Rotation2d(-Math.PI / 4)))
+        .withAccelerationLimit(3)
+        .withSpeedLimit(5);   
+             
         //Auto align over bump
         launchAllFuel(robot);
         Commands.waitSeconds(3); //give robot time to launch before climbing
