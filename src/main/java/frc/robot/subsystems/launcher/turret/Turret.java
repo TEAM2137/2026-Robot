@@ -5,6 +5,7 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -22,12 +23,13 @@ public class Turret {
         public static final double offsetY = -5.875; // inches, positive towards robot front
     }
 
-    public double turretOffset = 0.0;
-
     private final TurretIO io;
     private final TurretIOInputsAutoLogged inputs;
 
     private final Trigger isAtTargetTrigger;
+
+    public double manualOffset = 0.0;
+    public boolean didZero = false;
 
     public Turret(TurretIO io) {
         this.io = io;
@@ -39,6 +41,14 @@ public class Turret {
         Alerts.add("Turret motor disconnected", AlertType.kError, () -> !inputs.connected);
     }
 
+    public Rotation2d getAngle() {
+        return Rotation2d.fromDegrees(io.getAngle());
+    }
+
+    public Trigger isAtTarget() {
+        return isAtTargetTrigger;
+    }
+
     public void setAngleFieldRelative(Rotation2d angle) {
         Rotation2d robot = RobotContainer.getInstance().drive.getRotation();
         this.setAngleRobotRelative(angle.relativeTo(robot.unaryMinus()));
@@ -46,7 +56,7 @@ public class Turret {
 
     public void setAngleRobotRelative(Rotation2d angle) {
         Rotation2d target = angle.unaryMinus().plus(Rotation2d.kCW_90deg)
-            .plus(Rotation2d.fromDegrees(turretOffset));
+            .plus(Rotation2d.fromDegrees(manualOffset));
         Rotation2d current = Rotation2d.fromDegrees(io.getAngle());
 
         Logger.recordOutput("Launcher/Turret/TargetAngle", target);
@@ -70,31 +80,20 @@ public class Turret {
         io.setAngleAndVelocity(output / 360.0, -robotRadsPerSec / (2 * Math.PI));
     }
 
-    public Rotation2d getAngle() {
-        return Rotation2d.fromDegrees(io.getAngle());
-    }
-
-    public Trigger isAtTarget() {
-        return isAtTargetTrigger;
-    }
-
     public Command increaseTurretOffset() {
-        return Commands.run(()-> turretOffset += 0.5);
+        return Commands.run(() -> manualOffset += 0.5);
     }
 
     public Command decreaseTurretOffset() {
-        return Commands.run(()-> turretOffset -= 0.5);
+        return Commands.run(() -> manualOffset -= 0.5);
     }
 
     public Command resetTurretOffset() {
-        return Commands.runOnce(()-> turretOffset = 0);
+        return Commands.runOnce(() -> manualOffset = 0);
     }
 
-    public void periodic() {
-        io.updateInputs(inputs);
-        Logger.processInputs("Launcher/Turret", inputs);
-        Logger.recordOutput("Launcher/TurretOffset", turretOffset);
-        Logger.recordOutput("Launcher/FieldSpacePose", this.getFieldSpacePose(RobotContainer.getInstance()));
+    public Command resetPosition() {
+        return Commands.runOnce(() -> io.resetPosition());
     }
 
     public Pose2d getFieldSpacePose(RobotContainer robot) {
@@ -110,7 +109,17 @@ public class Turret {
         );
     }
 
-    public Command resetPosition() {
-        return Commands.runOnce(() -> io.resetPosition());
+    public void periodic() {
+        io.updateInputs(inputs);
+        Logger.processInputs("Launcher/Turret", inputs);
+
+        if (inputs.sensorValue && DriverStation.isDisabled()) {
+            io.resetPosition();
+            this.didZero = true;
+        }
+
+        Logger.recordOutput("Launcher/Turret/DidZero", this.didZero);
+        Logger.recordOutput("Launcher/Turret/ManualOffset", this.manualOffset);
+        Logger.recordOutput("Launcher/Turret/FieldSpacePose", this.getFieldSpacePose(RobotContainer.getInstance()));
     }
 }

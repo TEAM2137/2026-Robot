@@ -11,6 +11,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DigitalInput;
 
 public class TurretIOTalonFX implements TurretIO {
     public static class Constants {
@@ -25,6 +26,7 @@ public class TurretIOTalonFX implements TurretIO {
     }
 
     protected final TalonFX motor;
+    protected final DigitalInput sensor;
 
     private double target = 0;
 
@@ -43,6 +45,8 @@ public class TurretIOTalonFX implements TurretIO {
             .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign));
 
         this.motor.setPosition(0.0);
+
+        this.sensor = new DigitalInput(9);
     }
 
     @Override
@@ -75,11 +79,12 @@ public class TurretIOTalonFX implements TurretIO {
     @Override
     public void updateInputs(TurretIOInputs inputs) {
         inputs.angleRotations = this.motor.getPosition().getValueAsDouble();
+        inputs.angle = Rotation2d.fromRotations(inputs.angleRotations);
         inputs.targetAngleRotations = this.target;
         inputs.velocityRotationsPerSecond = this.motor.getVelocity().getValueAsDouble();
         inputs.appliedVolts = this.motor.getMotorVoltage().getValueAsDouble();
-        inputs.angle = Rotation2d.fromRotations(inputs.angleRotations);
-        inputs.didZero = false;
+
+        inputs.sensorValue = this.sensor.get();
         inputs.connected = this.motor.isConnected();
     }
 }
