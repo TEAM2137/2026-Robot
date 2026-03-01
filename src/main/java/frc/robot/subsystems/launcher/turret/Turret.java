@@ -15,9 +15,8 @@ import frc.robot.util.Alerts;
 
 public class Turret {
     public static class Constants {
-        public static final double overlapDegrees = 50;
-        public static final double leftBound = -180 - overlapDegrees / 2.0;
-        public static final double rightBound = 180 + overlapDegrees / 2.0;
+        public static final double leftBound = -185;//-205;
+        public static final double rightBound = 185;//205;
 
         public static final double offsetX = 6.375; // inches, positive towards robot right
         public static final double offsetY = -5.875; // inches, positive towards robot front
