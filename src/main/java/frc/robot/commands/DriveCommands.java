@@ -44,7 +44,8 @@ public class DriveCommands {
     private static final double WHEEL_RADIUS_MAX_VELOCITY = 1.0; // Rad/Sec
     private static final double WHEEL_RADIUS_RAMP_RATE = 0.5; // Rad/Sec^2
 
-    private static final double DRIVE_MAX_ACCELERATION = 20.0; // Meters/Sec^2
+    private static final double DRIVE_MAX_ACCELERATION = 13.0; // Meters/Sec^2
+    private static final double DRIVE_MAX_ANGULAR_ACCELERATION = 1.8; // Rad/Sec^2
 
     private DriveCommands() {}
 
@@ -81,7 +82,8 @@ public class DriveCommands {
             double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
 
             // Square rotation value for more precise control
-            omega = Math.copySign(omega * omega, omega);
+            omega = Math.copySign(omega * omega, omega) * drive.getMaxAngularSpeedRadPerSec();
+            omega = limitAngularVelocityFor(drive.getAngularVelocityRadsPerSec(), omega, DRIVE_MAX_ANGULAR_ACCELERATION);
 
             double multiplier = slowMode.getAsBoolean() ? 0.3 : 1.0;
             Translation2d finalVelocity = limitAccelerationFor(
@@ -96,10 +98,7 @@ public class DriveCommands {
             finalVelocityPublisher.accept(finalVelocity);
 
             // Convert to field relative speeds & send command
-            ChassisSpeeds speeds = new ChassisSpeeds(
-                finalVelocity.getX(), finalVelocity.getY(),
-                omega * drive.getMaxAngularSpeedRadPerSec()
-            );
+            ChassisSpeeds speeds = new ChassisSpeeds(finalVelocity.getX(), finalVelocity.getY(), omega);
             drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(speeds,
                 AllianceFlipUtil.shouldFlip()
                     ? drive.getRotation().plus(new Rotation2d(Math.PI))
@@ -163,7 +162,7 @@ public class DriveCommands {
         // Reset PID controller when command starts
         .beforeStarting(() -> angleController.reset(
             drive.getRotation().getRadians(),
-            drive.getAngularSpeedRadsPerSec()), drive);
+            drive.getAngularVelocityRadsPerSec()), drive);
     }
 
     /**
@@ -308,6 +307,13 @@ public class DriveCommands {
         Translation2d desiredAccel = wantedVelocity.minus(flippedVelocity);
         if (desiredAccel.getNorm() > maxAcceleration * 0.04)
             return flippedVelocity.plus(Utils.normalize(desiredAccel).times(maxAcceleration * 0.04));
+        else return wantedVelocity;
+    }
+
+    public static double limitAngularVelocityFor(double currentVelocity, double wantedVelocity, double maxAcceleration) {
+        double desiredAccel = wantedVelocity - currentVelocity;
+        if (Math.abs(desiredAccel) > maxAcceleration)
+            return currentVelocity + Math.signum(desiredAccel) * maxAcceleration;
         else return wantedVelocity;
     }
 }

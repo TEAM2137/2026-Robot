@@ -82,7 +82,7 @@ public class AutoAlignCommand extends Command {
 
         this.angleController.reset(
                 drive.getRotation().getRadians(),
-                drive.getAngularSpeedRadsPerSec()
+                drive.getAngularVelocityRadsPerSec()
         );
 
         this.pendingCommandMarkers = new ArrayList<>(markers);

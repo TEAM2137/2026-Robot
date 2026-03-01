@@ -22,6 +22,7 @@ public interface TurretIO {
     default void setAngleAndVelocity(double degrees, double velocity) {}
     default double getAngle() { return 0.0; }
     default boolean isAtTarget() { return true; }
+    default void resetPosition() {}
 
     default void updateInputs(TurretIOInputs inputs) {}
 }

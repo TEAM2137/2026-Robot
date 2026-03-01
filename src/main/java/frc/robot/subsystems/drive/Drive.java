@@ -359,7 +359,7 @@ public class Drive extends SubsystemBase {
     }
 
     /** Returns the current angular speed in radians per sec. */
-    public double getAngularSpeedRadsPerSec() {
+    public double getAngularVelocityRadsPerSec() {
         return kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond;
     }
 

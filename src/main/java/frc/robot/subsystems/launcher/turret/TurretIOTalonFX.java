@@ -18,10 +18,10 @@ public class TurretIOTalonFX implements TurretIO {
         
         public static final double gearing = 4352.0 / 77.0;
 
-        public static final double kP = 60.0;
+        public static final double kP = 80.0;
         public static final double kD = 1.5;
-        public static final double kV = 0.0; //8 in sim, 5.52 calculated
-        public static final double kS = 0.0; 
+        public static final double kV = 8.0; //8 in sim, 5.52 calculated
+        public static final double kS = 0.22; 
     }
 
     protected final TalonFX motor;
@@ -32,7 +32,7 @@ public class TurretIOTalonFX implements TurretIO {
         this.motor = new TalonFX(Constants.id, "turret");
 
         this.motor.getConfigurator().apply(new MotorOutputConfigs()
-            .withInverted(InvertedValue.Clockwise_Positive));
+            .withInverted(InvertedValue.CounterClockwise_Positive));
 
         this.motor.getConfigurator().apply(new FeedbackConfigs()
             .withSensorToMechanismRatio(Constants.gearing));
@@ -59,12 +59,17 @@ public class TurretIOTalonFX implements TurretIO {
     @Override
     public void setAngleAndVelocity(double position, double velocity) {
         this.target = position;
-        this.motor.setControl(new PositionVoltage(position));
+        this.motor.setControl(new PositionVoltage(position).withVelocity(velocity));
     }
 
     @Override
     public boolean isAtTarget() {
         return Math.abs(this.motor.getClosedLoopError().getValueAsDouble()) < 0.025;
+    }
+
+    @Override
+    public void resetPosition() {
+        this.motor.setPosition(0.0);
     }
 
     @Override

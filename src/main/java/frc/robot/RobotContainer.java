@@ -19,6 +19,7 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberIOTalonFX;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -110,7 +111,7 @@ public class RobotContainer {
                 new FlywheelIOTalonFX()
             );
 
-            climber = new Climber(new ClimberIO() {});
+            climber = new Climber(new ClimberIOTalonFX());
 
             break;
 
@@ -238,17 +239,22 @@ public class RobotContainer {
 
         launcher.isLaunching().and(RobotModeTriggers.teleop()).onFalse(indexer.stop().andThen(intake.retract().andThen(intake.runRollers(0))));
 
-        driverController.povLeft().whileTrue(launcher.getTurret().increaseTurretOffset());
-        driverController.povRight().whileTrue(launcher.getTurret().decreaseTurretOffset());
-        driverController.povDown().onTrue(launcher.getTurret().resetTurretOffset());
+        driverController.povLeft().and(RobotModeTriggers.teleop()).whileTrue(launcher.getTurret().increaseTurretOffset());
+        driverController.povRight().and(RobotModeTriggers.teleop()).whileTrue(launcher.getTurret().decreaseTurretOffset());
+        driverController.povDown().and(RobotModeTriggers.teleop()).onTrue(launcher.getTurret().resetTurretOffset());
 
         driverController.leftBumper().and(RobotModeTriggers.teleop()).whileTrue(intake.deploy().andThen(
             intake.runRollers(() -> Math.min(Intake.Constants.rollerVoltage + drive.getLinearSpeedMetersPerSec(), 12)).repeatedly()));
         driverController.leftBumper().and(RobotModeTriggers.teleop()).onFalse(intake.stopIntakeSequence());
-        driverController.x().and(RobotModeTriggers.teleop()).onTrue(intake.retract().andThen(intake.runRollers(0)));
+        
+        Command retractIntake = intake.retract().andThen(intake.runRollers(0));
+        driverController.x().and(RobotModeTriggers.teleop()).onTrue(retractIntake);
+        RobotModeTriggers.disabled().onFalse(retractIntake);
 
         operatorController.b().onTrue(intake.deploy().andThen(intake.runRollers(-12)));
         operatorController.b().onFalse(intake.retract().andThen(intake.runRollers(0)));
+
+        operatorController.start().onTrue(launcher.getTurret().resetPosition().ignoringDisable(true));
 
         Command dismountCommand = climber.dismountFromAutoClimb();
         dismountCommand.addRequirements(drive); // block drive default command while this command is active
@@ -284,8 +290,10 @@ public class RobotContainer {
         
         driverController.povUp().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualHoodAngle(5));
         driverController.povDown().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualHoodAngle(-5));
-        driverController.povRight().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualFlywheelRPM(800));
-        driverController.povLeft().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualFlywheelRPM(-800));
+        driverController.povRight().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualFlywheelRPM(400));
+        driverController.povLeft().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualFlywheelRPM(-400));
+        driverController.a().and(TestMode.LOOKUP_TABLES.isActive()).onTrue(indexer.run());
+        driverController.a().and(TestMode.LOOKUP_TABLES.isActive()).onFalse(indexer.stop());
     }
 
     public Supplier<Translation2d> joystickMotionSupplier() {
