@@ -3,6 +3,8 @@ package frc.robot.subsystems.launcher.hood;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.util.Alerts;
 
 public class Hood {
@@ -18,6 +20,10 @@ public class Hood {
 
     public void setAngle(double degrees) {
         io.setAngle(degrees);
+    }
+
+    public Command resetPosition() {
+        return Commands.runOnce(() -> io.resetPosition());
     }
 
     public void periodic() {

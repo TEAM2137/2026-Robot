@@ -11,6 +11,7 @@ public interface HoodIO {
     }
 
     default void setAngle(double degrees) {}
+    default void resetPosition() {};
 
     default void updateInputs(HoodIOInputs inputs) {}
 }

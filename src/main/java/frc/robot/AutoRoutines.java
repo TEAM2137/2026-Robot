@@ -143,8 +143,14 @@ public class AutoRoutines {
         );
     }
 
+    public static UnregisteredAuto testAuto(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
+        auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[0].cmd()));
+        return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
+    }
+
     /** register all the autos defined above */
     public static void registerAutos(AutoFactory factory, AutoRegistry autos) {
+        autos.add("Test Auto", "auto", 1, false, AutoRoutines::testAuto);
         autos.add("Two Cycle", "twoCycle", 5, false, AutoRoutines::twoCycleAuto);
         // autos.add("Questionable", "questionable", 6, AutoRoutines::questionableAuto);
         // autos.add("Second Cycle Near", "secondCycleNear", 9, AutoRoutines::secondCycleNear);

@@ -16,10 +16,10 @@ public class HoodIOTalonFX implements HoodIO {
         
         public static final double gearing = 43;
 
-        public static final double kP = 125.0;
-        public static final double kI = 300.0;
+        public static final double kP = 80.0;
+        public static final double kI = 0.0;
         public static final double kD = 0.0;
-        public static final double kS = 0.0;
+        public static final double kS = 0.26;
     }
 
     protected final TalonFX motor;
@@ -40,13 +40,18 @@ public class HoodIOTalonFX implements HoodIO {
             .withKD(Constants.kD).withKS(Constants.kS)
             .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign));
 
-        this.motor.setPosition(0.0);
+        this.resetPosition();
     }
 
     @Override
     public void setAngle(double degrees) {
         this.targetAngleDegrees = degrees;
         this.motor.setControl(new PositionVoltage(degrees / 360.0));
+    }
+
+    @Override
+    public void resetPosition() {
+        this.motor.setPosition(0.0);
     }
 
     @Override

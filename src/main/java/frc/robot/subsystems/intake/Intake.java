@@ -17,7 +17,7 @@ public class Intake extends SubsystemBase {
         public static final double homePosition = 0.0;
         public static final double halfwayPosition = 1.0;
         public static final double deployPosition = 2.2;//1.995;
-        public static final double rollerVoltage = 12.0;
+        public static final double rollerVoltage = 8.0;
     }
 
     private final IntakeIO io;

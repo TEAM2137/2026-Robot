@@ -121,6 +121,8 @@ public class Drive extends SubsystemBase {
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this)
         );
 
+        autoHeadingController.enableContinuousInput(-Math.PI, Math.PI);
+
         // register alerts
         Alerts.add("Gyro disconnected", AlertType.kError,
             () -> !gyroInputs.connected && Constants.currentMode != Mode.SIM);
@@ -401,6 +403,9 @@ public class Drive extends SubsystemBase {
         Logger.recordOutput("Autonomous/VyAddition", vyAddition);
         Logger.recordOutput("Autonomous/VxError", autoXController.getError());
         Logger.recordOutput("Autonomous/VyError", autoYController.getError());
+
+        Logger.recordOutput("Autonomous/CurrentHeading", pose.getRotation().getRadians());
+        Logger.recordOutput("Autonomous/TargetHeading", sample.heading);
 
         ChassisSpeeds speeds = new ChassisSpeeds(
             sample.vx + vxAddition,

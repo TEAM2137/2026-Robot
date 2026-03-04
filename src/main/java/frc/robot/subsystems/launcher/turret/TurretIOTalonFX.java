@@ -44,7 +44,7 @@ public class TurretIOTalonFX implements TurretIO {
             .withKV(Constants.kV).withKS(Constants.kS)
             .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign));
 
-        this.motor.setPosition(0.0);
+        this.resetPosition();
 
         this.sensor = new DigitalInput(9);
     }
@@ -84,7 +84,7 @@ public class TurretIOTalonFX implements TurretIO {
         inputs.velocityRotationsPerSecond = this.motor.getVelocity().getValueAsDouble();
         inputs.appliedVolts = this.motor.getMotorVoltage().getValueAsDouble();
 
-        inputs.sensorValue = this.sensor.get();
+        inputs.sensorValue = !this.sensor.get();
         inputs.connected = this.motor.isConnected();
     }
 }

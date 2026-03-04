@@ -15,7 +15,6 @@ public interface TurretIO {
         public Rotation2d angle;
 
         public boolean sensorValue;
-        public boolean didZero;
         public boolean connected;
     }
 

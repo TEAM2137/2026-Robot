@@ -36,7 +36,7 @@ public class Turret {
         
         this.isAtTargetTrigger = new Trigger(io::isAtTarget);
 
-        Alerts.add("Turret encoder not zeroed", AlertType.kWarning, () -> !inputs.didZero);
+        Alerts.add("Turret encoder not zeroed", AlertType.kWarning, () -> !this.didZero);
         Alerts.add("Turret motor disconnected", AlertType.kError, () -> !inputs.connected);
     }
 
@@ -109,10 +109,12 @@ public class Turret {
     }
 
     public void periodic() {
+        boolean previousSensorValue = inputs.sensorValue;
+
         io.updateInputs(inputs);
         Logger.processInputs("Launcher/Turret", inputs);
 
-        if (inputs.sensorValue && DriverStation.isDisabled()) {
+        if (inputs.sensorValue && !previousSensorValue && DriverStation.isDisabled() && inputs.velocityRotationsPerSecond < 0) {
             io.resetPosition();
             this.didZero = true;
         }

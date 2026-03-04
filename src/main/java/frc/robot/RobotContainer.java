@@ -103,7 +103,7 @@ public class RobotContainer {
             );
 
             intake = new Intake(new IntakeIOTalonFX());
-            indexer = new Indexer(new IndexerIOTalonFX() {});
+            indexer = new Indexer(new IndexerIOTalonFX());
 
             launcher = new Launcher(
                 new TurretIOTalonFX(),
@@ -224,7 +224,7 @@ public class RobotContainer {
 
     // configure teleop specific bindings here
     private void configureTeleopBindings() {
-        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onTrue(launcher.startLaunching().andThen(intake.agitate()));
+        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onTrue(launcher.startLaunching());//.andThen(intake.agitate()));
         driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onFalse(launcher.stopLaunching().andThen(intake.retract()).andThen(intake.runRollers(0)));
 
         launcher.isLaunching().and(RobotModeTriggers.teleop()).whileTrue(
@@ -243,9 +243,9 @@ public class RobotContainer {
         driverController.povRight().and(RobotModeTriggers.teleop()).whileTrue(launcher.getTurret().decreaseTurretOffset());
         driverController.povDown().and(RobotModeTriggers.teleop()).onTrue(launcher.getTurret().resetTurretOffset());
 
-        driverController.leftBumper().and(RobotModeTriggers.teleop()).whileTrue(intake.deploy().andThen(
-            intake.runRollers(() -> Math.min(Intake.Constants.rollerVoltage + drive.getLinearSpeedMetersPerSec(), 12)).repeatedly()));
-        driverController.leftBumper().and(RobotModeTriggers.teleop()).onFalse(intake.stopIntakeSequence());
+        // driverController.leftBumper().and(RobotModeTriggers.teleop()).whileTrue(intake.deploy().andThen(
+        //     intake.runRollers(() -> Math.min(Intake.Constants.rollerVoltage + drive.getLinearSpeedMetersPerSec(), 12)).repeatedly()));
+        // driverController.leftBumper().and(RobotModeTriggers.teleop()).onFalse(intake.stopIntakeSequence());
         
         Command retractIntake = intake.retract().andThen(intake.runRollers(0));
         driverController.x().and(RobotModeTriggers.teleop()).onTrue(retractIntake);
@@ -255,6 +255,7 @@ public class RobotContainer {
         operatorController.b().onFalse(intake.retract().andThen(intake.runRollers(0)));
 
         operatorController.start().onTrue(launcher.getTurret().resetPosition().ignoringDisable(true));
+        operatorController.back().onTrue(launcher.getHood().resetPosition().ignoringDisable(true));
 
         Command dismountCommand = climber.dismountFromAutoClimb();
         dismountCommand.addRequirements(drive); // block drive default command while this command is active

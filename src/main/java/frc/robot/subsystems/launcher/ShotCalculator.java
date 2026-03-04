@@ -31,23 +31,30 @@ public interface ShotCalculator {
         Map.entry(3.0319, 18.3),
         Map.entry(3.4845, 19.8),
         Map.entry(3.8919, 20.9),
-        Map.entry(4.3134, 25.2)
+        Map.entry(4.3134, 25.0)
+    );
+
+    static final InterpolatingDoubleTreeMap FLYWHEEL_RPM_PASSING = InterpolatingDoubleTreeMap.ofEntries(
+        Map.entry(0.0, 2200.0)
+    );
+    static final InterpolatingDoubleTreeMap HOOD_ANGLE_PASSING = InterpolatingDoubleTreeMap.ofEntries(
+        Map.entry(0.0, 25.0)
     );
 
     static final ShotCalculator HUB = robot -> {
         Translation2d target = AllianceFlipUtil.either(FieldConstants.blueHub, FieldConstants.redHub);
-        return simpleLookupShot(target, robot);
+        return simpleLookupShot(target, robot, FLYWHEEL_RPM_HUB, HOOD_ANGLE_HUB);
     };
     static final ShotCalculator PASS_LEFT = robot -> {
         Translation2d target = AllianceFlipUtil.either(FieldConstants.blueLeftCorner, FieldConstants.redLeftCorner);
-        return simpleLookupShot(target, robot);
+        return simpleLookupShot(target, robot, FLYWHEEL_RPM_PASSING, HOOD_ANGLE_PASSING);
     };
     static final ShotCalculator PASS_RIGHT = robot -> {
         Translation2d target = AllianceFlipUtil.either(FieldConstants.blueRightCorner, FieldConstants.redRightCorner);
-        return simpleLookupShot(target, robot);
+        return simpleLookupShot(target, robot, FLYWHEEL_RPM_PASSING, HOOD_ANGLE_PASSING);
     };
 
-    static ShotParameters simpleLookupShot(Translation2d target, RobotContainer robot) {
+    static ShotParameters simpleLookupShot(Translation2d target, RobotContainer robot, InterpolatingDoubleTreeMap flywheelRpm, InterpolatingDoubleTreeMap hoodAngle) {
         Translation2d turretPos = robot.launcher.getTurret().getFieldSpacePose(robot).getTranslation();
 
         double dst = target.getDistance(turretPos);
@@ -62,8 +69,7 @@ public interface ShotCalculator {
 
         return new ShotParameters(
             Rotation2d.fromRadians(theAngle).plus(Rotation2d.k180deg),
-            FLYWHEEL_RPM_HUB.get(dst),
-            HOOD_ANGLE_HUB.get(dst)
+            flywheelRpm.get(dst), hoodAngle.get(dst)
         );
     }
 
