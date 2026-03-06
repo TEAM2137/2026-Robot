@@ -39,14 +39,14 @@ public class DriveCommands {
     public static final double ANGLE_MAX_ACCELERATION = 45.0;
     public static final double ANGLE_DEADBAND = 0.0045;
 
-    private static final double FF_START_DELAY = 2.0; // Secs
-    private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
+    public static final double FF_START_DELAY = 2.0; // Secs
+    public static final double FF_RAMP_RATE = 0.1; // Volts/Sec
 
-    private static final double WHEEL_RADIUS_MAX_VELOCITY = 1.0; // Rad/Sec
-    private static final double WHEEL_RADIUS_RAMP_RATE = 0.5; // Rad/Sec^2
+    public static final double WHEEL_RADIUS_MAX_VELOCITY = 1.0; // Rad/Sec
+    public static final double WHEEL_RADIUS_RAMP_RATE = 0.5; // Rad/Sec^2
 
-    private static final double DRIVE_MAX_ACCELERATION = 13.0; // Meters/Sec^2
-    private static final double DRIVE_MAX_ANGULAR_ACCELERATION = 1.8; // Rad/Sec^2
+    public static final double MAX_LINEAR_ACCELERATION = 13.0; // Meters/Sec^2
+    public static final double MAX_ANGULAR_ACCELERATION = 1.8; // Rad/Sec^2
 
     private DriveCommands() {}
 
@@ -88,7 +88,7 @@ public class DriveCommands {
 
             // Square rotation value for more precise control
             omega = Math.copySign(omega * omega, omega) * drive.getMaxAngularSpeedRadPerSec() * omegaMultiplier;
-            omega = limitAngularAccelerationFor(drive.getAngularVelocityRadsPerSec(), omega, DRIVE_MAX_ANGULAR_ACCELERATION);
+            omega = limitAngularAccelerationFor(drive.getAngularVelocityRadsPerSec(), omega, MAX_ANGULAR_ACCELERATION);
 
             // Apply linear velocity multiplier
             double velocityMultiplier = slowMode.getAsBoolean() ? 0.3 : 1.0;
@@ -101,7 +101,7 @@ public class DriveCommands {
                     linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec() * velocityMultiplier,
                     linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec() * velocityMultiplier
                 ),
-                DRIVE_MAX_ACCELERATION
+                MAX_LINEAR_ACCELERATION
             );
             finalVelocityPublisher.accept(finalVelocity);
 
@@ -154,7 +154,7 @@ public class DriveCommands {
                     linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec() * velocityMultiplier,
                     linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec() * velocityMultiplier
                 ),
-                DRIVE_MAX_ACCELERATION
+                MAX_LINEAR_ACCELERATION
             );
 
             finalVelocityPublisher.accept(finalVelocity);

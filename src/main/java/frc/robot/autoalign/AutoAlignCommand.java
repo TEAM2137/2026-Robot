@@ -115,13 +115,15 @@ public class AutoAlignCommand extends Command {
         // calculate deltas to goal
         double dxRemaining = targetPose.getX() - robotPos.getX();
         double dyRemaining = targetPose.getY() - robotPos.getY();
-
-        Logger.recordOutput("AutoAlign/x", dxRemaining);
-        Logger.recordOutput("AutoAlign/y", dyRemaining);
+        Translation2d delta = new Translation2d(dxRemaining, dyRemaining);
+        double distanceRemaining = delta.getNorm();
+        
+        Logger.recordOutput("AutoAlign/dx", dxRemaining);
+        Logger.recordOutput("AutoAlign/dy", dyRemaining);
 
         // calculate position error and progress along path
         this.pathLength = getPathLength(targetPose);
-        this.error = Math.hypot(dxRemaining, dyRemaining);
+        this.error = distanceRemaining;
         this.progress = (pathLength - error) / pathLength;
 
         Logger.recordOutput("AutoAlign/error", error);
@@ -131,60 +133,61 @@ public class AutoAlignCommand extends Command {
         double vxCurrent = robotVel.getX();
         double vyCurrent = robotVel.getY();
 
-        // scale constraints so combined speed is under the limit.
-        // this is necessary because x and y act independently, and ensures
-        // that we don't move at sqrt(2) times the speed when moving diagonally
-        double totalRemaining = Math.hypot(dxRemaining, dyRemaining);
-        double scaleX = (totalRemaining > 1e-6) ? Math.abs(dxRemaining) / totalRemaining : 0.0;
-        double scaleY = (totalRemaining > 1e-6) ? Math.abs(dyRemaining) / totalRemaining : 0.0;
+        // get direction toward the target
+        Translation2d pathDir = distanceRemaining > 1e-6
+                ? delta.div(distanceRemaining)
+                : new Translation2d();
 
-        // create trapezoidal velocity profiles for x and y components.
+        // project current velocity onto the path direction
+        double vAlongPath = Utils.dot(robotVel, pathDir);
+
+        // create a trapezoidal profile along the path
         // creating a new profile each cycle ensures that we won't get off
-        TrapezoidProfile xProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(
-                speedLimit * scaleX, accelerationLimit * scaleX));
-        TrapezoidProfile yProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(
-                speedLimit * scaleY, accelerationLimit * scaleY));
-
-        // target velocity for each axis
-        double vxGoal = finalVelocity.getX();
-        double vyGoal = finalVelocity.getY();
-
-        // advance the profiles
-        TrapezoidProfile.State xState = xProfile.calculate(
-                dt, // delta time
-                new TrapezoidProfile.State(0.0, vxCurrent), // current
-                new TrapezoidProfile.State(dxRemaining, vxGoal) // goal
-        );
-        TrapezoidProfile.State yState = yProfile.calculate(
-                dt, // delta time
-                new TrapezoidProfile.State(0.0, vyCurrent), // current
-                new TrapezoidProfile.State(dyRemaining, vyGoal) // goal
+        TrapezoidProfile profile = new TrapezoidProfile(
+            new TrapezoidProfile.Constraints(speedLimit, accelerationLimit)
         );
 
-        // get x and y velocities from the trapezoid state
-        double vx = xState.velocity;
-        double vy = yState.velocity;
+        // advance the profile
+        TrapezoidProfile.State state = profile.calculate(dt,
+            new TrapezoidProfile.State(0.0, vAlongPath), // current
+            new TrapezoidProfile.State(distanceRemaining, 0.0) // goal (ignoring final velocity for now)
+        );
 
-        // get rotational velocity from the angle controller
+        // convert path velocity back into field-relative velocities
+        double vx = pathDir.getX() * state.velocity;
+        double vy = pathDir.getY() * state.velocity;
+
+        Logger.recordOutput("AutoAlign/v", state.velocity);
+        Logger.recordOutput("AutoAlign/vx", vx);
+        Logger.recordOutput("AutoAlign/vy", vy);
+
+        // create commanded velocity vector
+        Translation2d newVelocityRaw = new Translation2d(
+            AllianceFlipUtil.shouldFlip() ? -vx : vx,
+            AllianceFlipUtil.shouldFlip() ? -vy : vy
+        );
+
+        // limit acceleration for the new velocity
+        Translation2d newVelocity = DriveCommands.limitAccelerationFor(
+            robotVel, newVelocityRaw,
+            DriveCommands.MAX_LINEAR_ACCELERATION
+        );
+
+        // get angular velocity from the angle controller
         double omega = angleController.calculate(drive.getRotation().getRadians(), targetPose.getRotation().getRadians());
         if (ignoreRotation || Math.abs(angleController.getPositionError()) < DriveCommands.ANGLE_DEADBAND) omega = 0.0;
 
         // create ChassisSpeeds, convert them to robot-relative, and apply to drivetrain
-        ChassisSpeeds speeds = new ChassisSpeeds(
-                AllianceFlipUtil.shouldFlip() ? -vx : vx,
-                AllianceFlipUtil.shouldFlip() ? -vy : vy,
-                omega);
+        ChassisSpeeds speeds = new ChassisSpeeds(newVelocity.getX(), newVelocity.getY(), omega);
         Rotation2d gyroAngle = AllianceFlipUtil.shouldFlip()
                 ? drive.getRotation().plus(new Rotation2d(Math.PI))
                 : drive.getRotation();
         drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, gyroAngle));
 
-        Logger.recordOutput("AutoAlign/vx", vx);
-        Logger.recordOutput("AutoAlign/vy", vy);
         Logger.recordOutput("AutoAlign/omega", omega);
 
         // run pending commands (if applicable)
-        checkPendingCommands();
+        this.checkPendingCommands();
     }
 
     @Override
@@ -255,7 +258,10 @@ public class AutoAlignCommand extends Command {
     }
 
     /** Decorates this command to roughly end with the given velocity
-     * (meters/second) */
+     * (meters/second)
+     * @deprecated Final velocity calculations were removed. We need to revisit this later
+     */
+    @Deprecated
     public AutoAlignCommand withFinalVelocity(Translation2d velocity) {
         this.finalVelocity = velocity;
         return this;
