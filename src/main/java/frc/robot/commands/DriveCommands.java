@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.Utils;
@@ -81,20 +82,27 @@ public class DriveCommands {
             // Apply rotation deadband
             double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
 
-            // Square rotation value for more precise control
-            omega = Math.copySign(omega * omega, omega) * drive.getMaxAngularSpeedRadPerSec();
-            omega = limitAngularVelocityFor(drive.getAngularVelocityRadsPerSec(), omega, DRIVE_MAX_ANGULAR_ACCELERATION);
+            // Apply angular velocity multiplier
+            double omegaMultiplier = slowMode.getAsBoolean() ? 0.75 : 1.0;
+            omegaMultiplier *= RobotContainer.getInstance().launcher.getAngularVelocityMultiplier();
 
-            double multiplier = slowMode.getAsBoolean() ? 0.3 : 1.0;
+            // Square rotation value for more precise control
+            omega = Math.copySign(omega * omega, omega) * drive.getMaxAngularSpeedRadPerSec() * omegaMultiplier;
+            omega = limitAngularAccelerationFor(drive.getAngularVelocityRadsPerSec(), omega, DRIVE_MAX_ANGULAR_ACCELERATION);
+
+            // Apply linear velocity multiplier
+            double velocityMultiplier = slowMode.getAsBoolean() ? 0.3 : 1.0;
+            velocityMultiplier *= RobotContainer.getInstance().launcher.getLinearVelocityMultiplier();
+
+            // Calculate final linear velocity
             Translation2d finalVelocity = limitAccelerationFor(
                 drive.getLinearSpeedsVector(),
                 new Translation2d(
-                    linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec() * multiplier,
-                    linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec() * multiplier
+                    linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec() * velocityMultiplier,
+                    linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec() * velocityMultiplier
                 ),
                 DRIVE_MAX_ACCELERATION
             );
-
             finalVelocityPublisher.accept(finalVelocity);
 
             // Convert to field relative speeds & send command
@@ -137,13 +145,14 @@ public class DriveCommands {
             double omega = angleController.calculate(drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
             if (Math.abs(angleController.getPositionError()) < ANGLE_DEADBAND) omega = 0.0;
 
-            double multiplier = slowMode.getAsBoolean() ? 0.3 : 1.0;
+            double velocityMultiplier = slowMode.getAsBoolean() ? 0.3 : 1.0;
+            velocityMultiplier *= RobotContainer.getInstance().launcher.getLinearVelocityMultiplier();
 
             Translation2d finalVelocity = limitAccelerationFor(
                 drive.getLinearSpeedsVector(),
                 new Translation2d(
-                    linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec() * multiplier,
-                    linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec() * multiplier
+                    linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec() * velocityMultiplier,
+                    linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec() * velocityMultiplier
                 ),
                 DRIVE_MAX_ACCELERATION
             );
@@ -310,7 +319,7 @@ public class DriveCommands {
         else return wantedVelocity;
     }
 
-    public static double limitAngularVelocityFor(double currentVelocity, double wantedVelocity, double maxAcceleration) {
+    public static double limitAngularAccelerationFor(double currentVelocity, double wantedVelocity, double maxAcceleration) {
         double desiredAccel = wantedVelocity - currentVelocity;
         if (Math.abs(desiredAccel) > maxAcceleration)
             return currentVelocity + Math.signum(desiredAccel) * maxAcceleration;

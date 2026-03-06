@@ -51,9 +51,15 @@ public interface ShotCalculator {
         return simpleLookupShot(target, robot, FLYWHEEL_RPM_HUB, HOOD_ANGLE_HUB);
     };
 
-    static final ShotCalculator JANKY_SOTF_HUB = robot -> {
-        Translation2d target = AllianceFlipUtil.either(FieldConstants.blueHub, FieldConstants.redHub);
-        return jankySOTFShot(target, robot, FLYWHEEL_RPM_HUB, HOOD_ANGLE_HUB);
+    static final ShotCalculator JANKY_SOTF_HUB = new ShotCalculator() {
+        @Override
+        public ShotParameters calculate(RobotContainer robot) {
+            Translation2d target = AllianceFlipUtil.either(FieldConstants.blueHub, FieldConstants.redHub);
+            return jankySOTFShot(target, robot, FLYWHEEL_RPM_HUB, HOOD_ANGLE_HUB);
+        }
+
+        @Override public double getLinearVelocityMultiplier() { return 0.5; }
+        @Override public double getAngularVelocityMultiplier() { return 0.5; }
     };
 
     static final ShotCalculator PASS_LEFT = robot -> {
@@ -109,6 +115,9 @@ public interface ShotCalculator {
     }
 
     ShotParameters calculate(RobotContainer robot);
+
+    default double getLinearVelocityMultiplier() { return 1.0; };
+    default double getAngularVelocityMultiplier() { return 1.0; };
 
     public record ShotParameters(Rotation2d turretAngle, double flywheelRpm, double hoodAngle) {}
 }

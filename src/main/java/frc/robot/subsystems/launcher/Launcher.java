@@ -74,7 +74,7 @@ public class Launcher extends SubsystemBase {
 
         Translation2d robotPos = robot.drive.getPose().getTranslation();
         if (AllianceFlipUtil.shouldFlip()) robotPos = new Translation2d(AllianceFlipUtil.flipX(robotPos.getX()), robotPos.getY());
-        if (robotPos.getX() < FieldConstants.allianceZoneX) this.shotCalculator = ShotCalculator.HUB;
+        if (robotPos.getX() < FieldConstants.allianceZoneX) this.shotCalculator = ShotCalculator.JANKY_SOTF_HUB;
         else if (robotPos.getY() < FieldConstants.passingFlipY) this.shotCalculator = ShotCalculator.PASS_RIGHT;
         else this.shotCalculator = ShotCalculator.PASS_LEFT;
 
@@ -109,6 +109,16 @@ public class Launcher extends SubsystemBase {
 
         Logger.recordOutput("Launcher/IsLaunching", this.isLaunching);
         Utils.logActiveCommand("Launcher", this);
+    }
+
+    public double getLinearVelocityMultiplier() {
+        if (isLaunching) return this.shotCalculator.getLinearVelocityMultiplier();
+        return 1.0;
+    }
+
+    public double getAngularVelocityMultiplier() {
+        if (isLaunching) return this.shotCalculator.getAngularVelocityMultiplier();
+        return 1.0;
     }
 
     public Turret getTurret() {
