@@ -16,8 +16,9 @@ public class Intake extends SubsystemBase {
     public static class Constants {
         public static final double homePosition = 0.0;
         public static final double halfwayPosition = 1.0;
-        public static final double deployPosition = 2.2;//1.995;
+        public static final double deployPosition = 2.329;//1.995;
         public static final double rollerVoltage = 8.0;
+        public static final double rollerRPM = 4000;
     }
 
     private final IntakeIO io;
@@ -38,16 +39,24 @@ public class Intake extends SubsystemBase {
         Utils.logActiveCommand("Intake", this);
     }
 
-    public Command runRollers(DoubleSupplier volts) {
-        return runOnce(() -> io.runRollers(volts.getAsDouble()));
+    public Command setRollerVoltage(DoubleSupplier volts) {
+        return runOnce(() -> io.setRollerVoltage(volts.getAsDouble()));
     }
 
-    public Command runRollers(double volts) {
-        return runOnce(() -> io.runRollers(volts));
+    public Command setRollerVoltage(double volts) {
+        return runOnce(() -> io.setRollerVoltage(volts));
+    }
+
+    public Command runRollers() {
+        return runOnce(() -> io.setRollerRPM(Constants.rollerRPM));
+    }
+
+    public Command stopRollers() {
+        return this.setRollerVoltage(0);
     }
 
     public Command agitate() {
-        return runRollers(Constants.rollerVoltage)
+        return setRollerVoltage(Constants.rollerVoltage)
             .andThen(new SequentialCommandGroup(
                 runOnce(() -> io.setPosition(Constants.halfwayPosition)),
                 Commands.waitSeconds(0.4),
@@ -67,12 +76,12 @@ public class Intake extends SubsystemBase {
     }
 
     public Command startIntakeSequence() {
-        return deploy().andThen(runRollers(Constants.rollerVoltage))
+        return deploy().andThen(setRollerVoltage(Constants.rollerVoltage))
             .withName("Intake Deploy Sequence");
     }
 
     public Command stopIntakeSequence() {
-        return Commands.waitSeconds(0.5).andThen(runRollers(0))
+        return Commands.waitSeconds(0.5).andThen(setRollerVoltage(0))
             .withName("Intake Retract Sequence");
     }
 }

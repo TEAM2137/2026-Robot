@@ -7,13 +7,17 @@ public interface IntakeIO {
     public static class IntakeIOInputs {
         public double positionRotations;
         public double targetPositionRotations;
-        public double rollerSpeedVolts;
+        
+        public double rollerAppliedVolts;
+        public double rollerVelocityRpm;
+        public double rollerTargetVelocityRpm;
 
         public boolean pivotConnected;
         public boolean rollersConnected;
     }
 
-    default void runRollers(double volts) {}
+    default void setRollerVoltage(double volts) {}
+    default void setRollerRPM(double rpm) {}
     default void setPosition(double position) {}
 
     default void updateInputs(IntakeIOInputs inputs) {}

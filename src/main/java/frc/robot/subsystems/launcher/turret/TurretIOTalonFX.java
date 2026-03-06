@@ -44,7 +44,7 @@ public class TurretIOTalonFX implements TurretIO {
             .withKV(Constants.kV).withKS(Constants.kS)
             .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign));
 
-        this.resetPosition();
+        this.setPosition(0.0);
 
         this.sensor = new DigitalInput(9);
     }
@@ -72,8 +72,8 @@ public class TurretIOTalonFX implements TurretIO {
     }
 
     @Override
-    public void resetPosition() {
-        this.motor.setPosition(0.0);
+    public void setPosition(double position) {
+        this.motor.setPosition(position);
     }
 
     @Override

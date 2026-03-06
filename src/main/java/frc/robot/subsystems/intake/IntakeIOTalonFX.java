@@ -1,10 +1,13 @@
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.RPM;
+
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -18,6 +21,9 @@ public class IntakeIOTalonFX implements IntakeIO {
         public static final double kP = 16.0;
         public static final double kD = 0.1;
 
+        public static final double rollerKP = 0.15;//0.25;
+        public static final double rollerKV = 0.117;//0.19;
+
         public static final double cruiseVelocity = 16;
         public static final double acceleration = 50;
     }
@@ -26,12 +32,16 @@ public class IntakeIOTalonFX implements IntakeIO {
     protected final TalonFX rollers;
 
     protected double targetPositionRotations;
+    protected double rollerTargetVelocity;
 
     public IntakeIOTalonFX() {
         this.rollers = new TalonFX(Constants.rollersId);
         this.rollers.getConfigurator().apply(new MotorOutputConfigs()
             .withNeutralMode(NeutralModeValue.Brake)
             .withInverted(InvertedValue.CounterClockwise_Positive));
+
+        this.rollers.getConfigurator().apply(new Slot0Configs()
+            .withKP(Constants.rollerKP).withKV(Constants.rollerKV));
 
         this.pivot = new TalonFX(Constants.pivotId);
         this.pivot.getConfigurator().apply(new FeedbackConfigs()
@@ -48,8 +58,14 @@ public class IntakeIOTalonFX implements IntakeIO {
     }
 
     @Override
-    public void runRollers(double volts) {
+    public void setRollerVoltage(double volts) {
         this.rollers.setVoltage(volts);
+    }
+
+    @Override
+    public void setRollerRPM(double rpm) {
+        this.rollerTargetVelocity = rpm;
+        this.rollers.setControl(new VelocityVoltage(rpm / 60.0));
     }
 
     @Override
@@ -62,7 +78,10 @@ public class IntakeIOTalonFX implements IntakeIO {
     public void updateInputs(IntakeIOInputs inputs) {
         inputs.positionRotations = this.pivot.getPosition().getValueAsDouble();
         inputs.targetPositionRotations = this.targetPositionRotations;
-        inputs.rollerSpeedVolts = this.rollers.getMotorVoltage().getValueAsDouble();
+
+        inputs.rollerAppliedVolts = this.rollers.getMotorVoltage().getValueAsDouble();
+        inputs.rollerVelocityRpm = this.rollers.getVelocity().getValue().in(RPM);
+        inputs.rollerTargetVelocityRpm = this.rollerTargetVelocity;
 
         inputs.pivotConnected = this.pivot.isConnected();
         inputs.rollersConnected = this.rollers.isConnected();

@@ -224,8 +224,8 @@ public class RobotContainer {
 
     // configure teleop specific bindings here
     private void configureTeleopBindings() {
-        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onTrue(launcher.startLaunching());//.andThen(intake.agitate()));
-        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onFalse(launcher.stopLaunching().andThen(intake.retract()).andThen(intake.runRollers(0)));
+        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onTrue(launcher.startLaunching().andThen(intake.agitate()));
+        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onFalse(launcher.stopLaunching().andThen(intake.retract()).andThen(intake.stopRollers()));
 
         launcher.isLaunching().and(RobotModeTriggers.teleop()).whileTrue(
             // Commands.waitUntil(launcher.getFlywheel().isWithinTarget(60))
@@ -237,22 +237,26 @@ public class RobotContainer {
             .repeatedly()
         ));
 
-        launcher.isLaunching().and(RobotModeTriggers.teleop()).onFalse(indexer.stop().andThen(intake.retract().andThen(intake.runRollers(0))));
+        launcher.isLaunching().and(RobotModeTriggers.teleop()).onFalse(indexer.stop().andThen(intake.retract().andThen(intake.stopRollers())));
 
         driverController.povLeft().and(RobotModeTriggers.teleop()).whileTrue(launcher.getTurret().increaseTurretOffset());
         driverController.povRight().and(RobotModeTriggers.teleop()).whileTrue(launcher.getTurret().decreaseTurretOffset());
         driverController.povDown().and(RobotModeTriggers.teleop()).onTrue(launcher.getTurret().resetTurretOffset());
 
-        // driverController.leftBumper().and(RobotModeTriggers.teleop()).whileTrue(intake.deploy().andThen(
-        //     intake.runRollers(() -> Math.min(Intake.Constants.rollerVoltage + drive.getLinearSpeedMetersPerSec(), 12)).repeatedly()));
-        // driverController.leftBumper().and(RobotModeTriggers.teleop()).onFalse(intake.stopIntakeSequence());
+        driverController.leftBumper().and(RobotModeTriggers.teleop()).whileTrue(intake.deploy().andThen(intake.runRollers().repeatedly()));
+        driverController.leftBumper().and(RobotModeTriggers.teleop()).onFalse(intake.stopIntakeSequence());
         
-        Command retractIntake = intake.retract().andThen(intake.runRollers(0));
+        Command retractIntake = new SequentialCommandGroup(
+            intake.retract(),
+            intake.runRollers(),
+            Commands.waitSeconds(0.5),
+            intake.stopRollers()
+        );
         driverController.x().and(RobotModeTriggers.teleop()).onTrue(retractIntake);
         RobotModeTriggers.disabled().onFalse(retractIntake);
 
-        operatorController.b().onTrue(intake.deploy().andThen(intake.runRollers(-12)));
-        operatorController.b().onFalse(intake.retract().andThen(intake.runRollers(0)));
+        operatorController.b().onTrue(intake.deploy().andThen(intake.setRollerVoltage(-12)));
+        operatorController.b().onFalse(intake.retract().andThen(intake.setRollerVoltage(0)));
 
         operatorController.start().onTrue(launcher.getTurret().resetPosition().ignoringDisable(true));
         operatorController.back().onTrue(launcher.getHood().resetPosition().ignoringDisable(true));
@@ -267,7 +271,7 @@ public class RobotContainer {
         driverController.leftBumper().and(TestMode.ALL.isActive()).onTrue(intake.startIntakeSequence());
         driverController.leftBumper().and(TestMode.ALL.isActive()).onFalse(intake.stopIntakeSequence());
         driverController.a().and(TestMode.ALL.isActive()).onTrue(indexer.run().andThen(intake.agitate()));
-        driverController.a().and(TestMode.ALL.isActive()).onFalse(indexer.stop().andThen(intake.retract().andThen(intake.runRollers(0))));
+        driverController.a().and(TestMode.ALL.isActive()).onFalse(indexer.stop().andThen(intake.retract().andThen(intake.stopRollers())));
         driverController.b().and(TestMode.ALL.isActive()).onTrue(launcher.setFlywheelSpeed(() -> SmartDashboard.getNumber("LauncherRPM", 1000)));
         driverController.b().and(TestMode.ALL.isActive()).onFalse(launcher.setFlywheelVoltage(() -> 0));
         driverController.y().and(TestMode.ALL.isActive()).onTrue(launcher.setHoodAngle(18));
@@ -275,8 +279,8 @@ public class RobotContainer {
 
         driverController.leftBumper().and(TestMode.INTAKE.isActive()).onTrue(intake.deploy());
         driverController.leftBumper().and(TestMode.INTAKE.isActive()).onFalse(intake.retract());
-        driverController.b().and(TestMode.INTAKE.isActive()).onTrue(intake.runRollers(Intake.Constants.rollerVoltage));
-        driverController.b().and(TestMode.INTAKE.isActive()).onFalse(intake.runRollers(0));
+        driverController.b().and(TestMode.INTAKE.isActive()).onTrue(intake.runRollers());
+        driverController.b().and(TestMode.INTAKE.isActive()).onFalse(intake.stopRollers());
         
         driverController.povUp().and(TestMode.CLIMBER.isActive()).onTrue(climber.setVoltage(() -> 12));
         driverController.povUp().and(TestMode.CLIMBER.isActive()).onFalse(climber.setVoltage(0));

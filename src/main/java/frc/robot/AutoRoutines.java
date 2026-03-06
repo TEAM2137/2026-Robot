@@ -53,7 +53,7 @@ public class AutoRoutines {
         trajectories[1].done().onTrue(trajectories[2].cmd());
         launchAllFuel(robot); // TODO: fix all of these command constructions
 
-        trajectories[2].done().onTrue(robot.intake.runRollers(0).andThen(robot.intake.retract()).andThen(trajectories[3].cmd()));
+        trajectories[2].done().onTrue(robot.intake.setRollerVoltage(0).andThen(robot.intake.retract()).andThen(trajectories[3].cmd()));
         //retract and stop intake
 
         trajectories[3].done().onTrue(trajectories[4].cmd().andThen(launchAllFuel(robot)));
@@ -75,7 +75,7 @@ public class AutoRoutines {
         .andThen(trajectories[1].cmd())
         .andThen(robot.intake.startIntakeSequence()));
         trajectories[1].done().onTrue(trajectories[2].cmd());
-        trajectories[2].done().onTrue(trajectories[3].cmd().andThen(robot.intake.runRollers(0)));
+        trajectories[2].done().onTrue(trajectories[3].cmd().andThen(robot.intake.setRollerVoltage(0)));
         trajectories[3].done().onTrue(trajectories[4].cmd().andThen(new AutoAlignCommand()
 
         ));
@@ -99,7 +99,7 @@ public class AutoRoutines {
         auto.active().onTrue(robot.intake.startIntakeSequence().andThen(trajectories[0].resetOdometry()).andThen(trajectories[1].cmd()));
         //go toward bump and launch fuel, stop intake
         trajectories[1].done().onTrue(new ParallelCommandGroup(
-            robot.intake.runRollers(0),
+            robot.intake.setRollerVoltage(0),
             new SequentialCommandGroup(
             launchAllFuel(robot),
             Commands.waitSeconds(5),
@@ -108,14 +108,14 @@ public class AutoRoutines {
             .withTargetPose(new Pose2d(5.71598, 5.60704, new Rotation2d(-Math.PI / 4)))
             .withAccelerationLimit(3)
             .withSpeedLimit(5),
-            robot.intake.runRollers(Intake.Constants.rollerVoltage),
+            robot.intake.setRollerVoltage(Intake.Constants.rollerVoltage),
             trajectories[3].cmd()
             )));
 
         //Auto align over bump, launch, go to tower, climb
         trajectories[3].done().onTrue
         (new SequentialCommandGroup(
-            robot.intake.runRollers(0),
+            robot.intake.setRollerVoltage(0),
             new AutoAlignCommand()
             .withTargetPose(new Pose2d(3.16147, 2.45647, new Rotation2d(-Math.PI * 3 / 4)))
             .withAccelerationLimit(3)

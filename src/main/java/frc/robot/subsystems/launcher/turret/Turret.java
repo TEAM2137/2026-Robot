@@ -1,10 +1,13 @@
 package frc.robot.subsystems.launcher.turret;
 
+import java.util.Map;
+
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,6 +23,16 @@ public class Turret {
 
         public static final double offsetX = 6.375; // inches, positive towards robot right
         public static final double offsetY = -5.875; // inches, positive towards robot front
+
+        public static final double magnetPosition = 0.004150390625; // rotations
+        
+        public static final double baseOffset = 15.0; // degrees
+        public static final InterpolatingDoubleTreeMap offsetLookup = InterpolatingDoubleTreeMap.ofEntries(
+            Map.entry(-315.0, -0.2),
+            Map.entry(-135.0, 1.0),
+            Map.entry(45.0, -0.2),
+            Map.entry(225.0, 1.0)
+        );
     }
 
     private final TurretIO io;
@@ -54,8 +67,15 @@ public class Turret {
     }
 
     public void setAngleRobotRelative(Rotation2d angle) {
+        if (!this.didZero) return;
+
         Rotation2d target = angle.unaryMinus().plus(Rotation2d.kCW_90deg)
             .plus(Rotation2d.fromDegrees(manualOffset));
+        
+        double offsetDegrees = Constants.baseOffset * Constants.offsetLookup.get(target.getDegrees());
+        Logger.recordOutput("Launcher/Turret/AimOffsetDegrees", offsetDegrees);
+        target = target.plus(Rotation2d.fromDegrees(offsetDegrees));
+
         Rotation2d current = Rotation2d.fromDegrees(io.getAngle());
 
         Logger.recordOutput("Launcher/Turret/TargetAngle", target);
@@ -92,7 +112,7 @@ public class Turret {
     }
 
     public Command resetPosition() {
-        return Commands.runOnce(() -> io.resetPosition());
+        return Commands.runOnce(() -> io.setPosition(0.0));
     }
 
     public Pose2d getFieldSpacePose(RobotContainer robot) {
@@ -115,7 +135,7 @@ public class Turret {
         Logger.processInputs("Launcher/Turret", inputs);
 
         if (inputs.sensorValue && !previousSensorValue && DriverStation.isDisabled() && inputs.velocityRotationsPerSecond < 0) {
-            io.resetPosition();
+            io.setPosition(-Constants.magnetPosition);
             this.didZero = true;
         }
 

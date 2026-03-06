@@ -41,10 +41,21 @@ public interface ShotCalculator {
         Map.entry(0.0, 25.0)
     );
 
+    static final InterpolatingDoubleTreeMap SOTF_OFFSET_SCALAR = InterpolatingDoubleTreeMap.ofEntries(
+        Map.entry(0.0, 0.0),
+        Map.entry(4.0, 1.0)
+    );
+
     static final ShotCalculator HUB = robot -> {
         Translation2d target = AllianceFlipUtil.either(FieldConstants.blueHub, FieldConstants.redHub);
         return simpleLookupShot(target, robot, FLYWHEEL_RPM_HUB, HOOD_ANGLE_HUB);
     };
+
+    static final ShotCalculator JANKY_SOTF_HUB = robot -> {
+        Translation2d target = AllianceFlipUtil.either(FieldConstants.blueHub, FieldConstants.redHub);
+        return jankySOTFShot(target, robot, FLYWHEEL_RPM_HUB, HOOD_ANGLE_HUB);
+    };
+
     static final ShotCalculator PASS_LEFT = robot -> {
         Translation2d target = AllianceFlipUtil.either(FieldConstants.blueLeftCorner, FieldConstants.redLeftCorner);
         return simpleLookupShot(target, robot, FLYWHEEL_RPM_PASSING, HOOD_ANGLE_PASSING);
@@ -70,6 +81,30 @@ public interface ShotCalculator {
         return new ShotParameters(
             Rotation2d.fromRadians(theAngle).plus(Rotation2d.k180deg),
             flywheelRpm.get(dst), hoodAngle.get(dst)
+        );
+    }
+
+    static ShotParameters jankySOTFShot(Translation2d target, RobotContainer robot, InterpolatingDoubleTreeMap flywheelRpm, InterpolatingDoubleTreeMap hoodAngle) {
+        Translation2d turretPos = robot.launcher.getTurret().getFieldSpacePose(robot).getTranslation();
+
+        double offsetScalar = SOTF_OFFSET_SCALAR.get(target.getDistance(turretPos));
+        Translation2d newTarget = target.plus(robot.drive.getLinearSpeedsVector()
+            .div(robot.drive.getMaxLinearSpeedMetersPerSec())
+            .unaryMinus().times(offsetScalar));
+
+        double dst = newTarget.getDistance(turretPos);
+        double dx = newTarget.getX() - turretPos.getX();
+        double dy = newTarget.getY() - turretPos.getY();
+        
+        double theAngle = Math.atan2(dx, dy);
+
+        Logger.recordOutput("LookupTables/TargetPos", newTarget);
+        Logger.recordOutput("LookupTables/TurretPos", turretPos);
+        Logger.recordOutput("LookupTables/Distance", dst);
+
+        return new ShotParameters(
+            Rotation2d.fromRadians(theAngle).plus(Rotation2d.k180deg),
+            FLYWHEEL_RPM_HUB.get(dst), HOOD_ANGLE_HUB.get(dst)
         );
     }
 
