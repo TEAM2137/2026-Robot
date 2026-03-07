@@ -10,8 +10,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -301,17 +299,7 @@ public class DriveCommands {
         );
     }
 
-    private static final StructPublisher<Translation2d> currentVelocityPublisher = NetworkTableInstance.getDefault()
-        .getStructTopic("AccelLimiting/CurrentVelocity", Translation2d.struct).publish();
-        private static final StructPublisher<Translation2d> finalVelocityPublisher = NetworkTableInstance.getDefault()
-        .getStructTopic("AccelLimiting/FinalVelocity", Translation2d.struct).publish();
-    private static final StructPublisher<Translation2d> wantedVelocityPublisher = NetworkTableInstance.getDefault()
-        .getStructTopic("AccelLimiting/WantedVelocity", Translation2d.struct).publish();
-
     public static Translation2d limitAccelerationFor(Translation2d currentVelocity, Translation2d wantedVelocity, double maxAcceleration) {
-        currentVelocityPublisher.accept(currentVelocity);
-        wantedVelocityPublisher.accept(wantedVelocity);
-
         Translation2d flippedVelocity = AllianceFlipUtil.shouldFlip() ? new Translation2d().minus(currentVelocity) : currentVelocity;
         Translation2d desiredAccel = wantedVelocity.minus(flippedVelocity);
         if (desiredAccel.getNorm() > maxAcceleration * 0.04)
