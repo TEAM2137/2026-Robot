@@ -33,7 +33,7 @@ public class Flywheel {
     public boolean canFire() {
         Translation2d robotPos = RobotContainer.getInstance().drive.getPose().getTranslation();
         if (AllianceFlipUtil.shouldFlip()) robotPos = AllianceFlipUtil.flip(robotPos);
-        return !FieldConstants.noFireZone1.contains(robotPos) && !FieldConstants.noFireZone2.contains(robotPos);
+        return !FieldConstants.noFireZone.contains(robotPos);
     }
 
     public BooleanSupplier isWithinTarget(double range) {

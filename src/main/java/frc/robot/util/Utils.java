@@ -2,10 +2,12 @@ package frc.robot.util;
 
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.RobotType;
 
 public class Utils {
     /** Logs the active command of the given subsystem */
@@ -80,5 +82,23 @@ public class Utils {
         public final String toString() {
             return name + " in " + ((int)Math.ceil(time)) + "s";
         }
+    }
+
+    public static Translation2d[] createRectOutline(Rectangle2d rect, boolean flip) {
+        Translation2d center = rect.getCenter().getTranslation();
+        if (flip) center = AllianceFlipUtil.flip(center);
+
+        Translation2d[] outline = new Translation2d[5];
+        outline[0] = center.plus(new Translation2d(-rect.getXWidth() / 2.0, -rect.getYWidth() / 2.0));
+        outline[1] = center.plus(new Translation2d(-rect.getXWidth() / 2.0, rect.getYWidth() / 2.0));
+        outline[2] = center.plus(new Translation2d(rect.getXWidth() / 2.0, rect.getYWidth() / 2.0));
+        outline[3] = center.plus(new Translation2d(rect.getXWidth() / 2.0, -rect.getYWidth() / 2.0));
+        outline[4] = outline[0];
+        
+        return outline;
+    }
+
+    public static boolean isSim() {
+        return Constants.currentRobotType == RobotType.SIM;
     }
 }

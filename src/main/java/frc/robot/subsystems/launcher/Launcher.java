@@ -1,13 +1,16 @@
 package frc.robot.subsystems.launcher;
 
+import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -38,6 +41,8 @@ public class Launcher extends SubsystemBase {
     // lookup table tuning values
     private double manualHoodAngle;
     private double manualFlywheelRPM;
+
+    private AllianceStationID lastAllianceStation = AllianceStationID.Unknown;
 
     public Launcher(TurretIO turretIO, HoodIO hoodIO, FlywheelIO flywheelIO) {
         this.turret = new Turret(turretIO);
@@ -74,8 +79,10 @@ public class Launcher extends SubsystemBase {
 
         Translation2d robotPos = robot.drive.getPose().getTranslation();
         if (AllianceFlipUtil.shouldFlip()) robotPos = new Translation2d(AllianceFlipUtil.flipX(robotPos.getX()), robotPos.getY());
+
+        double passingFlipY = this.getPassingFlipY();
         if (robotPos.getX() < FieldConstants.allianceZoneX) this.shotCalculator = ShotCalculator.JANKY_SOTF_HUB;
-        else if (robotPos.getY() < FieldConstants.passingFlipY) this.shotCalculator = ShotCalculator.PASS_RIGHT;
+        else if (robotPos.getY() < passingFlipY) this.shotCalculator = ShotCalculator.PASS_RIGHT;
         else this.shotCalculator = ShotCalculator.PASS_LEFT;
 
         ShotParameters params = this.shotCalculator.calculate(robot);
@@ -109,6 +116,28 @@ public class Launcher extends SubsystemBase {
 
         Logger.recordOutput("Launcher/IsLaunching", this.isLaunching);
         Utils.logActiveCommand("Launcher", this);
+    }
+
+    public double getPassingFlipY() {
+        AllianceStationID currentStation = DriverStation.getRawAllianceStation();
+        if (!SmartDashboard.containsKey("PassingPriority")) {
+            this.lastAllianceStation = currentStation;
+            SmartDashboard.putBoolean("PassingPriority", false);
+        }
+        if (this.lastAllianceStation != currentStation) {
+            this.lastAllianceStation = currentStation;
+            this.getDefaultPassingPriority().ifPresent(priority ->
+                SmartDashboard.putBoolean("PassingPriority", priority));
+        }
+        boolean priority = SmartDashboard.getBoolean("PassingPriority", false);
+        if (AllianceFlipUtil.shouldFlip()) return priority ? FieldConstants.midPassY2 : FieldConstants.midPassY1;
+        return priority ? FieldConstants.midPassY1 : FieldConstants.midPassY2;
+    }
+
+    public Optional<Boolean> getDefaultPassingPriority() {
+        if (DriverStation.getRawAllianceStation().toString().contains("1")) return Optional.of(false);
+        if (DriverStation.getRawAllianceStation().toString().contains("3")) return Optional.of(true);
+        return Optional.empty();
     }
 
     public double getLinearVelocityMultiplier() {

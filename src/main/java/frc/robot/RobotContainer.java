@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -233,25 +234,37 @@ public class RobotContainer {
             .andThen(new SequentialCommandGroup(
                 indexer.run().repeatedly().onlyWhile(launcher.getTurret().isAtTarget()),
                 indexer.stop()
-            )
-            .repeatedly()
-        ));
+            ).repeatedly()
+        ).withName("Run Indexer"));
 
-        launcher.isLaunching().and(RobotModeTriggers.teleop()).onFalse(indexer.stop().andThen(intake.retract().andThen(intake.stopRollers())));
+        launcher.isLaunching().and(RobotModeTriggers.teleop()).onFalse(new SequentialCommandGroup(
+            indexer.stop(),
+            intake.retract(),
+            intake.stopRollers()
+        ).withName("Stop Launching"));
 
         driverController.povLeft().and(RobotModeTriggers.teleop()).whileTrue(launcher.getTurret().increaseTurretOffset());
         driverController.povRight().and(RobotModeTriggers.teleop()).whileTrue(launcher.getTurret().decreaseTurretOffset());
         driverController.povDown().and(RobotModeTriggers.teleop()).onTrue(launcher.getTurret().resetTurretOffset());
 
-        driverController.leftBumper().and(RobotModeTriggers.teleop()).whileTrue(intake.deploy().andThen(intake.runRollers().repeatedly()));
-        driverController.leftBumper().and(RobotModeTriggers.teleop()).onFalse(intake.stopIntakeSequence());
+        driverController.leftBumper().and(RobotModeTriggers.teleop()).whileTrue(new SequentialCommandGroup(
+            intake.deploy(),
+            intake.runRollers().repeatedly()
+        ).withName("Intake"));
+
+        driverController.leftBumper().and(RobotModeTriggers.teleop()).onFalse(new ConditionalCommand(
+            intake.agitate(),
+            intake.stopIntakeSequence(),
+            launcher.isLaunching()
+        ).withName("Stop Intaking"));
         
         Command retractIntake = new SequentialCommandGroup(
             intake.retract(),
             intake.runRollers(),
             Commands.waitSeconds(0.5),
             intake.stopRollers()
-        );
+        ).withName("Retract Intake");
+
         driverController.x().and(RobotModeTriggers.teleop()).onTrue(retractIntake);
         RobotModeTriggers.disabled().onFalse(retractIntake);
 

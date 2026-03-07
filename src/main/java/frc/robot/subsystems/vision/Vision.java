@@ -24,6 +24,8 @@ public class Vision extends SubsystemBase {
     private final VisionIOInputsAutoLogged[] inputs;
     private final Alert[] disconnectedAlerts;
 
+    private boolean isEnabled = true;
+
     public Vision(VisionConsumer consumer, VisionIO... io) {
         this.consumer = consumer;
         this.io = io;
@@ -37,6 +39,8 @@ public class Vision extends SubsystemBase {
         for (int i = 0; i < inputs.length; i++) {
             disconnectedAlerts[i] = new Alert("Vision camera " + Integer.toString(i) + " disconnected", AlertType.kWarning);
         }
+
+        // RobotModeTriggers.disabled().onFalse(this.enable());
     }
 
     /**
@@ -79,7 +83,7 @@ public class Vision extends SubsystemBase {
             }
 
             // Loop over pose observations
-            for (var observation : inputs[cameraIndex].poseObservations) {
+            for (var observation : inputs[cameraIndex].poseObservations) {                
                 // Check whether to reject pose
                 boolean rejectPose = observation.tagCount() == 0 // Must have at least one tag
                                 // Cannot be high ambiguity
@@ -135,6 +139,8 @@ public class Vision extends SubsystemBase {
         Logger.recordOutput("Vision/Summary/RobotPoses", allRobotPoses.toArray(new Pose3d[allRobotPoses.size()]));
         Logger.recordOutput("Vision/Summary/RobotPosesAccepted", allRobotPosesAccepted.toArray(new Pose3d[allRobotPosesAccepted.size()]));
         Logger.recordOutput("Vision/Summary/RobotPosesRejected", allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()]));
+
+        Logger.recordOutput("Vision/Enabled", this.isEnabled);
     }
 
     @FunctionalInterface
@@ -144,4 +150,12 @@ public class Vision extends SubsystemBase {
                 double timestampSeconds,
                 Matrix<N3, N1> visionMeasurementStdDevs);
     }
+
+    // public Command enable() {
+    //     return runOnce(() -> this.isEnabled = true);
+    // }
+
+    // public Command disable() {
+    //     return runOnce(() -> this.isEnabled = false);
+    // }
 }

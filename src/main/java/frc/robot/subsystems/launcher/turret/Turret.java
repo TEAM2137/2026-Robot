@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
 import frc.robot.util.Alerts;
+import frc.robot.util.Utils;
 
 public class Turret {
     public static class Constants {
@@ -67,7 +68,7 @@ public class Turret {
     }
 
     public void setAngleRobotRelative(Rotation2d angle) {
-        if (!this.didZero) return;
+        if (!this.didZero && !Utils.isSim()) return;
 
         Rotation2d target = angle.unaryMinus().plus(Rotation2d.kCW_90deg)
             .plus(Rotation2d.fromDegrees(manualOffset));
