@@ -12,8 +12,6 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -29,6 +27,8 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+
+import org.littletonrobotics.junction.Logger;
 
 public class DriveCommands {
     public static final double DEADBAND = 0.1;
@@ -73,44 +73,25 @@ public class DriveCommands {
             BooleanSupplier slowMode,
             DoubleSupplier omegaSupplier) {
         return Commands.run(() -> {
-            // Get linear velocity
+            // Get controller drive inputs
             Translation2d movementRaw = movementSupplier.get();
+            double velocityMultiplier = slowMode.getAsBoolean() ? 0.3 : 1.0;
+
+            // Get linear velocity from controller values
             Translation2d linearVelocity = getLinearVelocityFromJoysticks(
-                    AllianceFlipUtil.shouldFlip() ? movementRaw.getX() : -movementRaw.getX(),
-                    AllianceFlipUtil.shouldFlip() ? movementRaw.getY() : -movementRaw.getY());
+                AllianceFlipUtil.shouldFlip() ? movementRaw.getX() : -movementRaw.getX(),
+                AllianceFlipUtil.shouldFlip() ? movementRaw.getY() : -movementRaw.getY()
+            ).times(velocityMultiplier * drive.getMaxLinearSpeedMetersPerSec());
 
             // Apply rotation deadband
             double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
-
-            // Apply angular velocity multiplier
             double omegaMultiplier = slowMode.getAsBoolean() ? 0.75 : 1.0;
-            omegaMultiplier *= RobotContainer.getInstance().launcher.getAngularVelocityMultiplier();
 
             // Square rotation value for more precise control
             omega = Math.copySign(omega * omega, omega) * drive.getMaxAngularSpeedRadPerSec() * omegaMultiplier;
-            omega = limitAngularAccelerationFor(drive.getAngularVelocityRadsPerSec(), omega, MAX_ANGULAR_ACCELERATION);
 
-            // Apply linear velocity multiplier
-            double velocityMultiplier = slowMode.getAsBoolean() ? 0.3 : 1.0;
-            velocityMultiplier *= RobotContainer.getInstance().launcher.getLinearVelocityMultiplier();
-
-            // Calculate final linear velocity
-            Translation2d finalVelocity = limitAccelerationFor(
-                drive.getLinearSpeedsVector(),
-                new Translation2d(
-                    linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec() * velocityMultiplier,
-                    linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec() * velocityMultiplier
-                ),
-                MAX_LINEAR_ACCELERATION
-            );
-            finalVelocityPublisher.accept(finalVelocity);
-
-            // Convert to field relative speeds & send command
-            ChassisSpeeds speeds = new ChassisSpeeds(finalVelocity.getX(), finalVelocity.getY(), omega);
-            drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(speeds,
-                AllianceFlipUtil.shouldFlip()
-                    ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                    : drive.getRotation()));
+            // Drive the robot
+            DriveCommands.driveFieldRelative(drive, linearVelocity, omega);
         }, drive);
     }
 
@@ -135,43 +116,62 @@ public class DriveCommands {
 
         // Construct command
         return Commands.run(() -> {
-            // Get linear velocity
+            // Get controller drive inputs
             Translation2d movementRaw = movementSupplier.get();
-            Translation2d linearVelocity = getLinearVelocityFromJoysticks(
-                    AllianceFlipUtil.shouldFlip() ? movementRaw.getX() : -movementRaw.getX(),
-                    AllianceFlipUtil.shouldFlip() ? movementRaw.getY() : -movementRaw.getY());
+            double velocityMultiplier = slowMode.getAsBoolean() ? 0.3 : 1.0;
 
-            // Calculate angular speed
+            // Get linear velocity from controller values
+            Translation2d linearVelocity = getLinearVelocityFromJoysticks(
+                AllianceFlipUtil.shouldFlip() ? movementRaw.getX() : -movementRaw.getX(),
+                AllianceFlipUtil.shouldFlip() ? movementRaw.getY() : -movementRaw.getY()
+            ).times(velocityMultiplier * drive.getMaxLinearSpeedMetersPerSec());
+
+            // Calculate angular velocity from PID
             double omega = angleController.calculate(drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
             if (Math.abs(angleController.getPositionError()) < ANGLE_DEADBAND) omega = 0.0;
-
-            double velocityMultiplier = slowMode.getAsBoolean() ? 0.3 : 1.0;
-            velocityMultiplier *= RobotContainer.getInstance().launcher.getLinearVelocityMultiplier();
-
-            Translation2d finalVelocity = limitAccelerationFor(
-                drive.getLinearSpeedsVector(),
-                new Translation2d(
-                    linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec() * velocityMultiplier,
-                    linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec() * velocityMultiplier
-                ),
-                MAX_LINEAR_ACCELERATION
-            );
-
-            finalVelocityPublisher.accept(finalVelocity);
-
-            // Convert to field relative speeds & send command
-            ChassisSpeeds speeds = new ChassisSpeeds(finalVelocity.getX(), finalVelocity.getY(), omega);
-            boolean isFlipped = DriverStation.getAlliance().isPresent()
-                && DriverStation.getAlliance().get() == Alliance.Red;
-            drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, isFlipped
-                ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                : drive.getRotation())
-            );
+            
+            // Drive the robot
+            DriveCommands.driveFieldRelative(drive, linearVelocity, omega);
         }, drive)
         // Reset PID controller when command starts
         .beforeStarting(() -> angleController.reset(
             drive.getRotation().getRadians(),
             drive.getAngularVelocityRadsPerSec()), drive);
+    }
+
+    public static void driveFieldRelative(Drive drive, Translation2d linearVelocity, double omega) {
+        // Apply linear velocity multiplier
+        double vx = linearVelocity.getX();
+        double vy = linearVelocity.getY();
+        double maxLinearAccel = MAX_LINEAR_ACCELERATION;
+        double maxAngularAccel = MAX_ANGULAR_ACCELERATION;
+
+        // Limit drivetrain if SOTF is active
+        if (RobotContainer.getInstance().launcher.shouldLimitDrive()) {
+            vx = Math.min(vx, drive.getMaxLinearSpeedMetersPerSec() * 0.7);
+            vy = Math.min(vy, drive.getMaxLinearSpeedMetersPerSec() * 0.7);
+            omega = Math.min(omega, drive.getMaxAngularSpeedRadPerSec() * 0.7);
+            maxLinearAccel *= 0.7;
+            maxAngularAccel *= 0.7;
+        }
+
+        // Record commanded velocities
+        Translation2d commanded = new Translation2d(vx, vy);
+        Logger.recordOutput("Drive/CommandedVelocity", commanded);
+        Logger.recordOutput("Drive/CommandedOmega", omega);
+
+        // Apply acceleration limits
+        Translation2d finalVelocity = limitAccelerationFor(drive.getLinearSpeedsVector(), commanded, maxLinearAccel);
+        double finalOmega = limitAngularAccelerationFor(drive.getAngularVelocityRadsPerSec(), omega, maxAngularAccel);
+        Logger.recordOutput("Drive/FinalLimitedVelocity", finalVelocity);
+        Logger.recordOutput("Drive/FinalLimitedOmega", finalOmega);
+
+        // Convert to field relative speeds & send command
+        ChassisSpeeds speeds = new ChassisSpeeds(finalVelocity.getX(), finalVelocity.getY(), finalOmega);
+        drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(speeds,
+            AllianceFlipUtil.shouldFlip()
+                ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                : drive.getRotation()));
     }
 
     /**

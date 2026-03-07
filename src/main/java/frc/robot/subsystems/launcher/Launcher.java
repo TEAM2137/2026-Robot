@@ -81,7 +81,7 @@ public class Launcher extends SubsystemBase {
         if (AllianceFlipUtil.shouldFlip()) robotPos = new Translation2d(AllianceFlipUtil.flipX(robotPos.getX()), robotPos.getY());
 
         double passingFlipY = this.getPassingFlipY();
-        if (robotPos.getX() < FieldConstants.allianceZoneX) this.shotCalculator = ShotCalculator.JANKY_SOTF_HUB;
+        if (robotPos.getX() < FieldConstants.allianceZoneX) this.shotCalculator = ShotCalculator.SOTF_HUB;
         else if (robotPos.getY() < passingFlipY) this.shotCalculator = ShotCalculator.PASS_RIGHT;
         else this.shotCalculator = ShotCalculator.PASS_LEFT;
 
@@ -140,16 +140,6 @@ public class Launcher extends SubsystemBase {
         return Optional.empty();
     }
 
-    public double getLinearVelocityMultiplier() {
-        if (isLaunching) return this.shotCalculator.getLinearVelocityMultiplier();
-        return 1.0;
-    }
-
-    public double getAngularVelocityMultiplier() {
-        if (isLaunching) return this.shotCalculator.getAngularVelocityMultiplier();
-        return 1.0;
-    }
-
     public Turret getTurret() {
         return this.turret;
     }
@@ -200,5 +190,9 @@ public class Launcher extends SubsystemBase {
 
     public Command modifyManualFlywheelRPM(int rpmPerSec) {
         return run(() -> this.manualFlywheelRPM += rpmPerSec / 50.0);
+    }
+
+    public boolean shouldLimitDrive() {
+        return this.isLaunching && this.shotCalculator == ShotCalculator.SOTF_HUB;
     }
 }

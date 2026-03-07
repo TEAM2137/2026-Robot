@@ -55,15 +55,18 @@ public interface ShotCalculator {
         return simpleLookupShot(target, robot, FLYWHEEL_RPM_HUB, HOOD_ANGLE_HUB);
     };
 
-    static final ShotCalculator JANKY_SOTF_HUB = new ShotCalculator() {
-        @Override
-        public ShotParameters calculate(RobotContainer robot) {
-            Translation2d target = AllianceFlipUtil.either(FieldConstants.blueHub, FieldConstants.redHub);
-            return jankySOTFShot(target, robot, FLYWHEEL_RPM_HUB, HOOD_ANGLE_HUB);
-        }
+    static final ShotCalculator SOTF_HUB = robot -> {
+        Translation2d target = AllianceFlipUtil.either(FieldConstants.blueHub, FieldConstants.redHub);
+        return simpleSOTFShot(target, robot, FLYWHEEL_RPM_HUB, HOOD_ANGLE_HUB);
+    };
 
-        @Override public double getLinearVelocityMultiplier() { return 0.5; }
-        @Override public double getAngularVelocityMultiplier() { return 0.5; }
+    static final ShotCalculator PASS_LEFT_SOTF = robot -> {
+        Translation2d target = AllianceFlipUtil.either(FieldConstants.blueLeftCorner, FieldConstants.redLeftCorner);
+        return simpleSOTFShot(target, robot, FLYWHEEL_RPM_PASSING, HOOD_ANGLE_PASSING);
+    };
+    static final ShotCalculator PASS_RIGHT_SOTF = robot -> {
+        Translation2d target = AllianceFlipUtil.either(FieldConstants.blueRightCorner, FieldConstants.redRightCorner);
+        return simpleSOTFShot(target, robot, FLYWHEEL_RPM_PASSING, HOOD_ANGLE_PASSING);
     };
 
     static final ShotCalculator PASS_LEFT = robot -> {
@@ -94,7 +97,7 @@ public interface ShotCalculator {
         );
     }
 
-    static ShotParameters jankySOTFShot(Translation2d target, RobotContainer robot, InterpolatingDoubleTreeMap flywheelRpm, InterpolatingDoubleTreeMap hoodAngle) {
+    static ShotParameters simpleSOTFShot(Translation2d target, RobotContainer robot, InterpolatingDoubleTreeMap flywheelRpm, InterpolatingDoubleTreeMap hoodAngle) {
         Translation2d turretPos = robot.launcher.getTurret().getFieldSpacePose(robot).getTranslation();
 
         double offsetScalar = SOTF_OFFSET_SCALAR.get(target.getDistance(turretPos));
@@ -118,14 +121,11 @@ public interface ShotCalculator {
 
         return new ShotParameters(
             Rotation2d.fromRadians(theAngle).plus(Rotation2d.k180deg),
-            FLYWHEEL_RPM_HUB.get(dst), HOOD_ANGLE_HUB.get(dst)
+            flywheelRpm.get(dst), hoodAngle.get(dst)
         );
     }
 
     ShotParameters calculate(RobotContainer robot);
-
-    default double getLinearVelocityMultiplier() { return 1.0; };
-    default double getAngularVelocityMultiplier() { return 1.0; };
 
     public record ShotParameters(Rotation2d turretAngle, double flywheelRpm, double hoodAngle) {}
 }
