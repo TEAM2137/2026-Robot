@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
@@ -18,10 +19,10 @@ public interface ShotCalculator {
         Map.entry(1.5658, 1744.0),
         Map.entry(2.0083, 1808.0),
         Map.entry(2.6245, 1872.0),
-        Map.entry(3.0319, 1920.0),
-        Map.entry(3.4845, 2000.0),
-        Map.entry(3.8919, 2064.0),
-        Map.entry(4.3134, 2110.0)
+        Map.entry(3.0319, 1934.0),
+        Map.entry(3.4845, 2010.0),
+        Map.entry(3.8919, 2075.0),
+        Map.entry(4.3134, 2120.0)
     );
     static final InterpolatingDoubleTreeMap HOOD_ANGLE_HUB = InterpolatingDoubleTreeMap.ofEntries(
         Map.entry(1.3165, 4.9),
@@ -42,8 +43,11 @@ public interface ShotCalculator {
     );
 
     static final InterpolatingDoubleTreeMap SOTF_OFFSET_SCALAR = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(0.0, 0.0),
-        Map.entry(4.0, 1.0)
+        Map.entry(1.5, 5.0),
+        Map.entry(2.5, 6.0),
+        Map.entry(3.0, 6.8),
+        Map.entry(3.5, 7.6),
+        Map.entry(4.0, 8.0)
     );
 
     static final ShotCalculator HUB = robot -> {
@@ -94,6 +98,9 @@ public interface ShotCalculator {
         Translation2d turretPos = robot.launcher.getTurret().getFieldSpacePose(robot).getTranslation();
 
         double offsetScalar = SOTF_OFFSET_SCALAR.get(target.getDistance(turretPos));
+        // if (!SmartDashboard.containsKey("SOTFOffset")) SmartDashboard.putNumber("SOTFOffset", 0);
+        // double offsetScalar = SmartDashboard.getNumber("SOTFOffset", 0);
+        
         Translation2d newTarget = target.plus(robot.drive.getLinearSpeedsVector()
             .div(robot.drive.getMaxLinearSpeedMetersPerSec())
             .unaryMinus().times(offsetScalar));
@@ -105,6 +112,7 @@ public interface ShotCalculator {
         double theAngle = Math.atan2(dx, dy);
 
         Logger.recordOutput("LookupTables/TargetPos", newTarget);
+        Logger.recordOutput("LookupTables/SOTFTargetPose", new Pose2d(newTarget, new Rotation2d()));
         Logger.recordOutput("LookupTables/TurretPos", turretPos);
         Logger.recordOutput("LookupTables/Distance", dst);
 
