@@ -145,13 +145,48 @@ public class AutoRoutines {
 
     public static UnregisteredAuto testAuto(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
         auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[0].cmd()));
+        trajectories[0].done().onTrue(trajectories[1].cmd());
+
+        trajectories[1].done().onTrue(new SequentialCommandGroup(
+            robot.intake.deploy(),
+            robot.intake.runRollers(),
+            trajectories[2].cmd()
+        ));
+
+        trajectories[2].done().onTrue(new SequentialCommandGroup(
+            robot.intake.stopRollers(),
+            trajectories[3].cmd()
+        ));
+
+        trajectories[3].done().onTrue(trajectories[4].cmd());
+        
+        trajectories[4].done().onTrue(new SequentialCommandGroup(
+            trajectories[5].cmd().asProxy(),
+            Commands.waitSeconds(0.5)
+            // robot.vision.enable()
+        ));
+
+        trajectories[5].done().onTrue(trajectories[6].cmd());
+
+        return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
+    }
+
+    public static UnregisteredAuto depotTest(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
+        // auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[0].cmd()).andThen(robot.vision.disable()));
+        // trajectories[0].done().onTrue(robot.vision.enable().andThen(trajectories[1].cmd()));
+        // trajectories[1].done().onTrue(trajectories[2].cmd());
+        // trajectories[2].done().onTrue(trajectories[3].cmd());
+        // trajectories[3].done().onTrue(robot.vision.disable().andThen(trajectories[4].cmd()));
+        // trajectories[4].done().onTrue(robot.vision.disable().andThen(trajectories[5].cmd()));
+        // trajectories[5].done().onTrue(trajectories[6].cmd());
         return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
     }
 
     /** register all the autos defined above */
     public static void registerAutos(AutoFactory factory, AutoRegistry autos) {
-        autos.add("Test Auto", "auto", 1, false, AutoRoutines::testAuto);
+        autos.add("Outpost Auto", "auto", 7, false, AutoRoutines::testAuto);
         autos.add("Two Cycle", "twoCycle", 5, false, AutoRoutines::twoCycleAuto);
+        autos.add("Depot Test", "depotTest", 7, false, AutoRoutines::depotTest);
         // autos.add("Questionable", "questionable", 6, AutoRoutines::questionableAuto);
         // autos.add("Second Cycle Near", "secondCycleNear", 9, AutoRoutines::secondCycleNear);
         // autos.add("Depot, Hub, Climb", "depotHubClimb", 6, AutoRoutines::depotHubClimb);
