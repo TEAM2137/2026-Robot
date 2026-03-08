@@ -36,7 +36,7 @@ public interface ShotCalculator {
     );
 
     static final InterpolatingDoubleTreeMap FLYWHEEL_RPM_PASSING = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(0.0, 2200.0)
+        Map.entry(0.0, 2000.0)
     );
     static final InterpolatingDoubleTreeMap HOOD_ANGLE_PASSING = InterpolatingDoubleTreeMap.ofEntries(
         Map.entry(0.0, 25.0)
