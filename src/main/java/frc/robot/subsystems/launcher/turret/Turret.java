@@ -8,7 +8,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -27,11 +26,11 @@ public class Turret {
 
         public static final double magnetPosition = 0.004150390625; // rotations
         
-        public static final double baseOffset = 15.0; // degrees
+        public static final double baseOffset = 7.5; // degrees
         public static final InterpolatingDoubleTreeMap offsetLookup = InterpolatingDoubleTreeMap.ofEntries(
-            Map.entry(-315.0, -0.2),
+            Map.entry(-315.0, 0.0),
             Map.entry(-135.0, 1.0),
-            Map.entry(45.0, -0.2),
+            Map.entry(45.0, 0.0),
             Map.entry(225.0, 1.0)
         );
     }
@@ -116,6 +115,16 @@ public class Turret {
         return Commands.runOnce(() -> io.setPosition(0.0));
     }
 
+    public Command markAsUnzeroed() {
+        return Commands.runOnce(() -> this.didZero = false);
+    }
+
+    public Command setVoltage(double volts) {
+        return Commands.runOnce(() -> {
+            if (!this.didZero) this.io.setVoltage(volts);
+        });
+    }
+
     public Pose2d getFieldSpacePose(RobotContainer robot) {
         Pose2d robotPose = robot.drive.getPose();
         Transform2d transform = new Transform2d(
@@ -135,7 +144,7 @@ public class Turret {
         io.updateInputs(inputs);
         Logger.processInputs("Launcher/Turret", inputs);
 
-        if (inputs.sensorValue && !previousSensorValue && DriverStation.isDisabled() && inputs.velocityRotationsPerSecond < 0) {
+        if (!this.didZero && inputs.sensorValue && !previousSensorValue && inputs.velocityRotationsPerSecond < 0) {
             io.setPosition(-Constants.magnetPosition);
             this.didZero = true;
         }

@@ -23,6 +23,7 @@ public interface TurretIO {
     default double getAngle() { return 0.0; }
     default boolean isAtTarget() { return true; }
     default void setPosition(double position) {}
+    default void setVoltage(double volts) {} 
 
     default void updateInputs(TurretIOInputs inputs) {}
 }

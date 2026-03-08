@@ -76,10 +76,8 @@ public class DriveCommands {
             double velocityMultiplier = slowMode.getAsBoolean() ? 0.3 : 1.0;
 
             // Get linear velocity from controller values
-            Translation2d linearVelocity = getLinearVelocityFromJoysticks(
-                AllianceFlipUtil.shouldFlip() ? movementRaw.getX() : -movementRaw.getX(),
-                AllianceFlipUtil.shouldFlip() ? movementRaw.getY() : -movementRaw.getY()
-            ).times(velocityMultiplier * drive.getMaxLinearSpeedMetersPerSec());
+            Translation2d linearVelocity = getLinearVelocityFromJoysticks(movementRaw.getX(), movementRaw.getY())
+                .times(velocityMultiplier * drive.getMaxLinearSpeedMetersPerSec());
 
             // Apply rotation deadband
             double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);

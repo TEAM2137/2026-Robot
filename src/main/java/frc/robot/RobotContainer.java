@@ -232,8 +232,16 @@ public class RobotContainer {
                 intake.agitate(),
                 driverController.leftBumper()
             )
-        ));
-        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onFalse(launcher.stopLaunching().andThen(intake.retract()).andThen(intake.stopRollers()));
+        ).withName("Launch and Agitate"));
+
+        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onFalse(new SequentialCommandGroup(
+            launcher.stopLaunching(),
+            new ConditionalCommand(
+                Commands.none(),
+                intake.retract().andThen(intake.stopRollers()),
+                driverController.leftBumper()
+            )
+        ).withName("Stop Launching"));
 
         launcher.isLaunching().and(RobotModeTriggers.teleop()).whileTrue(new SequentialCommandGroup(
             // Commands.waitUntil(() -> launcher.getFlywheel().isWithinTarget(60)),
@@ -246,9 +254,12 @@ public class RobotContainer {
 
         launcher.isLaunching().and(RobotModeTriggers.teleop()).onFalse(new SequentialCommandGroup(
             indexer.stop(),
-            intake.retract(),
-            intake.stopRollers()
-        ).withName("Stop Launching"));
+            new ConditionalCommand(
+                Commands.none(),
+                intake.retract().andThen(intake.stopRollers()),
+                driverController.leftBumper()
+            )
+        ).withName("Stop Indexer"));
 
         driverController.povLeft().and(RobotModeTriggers.teleop()).whileTrue(launcher.getTurret().increaseTurretOffset());
         driverController.povRight().and(RobotModeTriggers.teleop()).whileTrue(launcher.getTurret().decreaseTurretOffset());
@@ -278,8 +289,15 @@ public class RobotContainer {
         operatorController.b().onTrue(intake.deploy().andThen(intake.setRollerVoltage(-12)));
         operatorController.b().onFalse(intake.retract().andThen(intake.setRollerVoltage(0)));
 
+        operatorController.povLeft().onTrue(launcher.getTurret().setVoltage(-0.5));
+        operatorController.povLeft().onFalse(launcher.getTurret().setVoltage(0));
+        operatorController.povRight().onTrue(launcher.getTurret().setVoltage(0.5));
+        operatorController.povRight().onFalse(launcher.getTurret().setVoltage(0));
+        operatorController.povDown().onTrue(launcher.getTurret().markAsUnzeroed());
+
         operatorController.start().onTrue(launcher.getTurret().resetPosition().ignoringDisable(true));
         operatorController.back().onTrue(launcher.getHood().resetPosition().ignoringDisable(true));
+        operatorController.leftBumper().onTrue(intake.resetPosition().ignoringDisable(true));
 
         Command dismountCommand = climber.dismountFromAutoClimb();
         dismountCommand.addRequirements(drive); // block drive default command while this command is active
@@ -337,4 +355,12 @@ public class RobotContainer {
     }
 
     public static RobotContainer getInstance() { return instance; }
+
+    public Command cancelEverything() {
+        return new SequentialCommandGroup(
+            this.intake.stopRollers().ignoringDisable(true),
+            this.indexer.stop().ignoringDisable(true),
+            this.launcher.stopLaunching().ignoringDisable(true)
+        );
+    }
 }

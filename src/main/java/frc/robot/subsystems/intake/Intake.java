@@ -84,4 +84,8 @@ public class Intake extends SubsystemBase {
         return Commands.waitSeconds(0.5).andThen(setRollerVoltage(0))
             .withName("Intake Retract Sequence");
     }
+
+    public Command resetPosition() {
+        return runOnce(() -> this.io.resetPosition());
+    }
 }

@@ -54,7 +54,7 @@ public class IntakeIOTalonFX implements IntakeIO {
             .withMotionMagicCruiseVelocity(Constants.cruiseVelocity)
             .withMotionMagicAcceleration(Constants.acceleration));
 
-        this.pivot.setPosition(0.0);
+        this.resetPosition();
     }
 
     @Override
@@ -72,6 +72,11 @@ public class IntakeIOTalonFX implements IntakeIO {
     public void setPosition(double position) {
         this.targetPositionRotations = position;
         this.pivot.setControl(new MotionMagicVoltage(position));
+    }
+
+    @Override
+    public void resetPosition() {
+        this.pivot.setPosition(0.0);
     }
 
     @Override
