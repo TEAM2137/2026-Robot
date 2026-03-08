@@ -1,7 +1,5 @@
 package frc.robot.subsystems.launcher.flywheel;
 
-import java.util.function.BooleanSupplier;
-
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -36,8 +34,8 @@ public class Flywheel {
         return !FieldConstants.noFireZone.contains(robotPos);
     }
 
-    public BooleanSupplier isWithinTarget(double range) {
-        return () -> this.io.isWithinTarget(range);
+    public boolean isWithinTarget(double range) {
+        return this.io.isWithinTarget(range);
     }
 
     public void periodic() {

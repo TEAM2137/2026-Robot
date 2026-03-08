@@ -225,13 +225,20 @@ public class RobotContainer {
 
     // configure teleop specific bindings here
     private void configureTeleopBindings() {
-        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onTrue(launcher.startLaunching().andThen(intake.agitate()));
+        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onTrue(new SequentialCommandGroup(
+            launcher.startLaunching(),
+            new ConditionalCommand(
+                Commands.none(),
+                intake.agitate(),
+                driverController.leftBumper()
+            )
+        ));
         driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onFalse(launcher.stopLaunching().andThen(intake.retract()).andThen(intake.stopRollers()));
 
-        launcher.isLaunching().and(RobotModeTriggers.teleop()).whileTrue(
-            // Commands.waitUntil(launcher.getFlywheel().isWithinTarget(60))
-            Commands.waitSeconds(0.2)
-            .andThen(new SequentialCommandGroup(
+        launcher.isLaunching().and(RobotModeTriggers.teleop()).whileTrue(new SequentialCommandGroup(
+            // Commands.waitUntil(() -> launcher.getFlywheel().isWithinTarget(60)),
+            Commands.waitSeconds(0.2),
+            new SequentialCommandGroup(
                 indexer.run().repeatedly().onlyWhile(launcher.getTurret().isAtTarget()),
                 indexer.stop()
             ).repeatedly()
@@ -247,9 +254,9 @@ public class RobotContainer {
         driverController.povRight().and(RobotModeTriggers.teleop()).whileTrue(launcher.getTurret().decreaseTurretOffset());
         driverController.povDown().and(RobotModeTriggers.teleop()).onTrue(launcher.getTurret().resetTurretOffset());
 
-        driverController.leftBumper().and(RobotModeTriggers.teleop()).whileTrue(new SequentialCommandGroup(
+        driverController.leftBumper().and(RobotModeTriggers.teleop()).onTrue(new SequentialCommandGroup(
             intake.deploy(),
-            intake.runRollers().repeatedly()
+            intake.runRollers()
         ).withName("Intake"));
 
         driverController.leftBumper().and(RobotModeTriggers.teleop()).onFalse(new ConditionalCommand(
