@@ -12,8 +12,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.autoalign.AutoAlignCommand;
-import frc.robot.subsystems.intake.Intake;
-
 
 public class AutoRoutines {
     /** starts on the top, drives into the neutral zone fuel, returns to shoot, repeats twice, and climbs */
@@ -108,7 +106,7 @@ public class AutoRoutines {
             .withTargetPose(new Pose2d(5.71598, 5.60704, new Rotation2d(-Math.PI / 4)))
             .withAccelerationLimit(3)
             .withSpeedLimit(5),
-            robot.intake.setRollerVoltage(Intake.Constants.rollerVoltage),
+            // robot.intake.setRollerVoltage(Intake.Constants.rollerVoltage),
             trajectories[3].cmd()
             )));
 
