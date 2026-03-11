@@ -333,8 +333,8 @@ public class RobotContainer {
         
         driverController.povUp().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualHoodAngle(5));
         driverController.povDown().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualHoodAngle(-5));
-        driverController.povRight().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualFlywheelRPM(400));
-        driverController.povLeft().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualFlywheelRPM(-400));
+        driverController.povRight().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualFlywheelRPM(150));
+        driverController.povLeft().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualFlywheelRPM(-150));
         driverController.a().and(TestMode.LOOKUP_TABLES.isActive()).onTrue(indexer.run());
         driverController.a().and(TestMode.LOOKUP_TABLES.isActive()).onFalse(indexer.stop());
     }
@@ -360,7 +360,8 @@ public class RobotContainer {
         return new SequentialCommandGroup(
             this.intake.stopRollers().ignoringDisable(true),
             this.indexer.stop().ignoringDisable(true),
-            this.launcher.stopLaunching().ignoringDisable(true)
+            this.launcher.stopLaunching().ignoringDisable(true),
+            this.launcher.setFlywheelVoltage(0).ignoringDisable(true)
         );
     }
 }

@@ -26,12 +26,11 @@ public class Turret {
 
         public static final double magnetPosition = 0.004150390625; // rotations
         
-        public static final double baseOffset = 7.5; // degrees
         public static final InterpolatingDoubleTreeMap offsetLookup = InterpolatingDoubleTreeMap.ofEntries(
-            Map.entry(-315.0, 0.0),
-            Map.entry(-135.0, 1.0),
-            Map.entry(45.0, 0.0),
-            Map.entry(225.0, 1.0)
+            Map.entry(-315.0, -7.5),
+            Map.entry(-135.0, 2.0),
+            Map.entry(45.0, -6.0),
+            Map.entry(225.0, 4.0)
         );
     }
 
@@ -72,7 +71,7 @@ public class Turret {
         Rotation2d target = angle.unaryMinus().plus(Rotation2d.kCW_90deg)
             .plus(Rotation2d.fromDegrees(manualOffset));
         
-        double offsetDegrees = Constants.baseOffset * Constants.offsetLookup.get(target.getDegrees());
+        double offsetDegrees = Constants.offsetLookup.get(target.getDegrees());
         Logger.recordOutput("Launcher/Turret/AimOffsetDegrees", offsetDegrees);
         target = target.plus(Rotation2d.fromDegrees(offsetDegrees));
 
