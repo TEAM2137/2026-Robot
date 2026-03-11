@@ -111,7 +111,7 @@ public interface ShotCalculator {
         // if (!SmartDashboard.containsKey("SOTFOffset")) SmartDashboard.putNumber("SOTFOffset", 0);
         // double offsetScalar = SmartDashboard.getNumber("SOTFOffset", 0);
         
-        Translation2d newTarget = target.plus(robot.drive.getLinearSpeedsVector().unaryMinus().times(timeOfFlight));
+        Translation2d newTarget = target.minus(robot.drive.getLinearSpeedsVector().times(timeOfFlight));
 
         double dst = newTarget.getDistance(turretPos);
         double dx = newTarget.getX() - turretPos.getX();
