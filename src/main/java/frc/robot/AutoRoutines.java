@@ -177,7 +177,7 @@ public class AutoRoutines {
         auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[0].cmd()));
         trajectories[0].done().onTrue(trajectories[1].cmd());
 
-        trajectories[1].atTimeBeforeEnd(0.4).onTrue(new SequentialCommandGroup(
+        trajectories[1].atTimeBeforeEnd(0.5).onTrue(new SequentialCommandGroup(
             robot.intake.deploy(),
             robot.intake.runRollers()
         ));
@@ -200,7 +200,7 @@ public class AutoRoutines {
         trajectories[5].done().onTrue(trajectories[6].cmd());
 
         trajectories[6].done().onTrue(new SequentialCommandGroup(
-            Commands.waitSeconds(1),
+            Commands.waitSeconds(3.0),
             robot.intake.agitate()
         ));
 
@@ -209,8 +209,8 @@ public class AutoRoutines {
 
     /** register all the autos defined above */
     public static void registerAutos(AutoFactory factory, AutoRegistry autos) {
-        autos.add("Outpost", "auto", 6, false, AutoRoutines::outpostAuto);
-        autos.add("Depot", "depotTest", 7, false, AutoRoutines::depotTest);
+        autos.add("Outpost", "outpost", 6, false, AutoRoutines::outpostAuto);
+        autos.add("Depot", "depot", 7, false, AutoRoutines::depotTest);
         // autos.add("Two Cycle", "twoCycle", 5, false, AutoRoutines::twoCycleAuto);
         // autos.add("Questionable", "questionable", 6, AutoRoutines::questionableAuto);
         // autos.add("Second Cycle Near", "secondCycleNear", 9, AutoRoutines::secondCycleNear);
