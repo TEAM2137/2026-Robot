@@ -49,12 +49,12 @@ public interface ShotCalculator {
         Map.entry(0.0, 26.0)
     );
 
-    static final InterpolatingDoubleTreeMap SOTF_OFFSET_SCALAR = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(1.5, 5.0),
-        Map.entry(2.5, 6.0),
-        Map.entry(3.0, 6.8),
-        Map.entry(3.5, 7.6),
-        Map.entry(4.0, 8.0)
+    static final InterpolatingDoubleTreeMap TOF_LOOKUP = InterpolatingDoubleTreeMap.ofEntries(
+        Map.entry(1.5, 0.976),
+        Map.entry(2.5, 1.172),
+        Map.entry(3.0, 1.328),
+        Map.entry(3.5, 1.484),
+        Map.entry(4.0, 1.563)
     );
 
     static final ShotCalculator HUB = robot -> {
@@ -107,13 +107,11 @@ public interface ShotCalculator {
     static ShotParameters simpleSOTFShot(Translation2d target, RobotContainer robot, InterpolatingDoubleTreeMap flywheelRpm, InterpolatingDoubleTreeMap hoodAngle) {
         Translation2d turretPos = robot.launcher.getTurret().getFieldSpacePose(robot).getTranslation();
 
-        double offsetScalar = SOTF_OFFSET_SCALAR.get(target.getDistance(turretPos));
+        double timeOfFlight = TOF_LOOKUP.get(target.getDistance(turretPos));
         // if (!SmartDashboard.containsKey("SOTFOffset")) SmartDashboard.putNumber("SOTFOffset", 0);
         // double offsetScalar = SmartDashboard.getNumber("SOTFOffset", 0);
         
-        Translation2d newTarget = target.plus(robot.drive.getLinearSpeedsVector()
-            .div(robot.drive.getMaxLinearSpeedMetersPerSec())
-            .unaryMinus().times(offsetScalar));
+        Translation2d newTarget = target.plus(robot.drive.getLinearSpeedsVector().unaryMinus().times(timeOfFlight));
 
         double dst = newTarget.getDistance(turretPos);
         double dx = newTarget.getX() - turretPos.getX();
