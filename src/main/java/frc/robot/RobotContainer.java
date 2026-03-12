@@ -201,7 +201,7 @@ public class RobotContainer {
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureControllerBindings() {
-        BooleanSupplier slowMode = () -> driverController.getLeftTriggerAxis() > 0.25;
+        BooleanSupplier slowMode = () -> driverController.getRightTriggerAxis() > 0.25;
 
         // Default command, normal field-relative drive
         drive.setDefaultCommand(DriveCommands.joystickDrive(drive, joystickSupplier,
@@ -283,7 +283,7 @@ public class RobotContainer {
             intake.stopRollers()
         ).withName("Retract Intake");
 
-        driverController.x().and(RobotModeTriggers.teleop()).onTrue(retractIntake);
+        driverController.leftTrigger().and(RobotModeTriggers.teleop()).onTrue(retractIntake);
         RobotModeTriggers.disabled().onFalse(retractIntake);
 
         operatorController.b().onTrue(intake.deploy().andThen(intake.setRollerVoltage(-12)));
