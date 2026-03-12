@@ -244,6 +244,10 @@ public class Drive extends SubsystemBase {
         return runOnce(this::stop);
     }
 
+    public Command xLockCommand() {
+        return run(() -> this.xLock());
+    }
+
     /**
      * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
      * return to their normal orientations the next time a nonzero velocity is requested.

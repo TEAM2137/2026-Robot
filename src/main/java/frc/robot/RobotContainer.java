@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climber.Climber;
@@ -260,6 +261,13 @@ public class RobotContainer {
                 driverController.leftBumper()
             )
         ).withName("Stop Indexer"));
+
+        Trigger xLock = launcher.isLaunching()
+            .and(() -> this.joystickSupplier.get().getNorm() < DriveCommands.DEADBAND)
+            .and(RobotModeTriggers.teleop())
+            .debounce(0.5);
+
+        xLock.whileTrue(drive.xLockCommand().withName("X-Lock"));
 
         driverController.povLeft().and(RobotModeTriggers.teleop()).whileTrue(launcher.getTurret().increaseTurretOffset());
         driverController.povRight().and(RobotModeTriggers.teleop()).whileTrue(launcher.getTurret().decreaseTurretOffset());
