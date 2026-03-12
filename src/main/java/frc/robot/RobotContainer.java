@@ -264,8 +264,9 @@ public class RobotContainer {
 
         Trigger xLock = launcher.isLaunching()
             .and(() -> this.joystickSupplier.get().getNorm() < DriveCommands.DEADBAND)
+            .and(() -> Math.abs(this.driverController.getRightX() * 0.75) < DriveCommands.DEADBAND)
             .and(RobotModeTriggers.teleop())
-            .debounce(0.5);
+            .debounce(0.25);
 
         xLock.whileTrue(drive.xLockCommand().withName("X-Lock"));
 

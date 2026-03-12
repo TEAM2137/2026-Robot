@@ -166,7 +166,7 @@ public class AutoRoutines {
         ));
 
         trajectories[5].done().onTrue(new SequentialCommandGroup(
-            Commands.waitSeconds(3.0),
+            Commands.waitSeconds(4.0),
             robot.intake.agitate()
         ));
 

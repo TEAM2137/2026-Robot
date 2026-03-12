@@ -144,9 +144,9 @@ public class DriveCommands {
 
         // Limit drivetrain if SOTF is active
         if (RobotContainer.getInstance().launcher.shouldLimitDrive()) {
-            vx = Math.min(vx, drive.getMaxLinearSpeedMetersPerSec() * 0.3);
-            vy = Math.min(vy, drive.getMaxLinearSpeedMetersPerSec() * 0.3);
-            omega = Math.min(omega, drive.getMaxAngularSpeedRadPerSec() * 0.5);
+            vx = MathUtil.clamp(vx, -drive.getMaxLinearSpeedMetersPerSec() * 0.3, drive.getMaxLinearSpeedMetersPerSec() * 0.3);
+            vy = MathUtil.clamp(vy, -drive.getMaxLinearSpeedMetersPerSec() * 0.3, drive.getMaxLinearSpeedMetersPerSec() * 0.3);
+            omega = MathUtil.clamp(omega, -drive.getMaxAngularSpeedRadPerSec() * 0.5, drive.getMaxAngularSpeedRadPerSec() * 0.5);
             maxAngularAccel *= 0.7;
         }
 
