@@ -18,8 +18,8 @@ import frc.robot.util.Utils;
 
 public class Turret {
     public static class Constants {
-        public static final double leftBound = -205;
-        public static final double rightBound = 205;
+        public static final double leftBound = -230;
+        public static final double rightBound = 180;
 
         public static final double offsetX = 6.375; // inches, positive towards robot right
         public static final double offsetY = -5.875; // inches, positive towards robot front

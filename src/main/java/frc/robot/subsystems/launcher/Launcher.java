@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.hal.AllianceStationID;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -91,8 +92,8 @@ public class Launcher extends SubsystemBase {
 
         if (isTest && testMode == TestMode.TURRET) {
             this.turret.setAngleFieldRelative(Rotation2d.fromRadians(Math.atan2(
-                robot.operatorController.getRightY(),
-                -robot.operatorController.getRightX()
+                MathUtil.applyDeadband(-robot.operatorController.getRightY(), 0.35),
+                MathUtil.applyDeadband(robot.operatorController.getRightX(), 0.35)
             )));
             this.hood.setAngle(0);
             this.flywheel.setRPM(0);
