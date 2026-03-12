@@ -18,8 +18,8 @@ import frc.robot.util.Utils;
 
 public class Turret {
     public static class Constants {
-        public static final double leftBound = -230;
-        public static final double rightBound = 180;
+        public static final double cwBound = 230;
+        public static final double ccwBound = 180;
 
         public static final double offsetX = 6.375; // inches, positive towards robot right
         public static final double offsetY = -5.875; // inches, positive towards robot front
@@ -81,11 +81,11 @@ public class Turret {
 
         double difference = target.getDegrees() - current.getDegrees();
         double output = target.getDegrees();
-        if (difference > 180 && (target.getDegrees() - 360) > Constants.leftBound) {
+        if (difference > 180 && (target.getDegrees() - 360) > -Constants.cwBound) {
             output -= 360;
             Logger.recordOutput("Launcher/Turret/AdjustedTarget", target.getDegrees() - 360);
         }
-        else if (difference < -180 && (target.getDegrees() + 360) < Constants.rightBound) {
+        else if (difference < -180 && (target.getDegrees() + 360) < Constants.ccwBound) {
             output += 360;
             Logger.recordOutput("Launcher/Turret/AdjustedTarget", target.getDegrees() + 360);
         }
