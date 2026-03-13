@@ -21,7 +21,6 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberIO;
-import frc.robot.subsystems.climber.ClimberIOTalonFX;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -113,7 +112,7 @@ public class RobotContainer {
                 new FlywheelIOTalonFX()
             );
 
-            climber = new Climber(new ClimberIOTalonFX());
+            climber = new Climber(new ClimberIO() {});
 
             break;
 
