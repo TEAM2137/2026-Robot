@@ -3,7 +3,6 @@ package frc.robot;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -146,7 +145,7 @@ public class Autonomous {
         try {
             if (!file.exists()) file.createNewFile();
         }
-        catch (IOException e) { e.printStackTrace(); }
+        catch (Exception e) { e.printStackTrace(); }
 
         // create score list and add current setup score
         ArrayList<SetupScore> setupScores = new ArrayList<>();
@@ -156,16 +155,16 @@ public class Autonomous {
         try (FileReader reader = new FileReader(file)) {
             Type listType = new TypeToken<List<SetupScore>>(){}.getType();
             List<SetupScore> previousScores = gson.fromJson(reader, listType);
-            setupScores.addAll(previousScores);
+            if (previousScores != null && setupScores != null) setupScores.addAll(previousScores);
         }
-        catch (IOException e) { e.printStackTrace(); }
+        catch (Exception e) { e.printStackTrace(); }
 
         // write the accumulated list to the file
         try (Writer writer = new FileWriter(file)) {
             gson.toJson(setupScores, writer);
             System.out.println("Successfully wrote scores list to " + file.getAbsolutePath());
         }
-        catch (IOException e) { e.printStackTrace(); }
+        catch (Exception e) { e.printStackTrace(); }
 
         // calculate average GPA based on previous scores
         double average = setupScores.stream()
