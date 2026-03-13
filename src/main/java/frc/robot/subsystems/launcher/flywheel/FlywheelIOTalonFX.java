@@ -7,6 +7,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -30,11 +31,14 @@ public class FlywheelIOTalonFX implements FlywheelIO {
     public FlywheelIOTalonFX() {
         this.leader = new TalonFX(Constants.leaderId, "turret");
         this.leader.getConfigurator().apply(new MotorOutputConfigs()
-            .withNeutralMode(NeutralModeValue.Coast));
+            .withNeutralMode(NeutralModeValue.Coast)
+            .withInverted(InvertedValue.Clockwise_Positive));
         this.leader.getConfigurator().apply(new Slot0Configs()
             .withKP(Constants.kP).withKS(Constants.kS).withKV(Constants.kV));
 
         this.follower = new TalonFX(Constants.followerId, "turret");
+        this.follower.getConfigurator().apply(new MotorOutputConfigs()
+            .withInverted(InvertedValue.Clockwise_Positive));
         
         this.follower.setControl(new Follower(this.leader.getDeviceID(), MotorAlignmentValue.Opposed));
     }
