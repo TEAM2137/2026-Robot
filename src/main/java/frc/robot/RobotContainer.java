@@ -298,6 +298,11 @@ public class RobotContainer {
         operatorController.b().onTrue(intake.deploy().andThen(intake.setRollerVoltage(-12)));
         operatorController.b().onFalse(intake.retract().andThen(intake.setRollerVoltage(0)));
 
+        operatorController.rightTrigger().whileTrue(Commands.runEnd(
+            () -> launcher.getHood().setVoltage(-3),
+            () -> launcher.getHood().resetPositionRaw()
+        ));
+
         operatorController.povLeft().onTrue(launcher.getTurret().setVoltage(-0.5));
         operatorController.povLeft().onFalse(launcher.getTurret().setVoltage(0));
         operatorController.povRight().onTrue(launcher.getTurret().setVoltage(0.5));

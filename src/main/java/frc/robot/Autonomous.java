@@ -123,7 +123,6 @@ public class Autonomous {
         
         // only log the score if we are in a real match
         boolean isOfficial = DriverStation.isFMSAttached()
-                && DriverStation.getMatchType() != MatchType.Practice
                 && DriverStation.getMatchType() != MatchType.None;
         if (!isOfficial) return;
 
@@ -139,7 +138,7 @@ public class Autonomous {
         String eventID = DriverStation.getEventName();
 
         // create gson instance
-        String filePath = "scores.json";
+        String filePath = DriverStation.getMatchType() == MatchType.Practice ? "scores-prac.json" : "scores.json";
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         // create score list and add current setup score
