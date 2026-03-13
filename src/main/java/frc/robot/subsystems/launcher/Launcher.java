@@ -115,7 +115,7 @@ public class Launcher extends SubsystemBase {
             this.turret.setAngleFieldRelative(params.turretAngle());
             if (!hoodManual) this.hood.setAngle(params.hoodAngle());
             if (this.isLaunching) this.flywheel.setRPM(params.flywheelRpm());
-            else this.flywheel.setRPM(Constants.IDLE_RPM);
+            else this.flywheel.setVoltage(0);
         }
 
         turret.periodic();

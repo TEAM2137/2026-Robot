@@ -2,6 +2,7 @@ package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.RPM;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -35,6 +36,8 @@ public class IntakeIOTalonFX implements IntakeIO {
     protected double rollerTargetVelocity;
 
     public IntakeIOTalonFX() {
+        // roller configs
+
         this.rollers = new TalonFX(Constants.rollersId);
         this.rollers.getConfigurator().apply(new MotorOutputConfigs()
             .withNeutralMode(NeutralModeValue.Brake)
@@ -42,6 +45,12 @@ public class IntakeIOTalonFX implements IntakeIO {
 
         this.rollers.getConfigurator().apply(new Slot0Configs()
             .withKP(Constants.rollerKP).withKV(Constants.rollerKV));
+        
+        this.rollers.getConfigurator().apply(new CurrentLimitsConfigs()
+            .withSupplyCurrentLimit(50)
+            .withSupplyCurrentLimitEnable(true));
+
+        // pivot configs
 
         this.pivot = new TalonFX(Constants.pivotId);
         this.pivot.getConfigurator().apply(new FeedbackConfigs()
@@ -53,7 +62,12 @@ public class IntakeIOTalonFX implements IntakeIO {
         this.pivot.getConfigurator().apply(new MotionMagicConfigs()
             .withMotionMagicCruiseVelocity(Constants.cruiseVelocity)
             .withMotionMagicAcceleration(Constants.acceleration));
+        
+        this.pivot.getConfigurator().apply(new CurrentLimitsConfigs()
+            .withSupplyCurrentLimit(25)
+            .withSupplyCurrentLimitEnable(true));
 
+        // reset encoder on startup
         this.resetPosition();
     }
 
