@@ -30,6 +30,10 @@ import frc.robot.util.TestMode;
 import frc.robot.util.Utils;
 
 public class Launcher extends SubsystemBase {
+    public static class Constants {
+        public static final double IDLE_RPM = 1600;
+    }
+
     private final Turret turret;
     private final Hood hood;
     private final Flywheel flywheel;
@@ -111,6 +115,7 @@ public class Launcher extends SubsystemBase {
             this.turret.setAngleFieldRelative(params.turretAngle());
             if (!hoodManual) this.hood.setAngle(params.hoodAngle());
             if (this.isLaunching) this.flywheel.setRPM(params.flywheelRpm());
+            else this.flywheel.setRPM(Constants.IDLE_RPM);
         }
 
         turret.periodic();
