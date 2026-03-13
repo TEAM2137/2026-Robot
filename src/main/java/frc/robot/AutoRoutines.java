@@ -145,7 +145,7 @@ public class AutoRoutines {
         auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[0].cmd()));
         trajectories[0].done().onTrue(trajectories[1].cmd());
 
-        trajectories[1].atTimeBeforeEnd(0.5).onTrue(new SequentialCommandGroup(
+        trajectories[1].atTimeBeforeEnd(0.7).onTrue(new SequentialCommandGroup(
             robot.intake.deploy(),
             robot.intake.runRollers()
         ));
@@ -166,8 +166,8 @@ public class AutoRoutines {
         ));
 
         trajectories[5].done().onTrue(new SequentialCommandGroup(
-            Commands.waitSeconds(4.5),
-            robot.intake.agitate(0.7)
+            Commands.waitSeconds(4.6),
+            robot.intake.agitate(0.85)
         ));
 
         return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
@@ -177,7 +177,7 @@ public class AutoRoutines {
         auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[0].cmd()));
         trajectories[0].done().onTrue(trajectories[1].cmd());
 
-        trajectories[1].atTimeBeforeEnd(0.5).onTrue(new SequentialCommandGroup(
+        trajectories[1].atTimeBeforeEnd(0.7).onTrue(new SequentialCommandGroup(
             robot.intake.deploy(),
             robot.intake.runRollers()
         ));
@@ -216,7 +216,7 @@ public class AutoRoutines {
         auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[0].cmd()));
         trajectories[0].done().onTrue(trajectories[1].cmd());
 
-        trajectories[1].atTimeBeforeEnd(0.5).onTrue(new SequentialCommandGroup(
+        trajectories[1].atTimeBeforeEnd(0.7).onTrue(new SequentialCommandGroup(
             robot.intake.deploy(),
             robot.intake.runRollers()
         ));
