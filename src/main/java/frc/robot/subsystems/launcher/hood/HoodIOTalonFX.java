@@ -50,6 +50,12 @@ public class HoodIOTalonFX implements HoodIO {
     }
 
     @Override
+    public void setVoltage(double volts) {
+        this.targetAngleDegrees = 0;
+        this.motor.setVoltage(volts);
+    }
+
+    @Override
     public void resetPosition() {
         this.motor.setPosition(0.0);
     }
