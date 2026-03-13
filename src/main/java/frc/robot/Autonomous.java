@@ -1,5 +1,6 @@
 package frc.robot;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -138,15 +139,21 @@ public class Autonomous {
         String eventID = DriverStation.getEventName();
 
         // create gson instance
-        String filePath = DriverStation.getMatchType() == MatchType.Practice ? "scores-prac.json" : "scores.json";
+        String fileName = DriverStation.getMatchType() == MatchType.Practice ? "scores-prac.json" : "scores.json";
+        File file = new File("/home/lvuser/" + fileName);
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+        try {
+            if (!file.exists()) file.createNewFile();
+        }
+        catch (IOException e) { e.printStackTrace(); }
 
         // create score list and add current setup score
         ArrayList<SetupScore> setupScores = new ArrayList<>();
         setupScores.add(new SetupScore(letterGrade, score, gpa, matchNumber, matchType, eventID));
 
         // read previous scores and add them to the list
-        try (FileReader reader = new FileReader(filePath)) {
+        try (FileReader reader = new FileReader(file)) {
             Type listType = new TypeToken<List<SetupScore>>(){}.getType();
             List<SetupScore> previousScores = gson.fromJson(reader, listType);
             setupScores.addAll(previousScores);
@@ -154,9 +161,9 @@ public class Autonomous {
         catch (IOException e) { e.printStackTrace(); }
 
         // write the accumulated list to the file
-        try (Writer writer = new FileWriter(filePath)) {
+        try (Writer writer = new FileWriter(file)) {
             gson.toJson(setupScores, writer);
-            System.out.println("Successfully wrote scores list to " + filePath);
+            System.out.println("Successfully wrote scores list to " + file.getAbsolutePath());
         }
         catch (IOException e) { e.printStackTrace(); }
 
