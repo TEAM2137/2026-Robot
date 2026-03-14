@@ -167,7 +167,7 @@ public class AutoRoutines {
 
         trajectories[5].done().onTrue(new SequentialCommandGroup(
             Commands.waitSeconds(4.6),
-            robot.intake.agitate(0.85)
+            robot.intake.agitate(0.95)
         ));
 
         return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
@@ -206,7 +206,7 @@ public class AutoRoutines {
 
         trajectories[7].done().onTrue(new SequentialCommandGroup(
             Commands.waitSeconds(1.8),
-            robot.intake.agitate(0.85)
+            robot.intake.agitate(0.95)
         ));
 
         return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
@@ -238,7 +238,7 @@ public class AutoRoutines {
 
         trajectories[5].done().onTrue(new SequentialCommandGroup(
             Commands.waitSeconds(2.5),
-            robot.intake.agitate(0.75).withTimeout(4),
+            robot.intake.agitate(0.85).withTimeout(4),
             robot.intake.retract(),
             robot.intake.stopRollers(),
             trajectories[6].cmd().asProxy()

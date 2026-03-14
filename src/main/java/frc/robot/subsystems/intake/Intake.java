@@ -59,7 +59,7 @@ public class Intake extends SubsystemBase {
     }
 
     public Command agitate() {
-        return this.agitate(0.43);
+        return this.agitate(0.85);
     }
 
     public Command agitate(double deployPercent) {
