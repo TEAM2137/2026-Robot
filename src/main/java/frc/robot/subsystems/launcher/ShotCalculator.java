@@ -15,16 +15,16 @@ import frc.robot.util.FieldConstants;
 @FunctionalInterface
 public interface ShotCalculator {
     static final InterpolatingDoubleTreeMap FLYWHEEL_RPM_HUB = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(1.3165, 1730.0),
-        Map.entry(1.5658, 1775.0),
-        Map.entry(2.0083, 1830.0),
-        Map.entry(2.6245, 1886.0),
-        Map.entry(3.0319, 1948.0),
-        Map.entry(3.4845, 2025.0),
-        Map.entry(3.8919, 3005.0),
-        Map.entry(4.3134, 2150.0),
-        Map.entry(5.0096, 2245.0),
-        Map.entry(5.7282, 2370.0)
+        Map.entry(1.3165, 1750.0),
+        Map.entry(1.5658, 1795.0),
+        Map.entry(2.0083, 1850.0),
+        Map.entry(2.6245, 1906.0),
+        Map.entry(3.0319, 1968.0),
+        Map.entry(3.4845, 2045.0),
+        Map.entry(3.8919, 2115.0),
+        Map.entry(4.3134, 2168.0),
+        Map.entry(5.0096, 2260.0),
+        Map.entry(5.7282, 2385.0)
     );
     static final InterpolatingDoubleTreeMap HOOD_ANGLE_HUB = InterpolatingDoubleTreeMap.ofEntries(
         Map.entry(1.3165, 4.9),
@@ -40,10 +40,10 @@ public interface ShotCalculator {
     );
 
     static final InterpolatingDoubleTreeMap FLYWHEEL_RPM_PASSING = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(4.5000, 1851.0),
-        Map.entry(6.9200, 2197.0),
-        Map.entry(8.7000, 2440.0),
-        Map.entry(12.0000, 2760.0)
+        Map.entry(4.5000, 1861.0),
+        Map.entry(6.9200, 2207.0),
+        Map.entry(8.7000, 2450.0),
+        Map.entry(12.0000, 2770.0)
     );
     static final InterpolatingDoubleTreeMap HOOD_ANGLE_PASSING = InterpolatingDoubleTreeMap.ofEntries(
         Map.entry(0.0, 22.0)
