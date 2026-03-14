@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -71,8 +72,12 @@ public class Turret {
         Rotation2d target = angle.unaryMinus().plus(Rotation2d.kCW_90deg)
             .plus(Rotation2d.fromDegrees(manualOffset));
         
-        double offsetDegrees = Constants.offsetLookup.get(target.getDegrees());
+        // double offsetDegrees = Constants.offsetLookup.get(target.getDegrees());
+        if (!SmartDashboard.containsKey("AimOffset")) SmartDashboard.putNumber("AimOffset", 0.0);
+        double offsetDegrees = SmartDashboard.getNumber("AimOffset", 0.0);
+        
         Logger.recordOutput("Launcher/Turret/AimOffsetDegrees", offsetDegrees);
+        Logger.recordOutput("Launcher/Turret/AimOffsetInput", target.getDegrees());
         target = target.plus(Rotation2d.fromDegrees(offsetDegrees));
 
         Rotation2d current = Rotation2d.fromDegrees(io.getAngle());

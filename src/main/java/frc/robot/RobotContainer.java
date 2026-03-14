@@ -302,6 +302,11 @@ public class RobotContainer {
             () -> launcher.getHood().resetPositionRaw()
         ));
 
+        operatorController.leftTrigger().whileTrue(new SequentialCommandGroup(
+            intake.setPivotVoltage(-3),
+            Commands.runEnd(() -> {}, () -> intake.resetPosition().schedule())
+        ));
+
         operatorController.povLeft().onTrue(launcher.getTurret().setVoltage(-0.5));
         operatorController.povLeft().onFalse(launcher.getTurret().setVoltage(0));
         operatorController.povRight().onTrue(launcher.getTurret().setVoltage(0.5));

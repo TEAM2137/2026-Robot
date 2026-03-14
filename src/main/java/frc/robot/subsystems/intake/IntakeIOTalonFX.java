@@ -89,6 +89,12 @@ public class IntakeIOTalonFX implements IntakeIO {
     }
 
     @Override
+    public void setPivotVoltage(double volts) {
+        this.targetPositionRotations = 0.0;
+        this.pivot.setVoltage(volts);
+    }
+
+    @Override
     public void resetPosition() {
         this.pivot.setPosition(0.0);
     }

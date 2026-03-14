@@ -46,6 +46,10 @@ public class Intake extends SubsystemBase {
         return runOnce(() -> io.setRollerVoltage(volts));
     }
 
+    public Command setPivotVoltage(double volts) {
+        return runOnce(() -> io.setPivotVoltage(volts));
+    }
+
     public Command runRollers() {
         return runOnce(() -> io.setRollerRPM(Constants.rollerRPM));
     }

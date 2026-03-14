@@ -11,7 +11,7 @@ public interface ClimberIO {
         public boolean upperHookState;
         public boolean lowerHookState;
 
-        public boolean connected;
+        public boolean connected = true;
     }
 
     default void setPosition(double target) {}
