@@ -167,11 +167,14 @@ public class Autonomous {
         catch (Exception e) { e.printStackTrace(); }
 
         // calculate average GPA based on previous scores
-        double average = setupScores.stream()
-                .filter(ss -> ss.matchType == MatchType.Elimination)
-                .mapToDouble(SetupScore::gpa)
-                .average().orElse(0);
-        Logger.recordOutput("Autonomous/Setup/AverageGPA", average);
+        try {
+            double average = setupScores.stream()
+                    .filter(ss -> ss.matchType == MatchType.Elimination)
+                    .mapToDouble(SetupScore::gpa)
+                    .average().orElse(0);
+            Logger.recordOutput("Autonomous/Setup/AverageGPA", average);
+        }
+        catch (Exception e) { e.printStackTrace(); }
     }
 
     private static double getRawSetupScore(Pose2d pose, Pose2d targetPose) {
