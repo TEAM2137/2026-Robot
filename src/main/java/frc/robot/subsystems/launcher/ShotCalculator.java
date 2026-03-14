@@ -15,16 +15,16 @@ import frc.robot.util.FieldConstants;
 @FunctionalInterface
 public interface ShotCalculator {
     static final InterpolatingDoubleTreeMap FLYWHEEL_RPM_HUB = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(1.3165, 1750.0),
-        Map.entry(1.5658, 1795.0),
-        Map.entry(2.0083, 1850.0),
-        Map.entry(2.6245, 1906.0),
-        Map.entry(3.0319, 1968.0),
-        Map.entry(3.4845, 2045.0),
-        Map.entry(3.8919, 2115.0),
-        Map.entry(4.3134, 2168.0),
-        Map.entry(5.0096, 2260.0),
-        Map.entry(5.7282, 2385.0)
+        Map.entry(1.3165, 1765.0),
+        Map.entry(1.5658, 1810.0),
+        Map.entry(2.0083, 1865.0),
+        Map.entry(2.6245, 1921.0),
+        Map.entry(3.0319, 1983.0),
+        Map.entry(3.4845, 2060.0),
+        Map.entry(3.8919, 2130.0),
+        Map.entry(4.3134, 2183.0),
+        Map.entry(5.0096, 2275.0),
+        Map.entry(5.7282, 2400.0)
     );
     static final InterpolatingDoubleTreeMap HOOD_ANGLE_HUB = InterpolatingDoubleTreeMap.ofEntries(
         Map.entry(1.3165, 4.9),
