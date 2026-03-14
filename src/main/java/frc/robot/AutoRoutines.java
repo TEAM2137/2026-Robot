@@ -206,7 +206,7 @@ public class AutoRoutines {
 
         trajectories[7].done().onTrue(new SequentialCommandGroup(
             Commands.waitSeconds(1.8),
-            robot.intake.agitate(0.8)
+            robot.intake.agitate(0.95)
         ));
 
         return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
