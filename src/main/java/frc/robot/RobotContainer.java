@@ -245,7 +245,7 @@ public class RobotContainer {
 
         launcher.isLaunching().and(RobotModeTriggers.teleop()).whileTrue(new SequentialCommandGroup(
             // Commands.waitUntil(() -> launcher.getFlywheel().isWithinTarget(60)),
-            Commands.waitSeconds(0.2),
+            Commands.waitSeconds(0.4),
             new SequentialCommandGroup(
                 indexer.run().repeatedly().onlyWhile(launcher.getTurret().isAtTarget()),
                 indexer.stop()
