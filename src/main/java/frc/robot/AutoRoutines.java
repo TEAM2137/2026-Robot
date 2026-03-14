@@ -290,7 +290,7 @@ public class AutoRoutines {
     public static void registerAutos(AutoFactory factory, AutoRegistry autos) {
         autos.add("Outpost", "outpost", 6, false, AutoRoutines::outpostAuto);
         autos.add("Depot", "depot", 8, false, AutoRoutines::depotAuto);
-        autos.add("Right Cycle", "cycleRight", 7, false, AutoRoutines::rightSideCycleAuto);
+        // autos.add("Right Cycle", "cycleRight", 7, false, AutoRoutines::rightSideCycleAuto);
         autos.add("Delayed Middle", "delayMid", 6, false, AutoRoutines::delayedMidAuto);
         // autos.add("Two Cycle", "twoCycle", 5, false, AutoRoutines::twoCycleAuto);
         // autos.add("Questionable", "questionable", 6, AutoRoutines::questionableAuto);
