@@ -46,6 +46,10 @@ public class Intake extends SubsystemBase {
         return runOnce(() -> io.setRollerVoltage(volts));
     }
 
+    public Command setPivotVoltage(double volts) {
+        return runOnce(() -> io.setPivotVoltage(volts));
+    }
+
     public Command runRollers() {
         return runOnce(() -> io.setRollerRPM(Constants.rollerRPM));
     }
@@ -55,9 +59,13 @@ public class Intake extends SubsystemBase {
     }
 
     public Command agitate() {
+        return this.agitate(0.7);
+    }
+
+    public Command agitate(double deployPercent) {
         return this.runRollers()
             .andThen(new SequentialCommandGroup(
-                runOnce(() -> io.setPosition(Constants.halfwayPosition)),
+                runOnce(() -> io.setPosition(Constants.deployPosition * deployPercent)),
                 Commands.waitSeconds(0.4),
                 runOnce(() -> io.setPosition(Constants.homePosition)),
                 Commands.waitSeconds(0.4)

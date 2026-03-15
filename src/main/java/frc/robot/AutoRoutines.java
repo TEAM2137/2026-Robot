@@ -145,7 +145,7 @@ public class AutoRoutines {
         auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[0].cmd()));
         trajectories[0].done().onTrue(trajectories[1].cmd());
 
-        trajectories[1].atTimeBeforeEnd(0.5).onTrue(new SequentialCommandGroup(
+        trajectories[1].atTimeBeforeEnd(0.7).onTrue(new SequentialCommandGroup(
             robot.intake.deploy(),
             robot.intake.runRollers()
         ));
@@ -166,18 +166,18 @@ public class AutoRoutines {
         ));
 
         trajectories[5].done().onTrue(new SequentialCommandGroup(
-            Commands.waitSeconds(3.0),
-            robot.intake.agitate()
+            Commands.waitSeconds(4.6),
+            robot.intake.agitate(0.8)
         ));
 
         return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
     }
 
-    public static UnregisteredAuto depotTest(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
+    public static UnregisteredAuto depotAuto(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
         auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[0].cmd()));
         trajectories[0].done().onTrue(trajectories[1].cmd());
 
-        trajectories[1].atTimeBeforeEnd(0.5).onTrue(new SequentialCommandGroup(
+        trajectories[1].atTimeBeforeEnd(0.7).onTrue(new SequentialCommandGroup(
             robot.intake.deploy(),
             robot.intake.runRollers()
         ));
@@ -200,6 +200,85 @@ public class AutoRoutines {
         trajectories[5].done().onTrue(trajectories[6].cmd());
 
         trajectories[6].done().onTrue(new SequentialCommandGroup(
+            Commands.waitSeconds(2.5),
+            trajectories[7].cmd().asProxy()
+        ));
+
+        trajectories[7].done().onTrue(new SequentialCommandGroup(
+            Commands.waitSeconds(1.8),
+            robot.intake.agitate(0.95)
+        ));
+
+        return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
+    }
+
+    public static UnregisteredAuto rightSideCycleAuto(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
+        auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[0].cmd()));
+        trajectories[0].done().onTrue(trajectories[1].cmd());
+
+        trajectories[1].atTimeBeforeEnd(0.7).onTrue(new SequentialCommandGroup(
+            robot.intake.deploy(),
+            robot.intake.runRollers()
+        ));
+        trajectories[1].done().onTrue(trajectories[2].cmd());
+
+        trajectories[2].done().onTrue(trajectories[3].cmd());
+        trajectories[3].done().onTrue(trajectories[4].cmd());
+        trajectories[4].done().onTrue(trajectories[5].cmd());
+
+        trajectories[5].atTimeBeforeEnd(0.6).onTrue(new SequentialCommandGroup(
+            robot.launcher.startLaunching(),
+            Commands.waitSeconds(0.2),
+            robot.intake.runRollers(),
+            new SequentialCommandGroup(
+                robot.indexer.run().repeatedly().onlyWhile(robot.launcher.getTurret().isAtTarget()),
+                robot.indexer.stop()
+            ).repeatedly()
+        ));
+
+        trajectories[5].done().onTrue(new SequentialCommandGroup(
+            Commands.waitSeconds(2.5),
+            robot.intake.agitate(0.8).withTimeout(4),
+            robot.intake.retract(),
+            robot.intake.stopRollers(),
+            trajectories[6].cmd().asProxy()
+        ));
+
+        trajectories[6].done().onTrue(trajectories[7].cmd());
+
+        trajectories[7].atTimeBeforeEnd(1.2).onTrue(new SequentialCommandGroup(
+            robot.intake.deploy(),
+            robot.intake.runRollers()
+        ));
+
+        return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
+    }
+
+    public static UnregisteredAuto delayedMidAuto(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
+        auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[0].cmd()));
+        trajectories[0].done().onTrue(trajectories[1].cmd());
+
+        trajectories[1].atTimeBeforeEnd(0.7).onTrue(new SequentialCommandGroup(
+            robot.intake.deploy(),
+            robot.intake.runRollers()
+        ));
+        trajectories[1].done().onTrue(trajectories[2].cmd());
+
+        trajectories[2].done().onTrue(trajectories[3].cmd());
+        trajectories[3].done().onTrue(trajectories[4].cmd());
+        trajectories[4].done().onTrue(trajectories[5].cmd());
+
+        trajectories[5].atTimeBeforeEnd(0.2).onTrue(new SequentialCommandGroup(
+            robot.launcher.startLaunching(),
+            Commands.waitSeconds(0.2),
+            robot.intake.runRollers(),
+            new SequentialCommandGroup(
+                robot.indexer.run().repeatedly().onlyWhile(robot.launcher.getTurret().isAtTarget()),
+                robot.indexer.stop()
+            ).repeatedly()
+        ));
+
+        trajectories[5].done().onTrue(new SequentialCommandGroup(
             Commands.waitSeconds(3.0),
             robot.intake.agitate()
         ));
@@ -210,7 +289,9 @@ public class AutoRoutines {
     /** register all the autos defined above */
     public static void registerAutos(AutoFactory factory, AutoRegistry autos) {
         autos.add("Outpost", "outpost", 6, false, AutoRoutines::outpostAuto);
-        autos.add("Depot", "depot", 7, false, AutoRoutines::depotTest);
+        autos.add("Depot", "depot", 8, false, AutoRoutines::depotAuto);
+        // autos.add("Right Cycle", "cycleRight", 7, false, AutoRoutines::rightSideCycleAuto);
+        autos.add("Delayed Middle", "delayMid", 6, false, AutoRoutines::delayedMidAuto);
         // autos.add("Two Cycle", "twoCycle", 5, false, AutoRoutines::twoCycleAuto);
         // autos.add("Questionable", "questionable", 6, AutoRoutines::questionableAuto);
         // autos.add("Second Cycle Near", "secondCycleNear", 9, AutoRoutines::secondCycleNear);

@@ -22,8 +22,16 @@ public class Hood {
         io.setAngle(degrees);
     }
 
+    public void setVoltage(double volts) {
+        io.setVoltage(volts);
+    }
+
+    public void resetPositionRaw() {
+        io.resetPosition();
+    }
+
     public Command resetPosition() {
-        return Commands.runOnce(() -> io.resetPosition());
+        return Commands.runOnce(() -> this.resetPositionRaw());
     }
 
     public void periodic() {

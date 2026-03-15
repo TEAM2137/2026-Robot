@@ -31,6 +31,15 @@ public class Turret {
             Map.entry(-135.0, 2.0),
             Map.entry(45.0, -6.0),
             Map.entry(225.0, 4.0)
+        //     Map.entry(-180.0, 2.0),
+        //     Map.entry(-135.0, 2.0),
+        //     Map.entry(-90.0, -2.0),
+        //     Map.entry(-45.0, -6.0),
+        //     Map.entry(0.0, -6.0),
+        //     Map.entry(45.0, -6.0),
+        //     Map.entry(90.0, -4.0),
+        //     Map.entry(135.0, -1.0),
+        //     Map.entry(180.0, 2.0)
         );
     }
 
@@ -72,7 +81,11 @@ public class Turret {
             .plus(Rotation2d.fromDegrees(manualOffset));
         
         double offsetDegrees = Constants.offsetLookup.get(target.getDegrees());
+        // if (!SmartDashboard.containsKey("AimOffset")) SmartDashboard.putNumber("AimOffset", 0.0);
+        // double offsetDegrees = SmartDashboard.getNumber("AimOffset", 0.0);
+        
         Logger.recordOutput("Launcher/Turret/AimOffsetDegrees", offsetDegrees);
+        Logger.recordOutput("Launcher/Turret/AimOffsetInput", target.getDegrees());
         target = target.plus(Rotation2d.fromDegrees(offsetDegrees));
 
         Rotation2d current = Rotation2d.fromDegrees(io.getAngle());

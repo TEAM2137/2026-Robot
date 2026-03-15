@@ -12,12 +12,13 @@ public class FieldConstants {
     public static final double fieldWidth = 16.541;
     public static final double fieldHeight = 8.0692;
 
-    public static final double cornerOffset = 1.5; /*Adjustable distance from corner*/
-    //Left/right is from Driver POV
-    public static final Translation2d blueLeftCorner = new Translation2d(cornerOffset, fieldHeight - cornerOffset);
-    public static final Translation2d blueRightCorner = new Translation2d(cornerOffset, cornerOffset);
-    public static final Translation2d redLeftCorner = new Translation2d(fieldWidth - cornerOffset, fieldHeight - cornerOffset);
-    public static final Translation2d redRightCorner = new Translation2d(fieldWidth - cornerOffset, cornerOffset);
+    public static final double cornerOffsetX = 1.5; // Adjustable distance from corner
+    public static final double cornerOffsetY = 2.0; // Adjustable distance from corner
+
+    public static final Translation2d blueLeftCorner = new Translation2d(cornerOffsetX, fieldHeight - cornerOffsetY);
+    public static final Translation2d blueRightCorner = new Translation2d(cornerOffsetX, cornerOffsetY);
+    public static final Translation2d redLeftCorner = new Translation2d(fieldWidth - cornerOffsetX, fieldHeight - cornerOffsetY);
+    public static final Translation2d redRightCorner = new Translation2d(fieldWidth - cornerOffsetX, cornerOffsetY);
 
     public static final Translation2d blueTowerLeftPost = new Translation2d(1.016, 4.323824 - (2.0 * 0.0762));
     public static final Translation2d blueTowerRightPost = new Translation2d(1.016, 3.504692 - (2.5 * 0.0762));

@@ -30,6 +30,10 @@ import frc.robot.util.TestMode;
 import frc.robot.util.Utils;
 
 public class Launcher extends SubsystemBase {
+    public static class Constants {
+        public static final double IDLE_RPM = 1600;
+    }
+
     private final Turret turret;
     private final Hood hood;
     private final Flywheel flywheel;
@@ -90,25 +94,28 @@ public class Launcher extends SubsystemBase {
         boolean isTest = DriverStation.isTest();
         TestMode testMode = RobotContainer.getInstance().getTestMode();
 
+        boolean hoodManual = robot.operatorController.rightTrigger().getAsBoolean();
+
         if (isTest && testMode == TestMode.TURRET) {
             this.turret.setAngleFieldRelative(Rotation2d.fromRadians(Math.atan2(
                 MathUtil.applyDeadband(-robot.operatorController.getRightY(), 0.35),
                 MathUtil.applyDeadband(robot.operatorController.getRightX(), 0.35)
             )));
-            this.hood.setAngle(0);
+            if (!hoodManual) this.hood.setAngle(0);
             this.flywheel.setRPM(0);
         }
         else if (isTest && testMode == TestMode.LOOKUP_TABLES) {
             this.turret.setAngleFieldRelative(params.turretAngle());
-            this.hood.setAngle(this.manualHoodAngle);
+            if (!hoodManual) this.hood.setAngle(this.manualHoodAngle);
             this.flywheel.setRPM(this.manualFlywheelRPM);
             Logger.recordOutput("LookupTables/HoodAngle", this.manualHoodAngle);
             Logger.recordOutput("LookupTables/FlywheelRPM", this.manualFlywheelRPM);
         }
         else if (!isTest) {
             this.turret.setAngleFieldRelative(params.turretAngle());
-            this.hood.setAngle(params.hoodAngle());
+            if (!hoodManual) this.hood.setAngle(params.hoodAngle());
             if (this.isLaunching) this.flywheel.setRPM(params.flywheelRpm());
+            else this.flywheel.setVoltage(0);
         }
 
         turret.periodic();

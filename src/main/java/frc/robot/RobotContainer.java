@@ -21,7 +21,6 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberIO;
-import frc.robot.subsystems.climber.ClimberIOTalonFX;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -113,7 +112,7 @@ public class RobotContainer {
                 new FlywheelIOTalonFX()
             );
 
-            climber = new Climber(new ClimberIOTalonFX());
+            climber = new Climber(new ClimberIO() {});
 
             break;
 
@@ -246,7 +245,7 @@ public class RobotContainer {
 
         launcher.isLaunching().and(RobotModeTriggers.teleop()).whileTrue(new SequentialCommandGroup(
             // Commands.waitUntil(() -> launcher.getFlywheel().isWithinTarget(60)),
-            Commands.waitSeconds(0.2),
+            Commands.waitSeconds(0.4),
             new SequentialCommandGroup(
                 indexer.run().repeatedly().onlyWhile(launcher.getTurret().isAtTarget()),
                 indexer.stop()
@@ -264,8 +263,9 @@ public class RobotContainer {
 
         Trigger xLock = launcher.isLaunching()
             .and(() -> this.joystickSupplier.get().getNorm() < DriveCommands.DEADBAND)
+            .and(() -> Math.abs(this.driverController.getRightX() * 0.75) < DriveCommands.DEADBAND)
             .and(RobotModeTriggers.teleop())
-            .debounce(0.5);
+            .debounce(0.25);
 
         xLock.whileTrue(drive.xLockCommand().withName("X-Lock"));
 
@@ -296,6 +296,16 @@ public class RobotContainer {
 
         operatorController.b().onTrue(intake.deploy().andThen(intake.setRollerVoltage(-12)));
         operatorController.b().onFalse(intake.retract().andThen(intake.setRollerVoltage(0)));
+
+        operatorController.rightTrigger().whileTrue(Commands.runEnd(
+            () -> launcher.getHood().setVoltage(-3),
+            () -> launcher.getHood().resetPositionRaw()
+        ));
+
+        operatorController.leftTrigger().whileTrue(new SequentialCommandGroup(
+            intake.setPivotVoltage(-3),
+            Commands.runEnd(() -> {}, () -> intake.resetPosition().schedule())
+        ));
 
         operatorController.povLeft().onTrue(launcher.getTurret().setVoltage(-0.5));
         operatorController.povLeft().onFalse(launcher.getTurret().setVoltage(0));

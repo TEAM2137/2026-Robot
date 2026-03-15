@@ -1,8 +1,8 @@
 package frc.robot;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -123,7 +123,6 @@ public class Autonomous {
         
         // only log the score if we are in a real match
         boolean isOfficial = DriverStation.isFMSAttached()
-                && DriverStation.getMatchType() != MatchType.Practice
                 && DriverStation.getMatchType() != MatchType.None;
         if (!isOfficial) return;
 
@@ -139,34 +138,43 @@ public class Autonomous {
         String eventID = DriverStation.getEventName();
 
         // create gson instance
-        String filePath = "scores.json";
+        String fileName = DriverStation.getMatchType() == MatchType.Practice ? "scores-prac.json" : "scores.json";
+        File file = new File("/home/lvuser/" + fileName);
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+        try {
+            if (!file.exists()) file.createNewFile();
+        }
+        catch (Exception e) { e.printStackTrace(); }
 
         // create score list and add current setup score
         ArrayList<SetupScore> setupScores = new ArrayList<>();
         setupScores.add(new SetupScore(letterGrade, score, gpa, matchNumber, matchType, eventID));
 
         // read previous scores and add them to the list
-        try (FileReader reader = new FileReader(filePath)) {
+        try (FileReader reader = new FileReader(file)) {
             Type listType = new TypeToken<List<SetupScore>>(){}.getType();
             List<SetupScore> previousScores = gson.fromJson(reader, listType);
-            setupScores.addAll(previousScores);
+            if (previousScores != null && setupScores != null) setupScores.addAll(previousScores);
         }
-        catch (IOException e) { e.printStackTrace(); }
+        catch (Exception e) { e.printStackTrace(); }
 
         // write the accumulated list to the file
-        try (Writer writer = new FileWriter(filePath)) {
+        try (Writer writer = new FileWriter(file)) {
             gson.toJson(setupScores, writer);
-            System.out.println("Successfully wrote scores list to " + filePath);
+            System.out.println("Successfully wrote scores list to " + file.getAbsolutePath());
         }
-        catch (IOException e) { e.printStackTrace(); }
+        catch (Exception e) { e.printStackTrace(); }
 
         // calculate average GPA based on previous scores
-        double average = setupScores.stream()
-                .filter(ss -> ss.matchType == MatchType.Elimination)
-                .mapToDouble(SetupScore::gpa)
-                .average().orElse(0);
-        Logger.recordOutput("Autonomous/Setup/AverageGPA", average);
+        try {
+            double average = setupScores.stream()
+                    .filter(ss -> ss.matchType == MatchType.Elimination)
+                    .mapToDouble(SetupScore::gpa)
+                    .average().orElse(0);
+            Logger.recordOutput("Autonomous/Setup/AverageGPA", average);
+        }
+        catch (Exception e) { e.printStackTrace(); }
     }
 
     private static double getRawSetupScore(Pose2d pose, Pose2d targetPose) {
