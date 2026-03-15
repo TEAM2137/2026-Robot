@@ -108,8 +108,8 @@ public class Launcher extends SubsystemBase {
             this.turret.setAngleFieldRelative(params.turretAngle());
             if (!hoodManual) this.hood.setAngle(this.manualHoodAngle);
             this.flywheel.setRPM(this.manualFlywheelRPM);
-            Logger.recordOutput("LookupTables/HoodAngle", this.manualHoodAngle);
-            Logger.recordOutput("LookupTables/FlywheelRPM", this.manualFlywheelRPM);
+            Logger.recordOutput("ShotCalculator/ManualHoodAngle", this.manualHoodAngle);
+            Logger.recordOutput("ShotCalculator/ManualFlywheelRPM", this.manualFlywheelRPM);
         }
         else if (!isTest) {
             this.turret.setAngleFieldRelative(params.turretAngle());

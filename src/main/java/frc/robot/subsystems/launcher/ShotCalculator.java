@@ -1,5 +1,6 @@
 package frc.robot.subsystems.launcher;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.littletonrobotics.junction.Logger;
@@ -14,6 +15,9 @@ import frc.robot.util.FieldConstants;
 
 @FunctionalInterface
 public interface ShotCalculator {
+    static final int SOTF_MAX_ITERATIONS = 5;
+    static final double SOTF_TOF_ERROR_TOLERANCE = 0.01;
+    
     static final InterpolatingDoubleTreeMap FLYWHEEL_RPM_HUB = InterpolatingDoubleTreeMap.ofEntries(
         Map.entry(1.3165, 1765.0),
         Map.entry(1.5658, 1810.0),
@@ -50,11 +54,14 @@ public interface ShotCalculator {
     );
 
     static final InterpolatingDoubleTreeMap TOF_LOOKUP = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(1.5, 0.976),
-        Map.entry(2.5, 1.172),
-        Map.entry(3.0, 1.328),
-        Map.entry(3.5, 1.484),
-        Map.entry(4.0, 1.563)
+        Map.entry(1.0, 0.7),
+        Map.entry(1.5, 0.8),
+        Map.entry(2.5, 1.0),
+        Map.entry(3.0, 1.2),
+        Map.entry(3.5, 1.3),
+        Map.entry(4.0, 1.4),
+        Map.entry(5.0, 1.5),
+        Map.entry(6.0, 1.6)
     );
 
     static final ShotCalculator HUB = robot -> {
@@ -94,9 +101,9 @@ public interface ShotCalculator {
         
         double theAngle = Math.atan2(dx, dy);
 
-        Logger.recordOutput("LookupTables/TargetPos", target);
-        Logger.recordOutput("LookupTables/TurretPos", turretPos);
-        Logger.recordOutput("LookupTables/Distance", dst);
+        Logger.recordOutput("ShotCalculator/TargetPos", target);
+        Logger.recordOutput("ShotCalculator/TurretPos", turretPos);
+        Logger.recordOutput("ShotCalculator/Distance", dst);
 
         return new ShotParameters(
             Rotation2d.fromRadians(theAngle).plus(Rotation2d.k180deg),
@@ -106,26 +113,51 @@ public interface ShotCalculator {
 
     static ShotParameters simpleSOTFShot(Translation2d target, RobotContainer robot, InterpolatingDoubleTreeMap flywheelRpm, InterpolatingDoubleTreeMap hoodAngle) {
         Translation2d turretPos = robot.launcher.getTurret().getFieldSpacePose(robot).getTranslation();
+        Translation2d turretVelocity = robot.launcher.getTurret().getFieldSpaceVelocity(robot);
 
-        double timeOfFlight = TOF_LOOKUP.get(target.getDistance(turretPos));
-        // if (!SmartDashboard.containsKey("SOTFOffset")) SmartDashboard.putNumber("SOTFOffset", 0);
-        // double offsetScalar = SmartDashboard.getNumber("SOTFOffset", 0);
+        ArrayList<Pose2d> iterationPoses = new ArrayList<>(SOTF_MAX_ITERATIONS);
+        ArrayList<Double> iterationDistances = new ArrayList<>(SOTF_MAX_ITERATIONS);
+        ArrayList<Double> iterationTofErrors = new ArrayList<>(SOTF_MAX_ITERATIONS);
+
+        int i = 0;
+        double dst = target.getDistance(turretPos);
+        double angle = 0;
+        double timeOfFlight = 0;
+        double tofError = 0;
+        Translation2d newTarget = target;
+
+        do {
+            double previousTof = timeOfFlight;
+            timeOfFlight = TOF_LOOKUP.get(dst);
+            tofError = Math.abs(previousTof - timeOfFlight);
+            
+            newTarget = target.minus(turretVelocity.times(timeOfFlight));
+            angle = Math.atan2(newTarget.getX() - turretPos.getX(), newTarget.getY() - turretPos.getY());
+            dst = newTarget.getDistance(turretPos);
+
+            iterationPoses.add(new Pose2d(newTarget, new Rotation2d()));
+            iterationDistances.add(dst);
+            iterationTofErrors.add(tofError);
+
+            i++;
+        }
+        while (i < SOTF_MAX_ITERATIONS && tofError > SOTF_TOF_ERROR_TOLERANCE);
+
+        Logger.recordOutput("ShotCalculator/SOTF/TargetPose", new Pose2d(newTarget, new Rotation2d()));
+        Logger.recordOutput("ShotCalculator/SOTF/Distance", dst);
+        Logger.recordOutput("ShotCalculator/SOTF/TimeOfFlight", timeOfFlight);
+        Logger.recordOutput("ShotCalculator/SOTF/TurretVelocity", turretVelocity);
         
-        Translation2d newTarget = target.minus(robot.drive.getLinearSpeedsVector().times(timeOfFlight));
-
-        double dst = newTarget.getDistance(turretPos);
-        double dx = newTarget.getX() - turretPos.getX();
-        double dy = newTarget.getY() - turretPos.getY();
-        
-        double theAngle = Math.atan2(dx, dy);
-
-        Logger.recordOutput("LookupTables/TargetPos", newTarget);
-        Logger.recordOutput("LookupTables/SOTFTargetPose", new Pose2d(newTarget, new Rotation2d()));
-        Logger.recordOutput("LookupTables/TurretPos", turretPos);
-        Logger.recordOutput("LookupTables/Distance", dst);
+        Pose2d[] posesArray = iterationPoses.toArray(new Pose2d[0]);
+        double[] distancesArray = iterationDistances.stream().mapToDouble(Double::doubleValue).toArray();
+        double[] tofErrorsArray = iterationTofErrors.stream().mapToDouble(Double::doubleValue).toArray();
+        Logger.recordOutput("ShotCalculator/SOTF/Iterations", i);
+        Logger.recordOutput("ShotCalculator/SOTF/IterationPoses", posesArray);
+        Logger.recordOutput("ShotCalculator/SOTF/IterationDistances", distancesArray);
+        Logger.recordOutput("ShotCalculator/SOTF/IterationTOFErrors", tofErrorsArray);
 
         return new ShotParameters(
-            Rotation2d.fromRadians(theAngle).plus(Rotation2d.k180deg),
+            Rotation2d.fromRadians(angle).plus(Rotation2d.k180deg),
             flywheelRpm.get(dst), hoodAngle.get(dst)
         );
     }

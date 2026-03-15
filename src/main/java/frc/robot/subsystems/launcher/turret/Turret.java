@@ -7,6 +7,7 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -23,6 +24,8 @@ public class Turret {
 
         public static final double offsetX = 6.375; // inches, positive towards robot right
         public static final double offsetY = -5.875; // inches, positive towards robot front
+
+        public static final Translation2d turretOffset = new Translation2d(Constants.offsetY / 39.37, -Constants.offsetX / 39.37);
 
         public static final double magnetPosition = 0.004150390625; // rotations
         
@@ -140,14 +143,24 @@ public class Turret {
     public Pose2d getFieldSpacePose(RobotContainer robot) {
         Pose2d robotPose = robot.drive.getPose();
         Transform2d transform = new Transform2d(
-            Constants.offsetY / 39.37,
-            -Constants.offsetX / 39.37,
+            Constants.turretOffset,
             robotPose.getRotation()
         );
         return new Pose2d(
             robotPose.transformBy(transform).getTranslation(),
             this.getAngle().plus(robot.drive.getRotation())
         );
+    }
+
+    public Translation2d getFieldSpaceVelocity(RobotContainer robot) {
+        Pose2d robotPose = robot.drive.getPose();
+        double omega = robot.drive.getAngularVelocityRadsPerSec();
+        Translation2d world = Constants.turretOffset.rotateBy(robotPose.getRotation());
+        Translation2d turretVelocity = new Translation2d(
+            -omega * world.getY(),
+            omega * world.getX()
+        );
+        return robot.drive.getLinearSpeedsVector().plus(turretVelocity);
     }
 
     public void periodic() {
@@ -164,5 +177,6 @@ public class Turret {
         Logger.recordOutput("Launcher/Turret/DidZero", this.didZero);
         Logger.recordOutput("Launcher/Turret/ManualOffset", this.manualOffset);
         Logger.recordOutput("Launcher/Turret/FieldSpacePose", this.getFieldSpacePose(RobotContainer.getInstance()));
+        Logger.recordOutput("Launcher/Turret/FieldSpaceVelocity", this.getFieldSpaceVelocity(RobotContainer.getInstance()));
     }
 }
