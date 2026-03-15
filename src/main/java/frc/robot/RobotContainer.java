@@ -50,9 +50,8 @@ import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.ShiftInfo;
 import frc.robot.util.TestMode;
-import frc.robot.util.Utils;
-import frc.robot.util.Utils.MatchEvent;
 
 public class RobotContainer {
     private static RobotContainer instance;
@@ -366,10 +365,8 @@ public class RobotContainer {
         return testModeChooser.getSelected();
     }
 
-    public static void periodic() {
-        MatchEvent next = Utils.getNextMatchEvent();
-        SmartDashboard.putString("NextMatchEvent", next.toString());
-        SmartDashboard.putBoolean("IsHubActive", next.isHubActive());
+    public void periodic() {
+        ShiftInfo.logShiftInfo();
     }
 
     public static RobotContainer getInstance() { return instance; }

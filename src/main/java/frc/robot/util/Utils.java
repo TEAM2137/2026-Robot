@@ -4,7 +4,6 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
@@ -51,37 +50,6 @@ public class Utils {
      */
     public static double dot(Translation2d a, Translation2d b) {
         return a.getX() * b.getX() + a.getY() * b.getY();
-    }
-
-    /**
-     * @return The next match event including a name, timestamp, and if the hub is currently active
-     */
-    public static MatchEvent getNextMatchEvent() {
-        double time = DriverStation.getMatchTime();
-        if (DriverStation.isAutonomous()) return new MatchEvent("Teleop", true, time);
-
-        String msg = DriverStation.getGameSpecificMessage();
-        boolean wonAuto = false;
-        if (msg.equals("R") && AllianceFlipUtil.shouldFlip()) wonAuto = true;
-        if (msg.equals("B") && !AllianceFlipUtil.shouldFlip()) wonAuto = true;
-
-        String active = "Hub Active";
-        String inactive = "Hub Inactive";
-
-        if (time > 140.0) return new MatchEvent("Teleop (Transition)", true, time - 140.0);
-        if (time > 130.0) return new MatchEvent((wonAuto ? inactive : active) + " (P1)", true, time - 130.0);
-        if (time > 105.0) return new MatchEvent((wonAuto ? active : inactive) + " (P2)", !wonAuto, time - 105.0);
-        if (time > 80.0) return new MatchEvent((wonAuto ? inactive : active) + " (P3)", wonAuto, time - 80.0);
-        if (time > 55.0) return new MatchEvent((wonAuto ? active : inactive) + " (P4)", !wonAuto, time - 55.0);
-        if (time > 30.0) return new MatchEvent(active + " (Endgame)", wonAuto, time - 30.0);
-        return new MatchEvent("Match Ends", true, time);
-    }
-
-    public record MatchEvent(String name, boolean isHubActive, double time) {
-        @Override
-        public final String toString() {
-            return name + " in " + ((int)Math.ceil(time)) + "s";
-        }
     }
 
     public static Translation2d[] createRectOutline(Rectangle2d rect, boolean flip) {
