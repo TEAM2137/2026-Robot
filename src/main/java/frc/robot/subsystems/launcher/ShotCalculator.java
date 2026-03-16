@@ -107,7 +107,7 @@ public interface ShotCalculator {
 
         return new ShotParameters(
             Rotation2d.fromRadians(theAngle).plus(Rotation2d.k180deg),
-            flywheelRpm.get(dst), hoodAngle.get(dst)
+            flywheelRpm.get(dst), hoodAngle.get(dst), TOF_LOOKUP.get(dst)
         );
     }
 
@@ -143,9 +143,11 @@ public interface ShotCalculator {
         }
         while (i < SOTF_MAX_ITERATIONS && tofError > SOTF_TOF_ERROR_TOLERANCE);
 
+        double finalTof = TOF_LOOKUP.get(dst);
+
         Logger.recordOutput("ShotCalculator/SOTF/TargetPose", new Pose2d(newTarget, new Rotation2d()));
         Logger.recordOutput("ShotCalculator/SOTF/Distance", dst);
-        Logger.recordOutput("ShotCalculator/SOTF/TimeOfFlight", timeOfFlight);
+        Logger.recordOutput("ShotCalculator/SOTF/TimeOfFlight", finalTof);
         Logger.recordOutput("ShotCalculator/SOTF/TurretVelocity", turretVelocity);
         
         Pose2d[] posesArray = iterationPoses.toArray(new Pose2d[0]);
@@ -158,11 +160,11 @@ public interface ShotCalculator {
 
         return new ShotParameters(
             Rotation2d.fromRadians(angle).plus(Rotation2d.k180deg),
-            flywheelRpm.get(dst), hoodAngle.get(dst)
+            flywheelRpm.get(dst), hoodAngle.get(dst), finalTof
         );
     }
 
     ShotParameters calculate(RobotContainer robot);
 
-    public record ShotParameters(Rotation2d turretAngle, double flywheelRpm, double hoodAngle) {}
+    public record ShotParameters(Rotation2d turretAngle, double flywheelRpm, double hoodAngle, double timeOfFlight) {}
 }

@@ -26,14 +26,11 @@ import frc.robot.subsystems.launcher.turret.Turret;
 import frc.robot.subsystems.launcher.turret.TurretIO;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
+import frc.robot.util.ShiftInfo;
 import frc.robot.util.TestMode;
 import frc.robot.util.Utils;
 
 public class Launcher extends SubsystemBase {
-    public static class Constants {
-        public static final double IDLE_RPM = 1600;
-    }
-
     private final Turret turret;
     private final Hood hood;
     private final Flywheel flywheel;
@@ -118,12 +115,27 @@ public class Launcher extends SubsystemBase {
             else this.flywheel.setVoltage(0);
         }
 
+        // TODO: implement auto-fire
+        Logger.recordOutput("Launcher/ShouldAutoLaunch", this.shouldAutoLaunch(params.timeOfFlight()));
+
         turret.periodic();
         hood.periodic();
         flywheel.periodic();
-
+        
         Logger.recordOutput("Launcher/IsLaunching", this.isLaunching);
         Utils.logActiveCommand("Launcher", this);
+    }
+
+    public boolean shouldAutoLaunch(double timeOfFlight) {
+        ShiftInfo shift = ShiftInfo.getCurrentShift();
+        double endOffset = FieldConstants.HUB_DEACTIVATION_SECONDS - timeOfFlight - FieldConstants.HUB_MAX_PROCESS_SECONDS;
+        if (shift.isHubActive()) {
+            double timeUntilInactive = ShiftInfo.getTimeUntilInactive();
+            if (endOffset < 0 && timeUntilInactive >= 0) return timeUntilInactive > -endOffset;
+            return true;
+        }
+        if (endOffset > 0 && shift.previous().isHubActive()) return shift.timeSinceStart() < endOffset;
+        return ShiftInfo.getTimeUntilActive() < timeOfFlight + FieldConstants.HUB_MIN_PROCESS_SECONDS;
     }
 
     public double getPassingFlipY() {

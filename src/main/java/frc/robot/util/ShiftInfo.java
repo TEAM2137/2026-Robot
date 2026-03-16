@@ -36,6 +36,10 @@ public enum ShiftInfo {
         return this.startTime;
     }
 
+    public int getEndTime() {
+        return this.next().getStartTime();
+    }
+
     public boolean isHubActive() {
         boolean wonAuto = didWinAuto().orElse(true);
         return switch (this) {
@@ -45,19 +49,33 @@ public enum ShiftInfo {
         };
     }
 
-    public double timeUntil() {
+    public double timeUntilStart() {
         if (DriverStation.isAutonomous()) return DriverStation.getMatchTime();
         if (this.getStartTime() > DriverStation.getMatchTime()) return 0.0;
         return DriverStation.getMatchTime() - this.getStartTime();
+    }
+
+    public double timeSinceStart() {
+        if (this.getStartTime() < DriverStation.getMatchTime()) return 0.0;
+        return this.getStartTime() - DriverStation.getMatchTime();
     }
 
     public boolean hasNext() {
         return this.ordinal() + 1 < values().length;
     }
 
+    public boolean hasPrevious() {
+        return this.ordinal() - 1 >= 0;
+    }
+
     public ShiftInfo next() {
         if (!this.hasNext()) return ShiftInfo.NONE;
         return values()[this.ordinal() + 1];
+    }
+
+    public ShiftInfo previous() {
+        if (!this.hasPrevious()) return ShiftInfo.AUTO;
+        return values()[this.ordinal() - 1];
     }
 
     static {
@@ -82,15 +100,25 @@ public enum ShiftInfo {
     }
 
     public static double getTimeUntilNextShift() {
-        return getNextShift().timeUntil();
+        return getNextShift().timeUntilStart();
     }
 
     public static double getTimeUntilActive() {
         ShiftInfo shift = getCurrentShift();
-        if (shift.isHubActive()) return -1.0;
+        if (shift.isHubActive()) return 0.0;
         while (shift.hasNext()) {
             shift = shift.next();
-            if (shift.isHubActive()) return shift.timeUntil();
+            if (shift.isHubActive()) return shift.timeUntilStart();
+        }
+        return -1.0;
+    }
+
+    public static double getTimeUntilInactive() {
+        ShiftInfo shift = getCurrentShift();
+        if (!shift.isHubActive()) return 0.0;
+        while (shift.hasNext()) {
+            shift = shift.next();
+            if (!shift.isHubActive()) return shift.timeUntilStart();
         }
         return -1.0;
     }
@@ -110,7 +138,7 @@ public enum ShiftInfo {
     public static void logShiftInfo() {
         ShiftInfo current = getCurrentShift();
         ShiftInfo next = getNextShift();
-        double timeUntilNext = next.timeUntil();
+        double timeUntilNext = next.timeUntilStart();
         String formatted = next.getName() + " in " + (int) Math.ceil(timeUntilNext) + "s";
         
         Logger.recordOutput("ShiftInfo/NextShiftFormatted", formatted);
@@ -119,6 +147,7 @@ public enum ShiftInfo {
         Logger.recordOutput("ShiftInfo/CurrentShift", current.getName());
         Logger.recordOutput("ShiftInfo/IsHubActive", current.isHubActive());
         Logger.recordOutput("ShiftInfo/HubActiveIn", Math.max((int) Math.ceil(getTimeUntilActive()), 0));
+        Logger.recordOutput("ShiftInfo/HubInactiveIn", Math.max((int) Math.ceil(getTimeUntilInactive()), 0));
 
         didWinAuto().ifPresent(value -> Logger.recordOutput("ShiftInfo/ActiveFirst", !value));
     }
