@@ -8,6 +8,8 @@ public interface HoodIO {
         public double appliedVolts;
         public double statorCurrentAmps;
         public double supplyCurrentAmps;
+        public double motorTempCelsius;
+        
         public double angleDegrees;
         public double targetAngleDegrees;
         public boolean connected;

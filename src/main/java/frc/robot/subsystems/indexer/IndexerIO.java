@@ -8,11 +8,13 @@ public interface IndexerIO {
         public double indexerAppliedVolts;
         public double indexerStatorCurrentAmps;
         public double indexerSupplyCurrentAmps;
+        public double indexerTempCelsius;
         public boolean indexerConnected;
 
         public double feederAppliedVolts;
         public double feederStatorCurrentAmps;
         public double feederSupplyCurrentAmps;
+        public double feederTempCelsius;
         public boolean feederConnected;
     }
 

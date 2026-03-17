@@ -10,6 +10,7 @@ public interface TurretIO {
         public double appliedVolts;
         public double statorCurrentAmps;
         public double supplyCurrentAmps;
+        public double motorTempCelsius;
 
         public double angleRotations;
         public double targetAngleRotations;

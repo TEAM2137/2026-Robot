@@ -15,7 +15,7 @@ import frc.robot.util.FieldConstants;
 
 @FunctionalInterface
 public interface ShotCalculator {
-    static final int SOTF_MAX_ITERATIONS = 5;
+    static final int SOTF_MAX_ITERATIONS = 8;
     static final double SOTF_TOF_ERROR_TOLERANCE = 0.01;
     
     static final InterpolatingDoubleTreeMap FLYWHEEL_RPM_HUB = InterpolatingDoubleTreeMap.ofEntries(
@@ -119,14 +119,14 @@ public interface ShotCalculator {
         ArrayList<Double> iterationDistances = new ArrayList<>(SOTF_MAX_ITERATIONS);
         ArrayList<Double> iterationTofErrors = new ArrayList<>(SOTF_MAX_ITERATIONS);
 
-        int i = 0;
         double dst = target.getDistance(turretPos);
         double angle = 0;
         double timeOfFlight = 0;
         double tofError = 0;
         Translation2d newTarget = target;
 
-        do {
+        int i;
+        for (i = 0; i < SOTF_MAX_ITERATIONS && tofError > SOTF_TOF_ERROR_TOLERANCE; i++) {
             double previousTof = timeOfFlight;
             timeOfFlight = TOF_LOOKUP.get(dst);
             tofError = Math.abs(previousTof - timeOfFlight);
@@ -138,10 +138,7 @@ public interface ShotCalculator {
             iterationPoses.add(new Pose2d(newTarget, new Rotation2d()));
             iterationDistances.add(dst);
             iterationTofErrors.add(tofError);
-
-            i++;
-        }
-        while (i < SOTF_MAX_ITERATIONS && tofError > SOTF_TOF_ERROR_TOLERANCE);
+       }
 
         double finalTof = TOF_LOOKUP.get(dst);
 

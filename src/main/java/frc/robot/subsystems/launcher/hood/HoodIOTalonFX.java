@@ -65,6 +65,8 @@ public class HoodIOTalonFX implements HoodIO {
         inputs.appliedVolts = this.motor.getMotorVoltage().getValueAsDouble();
         inputs.statorCurrentAmps = this.motor.getStatorCurrent().getValueAsDouble();
         inputs.supplyCurrentAmps = this.motor.getSupplyVoltage().getValueAsDouble();
+        inputs.motorTempCelsius = this.motor.getDeviceTemp().getValueAsDouble();
+
         inputs.angleDegrees = this.motor.getPosition().getValue().in(Degrees);
         inputs.targetAngleDegrees = this.targetAngleDegrees;
         inputs.connected = this.motor.isConnected();

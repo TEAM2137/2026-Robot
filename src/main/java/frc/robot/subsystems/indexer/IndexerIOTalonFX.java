@@ -40,11 +40,13 @@ public class IndexerIOTalonFX implements IndexerIO {
         inputs.indexerAppliedVolts = this.indexer.getMotorVoltage().getValueAsDouble();
         inputs.indexerStatorCurrentAmps = this.indexer.getStatorCurrent().getValueAsDouble();
         inputs.indexerSupplyCurrentAmps = this.indexer.getSupplyCurrent().getValueAsDouble();
+        inputs.indexerTempCelsius = this.indexer.getDeviceTemp().getValueAsDouble();
         inputs.indexerConnected = this.indexer.isConnected();
 
         inputs.feederAppliedVolts = this.feeder.getMotorVoltage().getValueAsDouble();
         inputs.feederStatorCurrentAmps = this.feeder.getStatorCurrent().getValueAsDouble();
         inputs.feederSupplyCurrentAmps = this.feeder.getSupplyCurrent().getValueAsDouble();
+        inputs.feederTempCelsius = this.feeder.getDeviceTemp().getValueAsDouble();
         inputs.feederConnected = this.feeder.isConnected();
     }
 }

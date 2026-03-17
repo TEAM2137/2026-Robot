@@ -8,6 +8,8 @@ public interface FlywheelIO {
         public double appliedVolts;
         public double statorCurrentAmps;
         public double supplyCurrentAmps;
+        public double motorTempCelsius;
+
         public double velocityRpm;
         public double targetVelocityRpm;
         public boolean flywheelConnected;
