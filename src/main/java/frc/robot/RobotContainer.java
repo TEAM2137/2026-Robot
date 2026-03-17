@@ -19,8 +19,6 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.climber.Climber;
-import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -65,7 +63,6 @@ public class RobotContainer {
     public final Intake intake;
     public final Indexer indexer;
     public final Launcher launcher;
-    public final Climber climber;
 
     // Controllers
     public final CommandXboxController driverController = new CommandXboxController(0);
@@ -111,8 +108,6 @@ public class RobotContainer {
                 new FlywheelIOTalonFX()
             );
 
-            climber = new Climber(new ClimberIO() {});
-
             break;
 
         case SIM:
@@ -142,8 +137,6 @@ public class RobotContainer {
                 new FlywheelIOSim() {}
             );
 
-            climber = new Climber(new ClimberIO() {});
-
             break;
 
         default:
@@ -172,8 +165,6 @@ public class RobotContainer {
                 new HoodIO() {},
                 new FlywheelIO() {}
             );
-
-            climber = new Climber(new ClimberIO() {});
 
             break;
         }
@@ -315,10 +306,6 @@ public class RobotContainer {
         operatorController.start().onTrue(launcher.getTurret().resetPosition().ignoringDisable(true));
         operatorController.back().onTrue(launcher.getHood().resetPosition().ignoringDisable(true));
         operatorController.leftBumper().onTrue(intake.resetPosition().ignoringDisable(true));
-
-        Command dismountCommand = climber.dismountFromAutoClimb();
-        dismountCommand.addRequirements(drive); // block drive default command while this command is active
-        RobotModeTriggers.teleop().and(autonomous::didClimbInAuto).onTrue(dismountCommand);
     }
 
     // configure test mode specific bindings here
@@ -336,11 +323,6 @@ public class RobotContainer {
         driverController.leftBumper().and(TestMode.INTAKE.isActive()).onFalse(intake.retract());
         driverController.b().and(TestMode.INTAKE.isActive()).onTrue(intake.runRollers());
         driverController.b().and(TestMode.INTAKE.isActive()).onFalse(intake.stopRollers());
-        
-        driverController.povUp().and(TestMode.CLIMBER.isActive()).onTrue(climber.setVoltage(() -> 12));
-        driverController.povUp().and(TestMode.CLIMBER.isActive()).onFalse(climber.setVoltage(0));
-        driverController.povDown().and(TestMode.CLIMBER.isActive()).onTrue(climber.setVoltage(() -> -12));
-        driverController.povDown().and(TestMode.CLIMBER.isActive()).onFalse(climber.setVoltage(0));
 
         driverController.b().and(TestMode.HOOD.isActive()).onTrue(launcher.setHoodAngle(18));
         driverController.b().and(TestMode.HOOD.isActive()).onFalse(launcher.setHoodAngle(0));

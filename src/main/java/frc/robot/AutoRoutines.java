@@ -135,9 +135,9 @@ public class AutoRoutines {
     }
     public static Command startAutoClimbSequence(RobotContainer robot) {
         return new SequentialCommandGroup(
-            robot.climber.extendClimb(),
-            robot.climber.deployUpperHooks(),
-            robot.climber.retractClimb()
+            // robot.climber.extendClimb(),
+            // robot.climber.deployUpperHooks(),
+            // robot.climber.retractClimb()
         );
     }
 
