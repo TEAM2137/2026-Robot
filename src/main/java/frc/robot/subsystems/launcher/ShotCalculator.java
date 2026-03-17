@@ -15,7 +15,7 @@ import frc.robot.util.FieldConstants;
 
 @FunctionalInterface
 public interface ShotCalculator {
-    static final int SOTF_MAX_ITERATIONS = 8;
+    static final int SOTF_MAX_ITERATIONS = 10;
     static final double SOTF_TOF_ERROR_TOLERANCE = 0.01;
     
     static final InterpolatingDoubleTreeMap FLYWHEEL_RPM_HUB = InterpolatingDoubleTreeMap.ofEntries(
@@ -122,7 +122,7 @@ public interface ShotCalculator {
         double dst = target.getDistance(turretPos);
         double angle = 0;
         double timeOfFlight = 0;
-        double tofError = 0;
+        double tofError = SOTF_TOF_ERROR_TOLERANCE + 1;
         Translation2d newTarget = target;
 
         int i;
