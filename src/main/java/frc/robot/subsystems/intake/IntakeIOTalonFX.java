@@ -101,14 +101,19 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     @Override
     public void updateInputs(IntakeIOInputs inputs) {
-        inputs.positionRotations = this.pivot.getPosition().getValueAsDouble();
-        inputs.targetPositionRotations = this.targetPositionRotations;
+        inputs.pivotPositionRotations = this.pivot.getPosition().getValueAsDouble();
+        inputs.pivotTargetPositionRotations = this.targetPositionRotations;
+
+        inputs.pivotAppliedVolts = this.pivot.getMotorVoltage().getValueAsDouble();
+        inputs.pivotStatorCurrentAmps = this.pivot.getStatorCurrent().getValueAsDouble();
+        inputs.pivotSupplyCurrentAmps = this.pivot.getSupplyCurrent().getValueAsDouble();
+        inputs.pivotConnected = this.pivot.isConnected();
 
         inputs.rollerAppliedVolts = this.rollers.getMotorVoltage().getValueAsDouble();
+        inputs.rollerStatorCurrentAmps = this.rollers.getStatorCurrent().getValueAsDouble();
+        inputs.rollerSupplyCurrentAmps = this.rollers.getSupplyCurrent().getValueAsDouble();
         inputs.rollerVelocityRpm = this.rollers.getVelocity().getValue().in(RPM);
         inputs.rollerTargetVelocityRpm = this.rollerTargetVelocity;
-
-        inputs.pivotConnected = this.pivot.isConnected();
         inputs.rollersConnected = this.rollers.isConnected();
     }
 }

@@ -7,10 +7,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 public interface TurretIO {
     @AutoLog
     public static class TurretIOInputs {
+        public double appliedVolts;
+        public double statorCurrentAmps;
+        public double supplyCurrentAmps;
+
         public double angleRotations;
         public double targetAngleRotations;
         public double velocityRotationsPerSecond;
-        public double appliedVolts;
         
         public Rotation2d angle;
 

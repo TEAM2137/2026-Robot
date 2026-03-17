@@ -62,9 +62,11 @@ public class FlywheelIOTalonFX implements FlywheelIO {
 
     @Override
     public void updateInputs(FlywheelIOInputs inputs) {
+        inputs.appliedVolts = this.leader.getMotorVoltage().getValueAsDouble();
+        inputs.statorCurrentAmps = this.leader.getStatorCurrent().getValueAsDouble();
+        inputs.supplyCurrentAmps = this.leader.getSupplyVoltage().getValueAsDouble();
         inputs.velocityRpm = this.leader.getVelocity().getValue().in(RPM);
         inputs.targetVelocityRpm = this.targetVelocityRpm;
-        inputs.appliedVolts = this.leader.getMotorVoltage().getValueAsDouble();
         inputs.flywheelConnected = this.leader.isConnected() && this.follower.isConnected();
     }
 }

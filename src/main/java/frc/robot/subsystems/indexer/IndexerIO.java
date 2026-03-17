@@ -5,10 +5,14 @@ import org.littletonrobotics.junction.AutoLog;
 public interface IndexerIO {
     @AutoLog
     public static class IndexerIOInputs {
-        public double indexerSpeedVolts;
-        public double feederSpeedVolts;
-
+        public double indexerAppliedVolts;
+        public double indexerStatorCurrentAmps;
+        public double indexerSupplyCurrentAmps;
         public boolean indexerConnected;
+
+        public double feederAppliedVolts;
+        public double feederStatorCurrentAmps;
+        public double feederSupplyCurrentAmps;
         public boolean feederConnected;
     }
 

@@ -5,11 +5,12 @@ import org.littletonrobotics.junction.AutoLog;
 public interface FlywheelIO {
     @AutoLog
     public static class FlywheelIOInputs {
+        public double appliedVolts;
+        public double statorCurrentAmps;
+        public double supplyCurrentAmps;
         public double velocityRpm;
         public double targetVelocityRpm;
-        public double appliedVolts;
         public boolean flywheelConnected;
-        public boolean feederConnected;
     }
 
     default void setRPM(double rpm) {}
