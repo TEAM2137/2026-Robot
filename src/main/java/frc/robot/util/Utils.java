@@ -14,9 +14,16 @@ public class Utils {
         Logger.recordOutput(
             subsystemName + "/ActiveCommand",
             subsystem.getCurrentCommand() == null
-                ? "None"
+                ? "Nothing"
                 : subsystem.getCurrentCommand().getName()
         );
+    }
+
+    /**
+     * @return true if the robot is running in sim, false otherwise
+     */
+    public static boolean isSim() {
+        return Constants.currentRobotType == RobotType.SIM;
     }
 
     /** Gets a constant based on the robot implementation (real, sim) */
@@ -64,9 +71,5 @@ public class Utils {
         outline[4] = outline[0];
         
         return outline;
-    }
-
-    public static boolean isSim() {
-        return Constants.currentRobotType == RobotType.SIM;
     }
 }

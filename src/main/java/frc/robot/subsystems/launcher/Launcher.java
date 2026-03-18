@@ -8,6 +8,7 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -35,14 +36,17 @@ public class Launcher extends SubsystemBase {
     private final Hood hood;
     private final Flywheel flywheel;
 
-    private final Trigger isLaunchingTrigger;
-    private boolean isLaunching = false;
+    private final Trigger isLaunching;
+    private final Trigger inAllianceZone;
+    private final Trigger inAllianceZoneDebounced;
 
-    private ShotCalculator shotCalculator;
+    private LaunchState state = LaunchState.AUTOMATIC;
+    private boolean autofire = false;
 
-    // lookup table tuning values
     private double manualHoodAngle;
     private double manualFlywheelRPM;
+
+    private ShotCalculator shotCalculator;
 
     private AllianceStationID lastAllianceStation = AllianceStationID.Unknown;
 
@@ -53,45 +57,39 @@ public class Launcher extends SubsystemBase {
 
         this.shotCalculator = ShotCalculator.HUB;
 
-        this.isLaunchingTrigger = new Trigger(() -> this.isLaunching);
-        this.isLaunchingTrigger.onFalse(this.setFlywheelSpeed(0));
+        this.isLaunching = new Trigger(() -> this.state == LaunchState.LAUNCH || (this.autofire && state != LaunchState.DONT_LAUNCH));
+        this.inAllianceZone = new Trigger(() -> this.shotCalculator == ShotCalculator.HUB);
+        this.inAllianceZoneDebounced = this.inAllianceZone.debounce(1.0);
 
-        RobotModeTriggers.teleop().onFalse(this.runOnce(() -> this.isLaunching = false));
+        RobotModeTriggers.disabled().onTrue(this.runOnce(() -> this.state = LaunchState.AUTOMATIC).ignoringDisable(true));
     }
 
     public Trigger isLaunching() {
-        return this.isLaunchingTrigger;
+        return this.isLaunching;
     }
 
-    public Command startLaunching() {
-        return runOnce(() -> this.setIsLaunching(true));
+    public Command setState(LaunchState state) {
+        return runOnce(() -> this.setLaunchState(state));
     }
 
-    public Command stopLaunching() {
-        return runOnce(() -> this.setIsLaunching(false));
-    }
-
-    public void setIsLaunching(boolean isLaunching) {
-        this.isLaunching = isLaunching;
+    public void setLaunchState(LaunchState state) {
+        this.state = state;
     }
 
     @Override
     public void periodic() {
         RobotContainer robot = RobotContainer.getInstance();
+        Pose2d pose = robot.drive.getPose();
 
-        Translation2d robotPos = robot.drive.getPose().getTranslation();
-        if (AllianceFlipUtil.shouldFlip()) robotPos = new Translation2d(AllianceFlipUtil.flipX(robotPos.getX()), robotPos.getY());
-
-        double passingFlipY = this.getPassingFlipY();
-        if (robotPos.getX() < FieldConstants.allianceZoneX) this.shotCalculator = ShotCalculator.SOTF_HUB;
-        else if (robotPos.getY() < passingFlipY) this.shotCalculator = ShotCalculator.PASS_RIGHT;
-        else this.shotCalculator = ShotCalculator.PASS_LEFT;
+        this.shotCalculator = this.selectTarget(pose.getTranslation());
 
         ShotParameters params = this.shotCalculator.calculate(robot);
-        boolean isTest = DriverStation.isTest();
-        TestMode testMode = RobotContainer.getInstance().getTestMode();
-
         boolean hoodManual = robot.operatorController.rightTrigger().getAsBoolean();
+        boolean isTest = DriverStation.isTest();
+        TestMode testMode = robot.getTestMode();
+        
+        this.autofire = this.shouldAutofire(pose.getTranslation(), params.timeOfFlight());
+        boolean shouldLaunch = this.isLaunching.getAsBoolean();
 
         if (isTest && testMode == TestMode.TURRET) {
             this.turret.setAngleFieldRelative(Rotation2d.fromRadians(Math.atan2(
@@ -105,28 +103,41 @@ public class Launcher extends SubsystemBase {
             this.turret.setAngleFieldRelative(params.turretAngle());
             if (!hoodManual) this.hood.setAngle(this.manualHoodAngle);
             this.flywheel.setRPM(this.manualFlywheelRPM);
+
             Logger.recordOutput("ShotCalculator/ManualHoodAngle", this.manualHoodAngle);
             Logger.recordOutput("ShotCalculator/ManualFlywheelRPM", this.manualFlywheelRPM);
         }
         else if (!isTest) {
             this.turret.setAngleFieldRelative(params.turretAngle());
             if (!hoodManual) this.hood.setAngle(params.hoodAngle());
-            if (this.isLaunching) this.flywheel.setRPM(params.flywheelRpm());
+            if (shouldLaunch) this.flywheel.setRPM(params.flywheelRpm());
             else this.flywheel.setVoltage(0);
         }
-
-        // TODO: implement auto-fire
-        Logger.recordOutput("Launcher/ShouldAutoLaunch", this.shouldAutoLaunch(params.timeOfFlight()));
 
         turret.periodic();
         hood.periodic();
         flywheel.periodic();
         
-        Logger.recordOutput("Launcher/IsLaunching", this.isLaunching);
+        Logger.recordOutput("Launcher/LaunchState", this.state);
+        Logger.recordOutput("Launcher/Autofire", this.autofire);
+        Logger.recordOutput("Launcher/IsLaunching", shouldLaunch);
+
         Utils.logActiveCommand("Launcher", this);
     }
 
-    public boolean shouldAutoLaunch(double timeOfFlight) {
+    public boolean shouldAutofire(Translation2d robot, double timeOfFlight) {
+        // should we try to score in the hub?
+        if (this.inAllianceZone.getAsBoolean()) {
+            if (!this.willFuelBeScored(timeOfFlight)) return false;
+            return this.inAllianceZoneDebounced.getAsBoolean();
+        }
+
+        // should we try to pass?
+        Translation2d flipped = AllianceFlipUtil.shouldFlip() ? AllianceFlipUtil.flip(robot) : robot;
+        return !ShiftInfo.getCurrentShift().isHubActive() && !FieldConstants.noFireZone.contains(flipped);
+    }
+
+    public boolean willFuelBeScored(double timeOfFlight) {
         ShiftInfo shift = ShiftInfo.getCurrentShift();
         double endOffset = FieldConstants.HUB_DEACTIVATION_SECONDS - timeOfFlight - FieldConstants.HUB_MAX_PROCESS_SECONDS;
         if (shift.isHubActive()) {
@@ -135,7 +146,18 @@ public class Launcher extends SubsystemBase {
             return true;
         }
         if (endOffset > 0 && shift.previous().isHubActive()) return shift.timeSinceStart() < endOffset;
-        return ShiftInfo.getTimeUntilActive() < timeOfFlight + FieldConstants.HUB_MIN_PROCESS_SECONDS;
+        return ShiftInfo.getTimeUntilActive() < timeOfFlight
+            + FieldConstants.HUB_MIN_PROCESS_SECONDS + Flywheel.Constants.SPIN_UP_TIME;
+    }
+
+    public ShotCalculator selectTarget(Translation2d robot) {
+        if (AllianceFlipUtil.shouldFlip()) robot = new Translation2d(AllianceFlipUtil.flipX(robot.getX()), robot.getY());
+
+        if (robot.getX() < FieldConstants.allianceZoneX) return ShotCalculator.HUB;
+
+        double passingFlipY = this.getPassingFlipY();
+        if (robot.getY() < passingFlipY) return ShotCalculator.PASS_RIGHT;
+        return ShotCalculator.PASS_LEFT;
     }
 
     public double getPassingFlipY() {
@@ -213,6 +235,6 @@ public class Launcher extends SubsystemBase {
     }
 
     public boolean shouldLimitDrive() {
-        return this.isLaunching && this.shotCalculator == ShotCalculator.SOTF_HUB;
+        return this.isLaunching.getAsBoolean();
     }
 }
