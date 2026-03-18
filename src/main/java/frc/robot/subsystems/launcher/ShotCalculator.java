@@ -19,28 +19,38 @@ public interface ShotCalculator {
     static final double SOTF_TOF_ERROR_TOLERANCE = 0.01;
     
     static final InterpolatingDoubleTreeMap FLYWHEEL_RPM_HUB = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(1.3165, 1765.0),
-        Map.entry(1.5658, 1810.0),
-        Map.entry(2.0083, 1865.0),
-        Map.entry(2.6245, 1921.0),
-        Map.entry(3.0319, 1983.0),
-        Map.entry(3.4845, 2060.0),
-        Map.entry(3.8919, 2130.0),
-        Map.entry(4.3134, 2183.0),
-        Map.entry(5.0096, 2275.0),
-        Map.entry(5.7282, 2400.0)
+        Map.entry(1.172, 1911.0),
+        Map.entry(1.741, 1977.0),
+        Map.entry(2.224, 1900.0),
+        Map.entry(2.484, 1971.0),
+        Map.entry(2.801, 2031.0),
+        Map.entry(3.236, 2037.0),
+        Map.entry(3.794, 2118.0),
+        Map.entry(4.261, 2180.0),
+        Map.entry(4.655, 2283.0)
     );
     static final InterpolatingDoubleTreeMap HOOD_ANGLE_HUB = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(1.3165, 4.9),
-        Map.entry(1.5658, 7.7),
-        Map.entry(2.0083, 10.2),
-        Map.entry(2.6245, 13.5),
-        Map.entry(3.0319, 18.3),
-        Map.entry(3.4845, 19.8),
-        Map.entry(3.8919, 20.9),
-        Map.entry(4.3134, 25.0),
-        Map.entry(5.0096, 26.0),
-        Map.entry(5.7282, 26.0)
+        Map.entry(1.172, 1.5),
+        Map.entry(1.741, 6.2),
+        Map.entry(2.224, 12.9),
+        Map.entry(2.484, 14.7),
+        Map.entry(2.801, 16.8),
+        Map.entry(3.236, 22.5),
+        Map.entry(3.794, 25.4),
+        Map.entry(4.261, 26.0),
+        Map.entry(4.655, 26.0)
+    );
+
+    static final InterpolatingDoubleTreeMap TIME_OF_FLIGHT_HUB = InterpolatingDoubleTreeMap.ofEntries(
+        Map.entry(1.172, 1.17),
+        Map.entry(1.741, 1.11),
+        Map.entry(2.224, 0.98),
+        Map.entry(2.484, 1.02),
+        Map.entry(2.801, 1.066),
+        Map.entry(3.236, 1.00),
+        Map.entry(3.794, 1.06),
+        Map.entry(4.261, 1.07),
+        Map.entry(4.655, 1.20)
     );
 
     static final InterpolatingDoubleTreeMap FLYWHEEL_RPM_PASSING = InterpolatingDoubleTreeMap.ofEntries(
@@ -51,17 +61,6 @@ public interface ShotCalculator {
     );
     static final InterpolatingDoubleTreeMap HOOD_ANGLE_PASSING = InterpolatingDoubleTreeMap.ofEntries(
         Map.entry(0.0, 22.0)
-    );
-
-    static final InterpolatingDoubleTreeMap TOF_LOOKUP = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(1.0, 0.7),
-        Map.entry(1.5, 0.8),
-        Map.entry(2.5, 1.0),
-        Map.entry(3.0, 1.2),
-        Map.entry(3.5, 1.3),
-        Map.entry(4.0, 1.4),
-        Map.entry(5.0, 1.5),
-        Map.entry(6.0, 1.6)
     );
 
     static final ShotCalculator HUB = robot -> {
@@ -107,7 +106,7 @@ public interface ShotCalculator {
 
         return new ShotParameters(
             Rotation2d.fromRadians(theAngle).plus(Rotation2d.k180deg),
-            flywheelRpm.get(dst), hoodAngle.get(dst), TOF_LOOKUP.get(dst)
+            flywheelRpm.get(dst), hoodAngle.get(dst), TIME_OF_FLIGHT_HUB.get(dst)
         );
     }
 
@@ -128,7 +127,7 @@ public interface ShotCalculator {
         int i;
         for (i = 0; i < SOTF_MAX_ITERATIONS && tofError > SOTF_TOF_ERROR_TOLERANCE; i++) {
             double previousTof = timeOfFlight;
-            timeOfFlight = TOF_LOOKUP.get(dst);
+            timeOfFlight = TIME_OF_FLIGHT_HUB.get(dst);
             tofError = Math.abs(previousTof - timeOfFlight);
             
             newTarget = target.minus(turretVelocity.times(timeOfFlight));
@@ -140,7 +139,7 @@ public interface ShotCalculator {
             iterationTofErrors.add(tofError);
        }
 
-        double finalTof = TOF_LOOKUP.get(dst);
+        double finalTof = TIME_OF_FLIGHT_HUB.get(dst);
 
         Logger.recordOutput("ShotCalculator/SOTF/TargetPose", new Pose2d(newTarget, new Rotation2d()));
         Logger.recordOutput("ShotCalculator/SOTF/Distance", dst);

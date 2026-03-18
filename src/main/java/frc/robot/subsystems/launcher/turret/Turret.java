@@ -30,19 +30,15 @@ public class Turret {
         public static final double magnetPosition = 0.004150390625; // rotations
         
         public static final InterpolatingDoubleTreeMap offsetLookup = InterpolatingDoubleTreeMap.ofEntries(
-            Map.entry(-315.0, -7.5),
-            Map.entry(-135.0, 2.0),
-            Map.entry(45.0, -6.0),
-            Map.entry(225.0, 4.0)
-        //     Map.entry(-180.0, 2.0),
-        //     Map.entry(-135.0, 2.0),
-        //     Map.entry(-90.0, -2.0),
-        //     Map.entry(-45.0, -6.0),
-        //     Map.entry(0.0, -6.0),
-        //     Map.entry(45.0, -6.0),
-        //     Map.entry(90.0, -4.0),
-        //     Map.entry(135.0, -1.0),
-        //     Map.entry(180.0, 2.0)
+            Map.entry(-180.0, 4.0),
+            Map.entry(-135.0, 7.0),
+            Map.entry(-90.0, 4.0),
+            Map.entry(-45.0, -4.0),
+            Map.entry(0.0, -7.0),
+            Map.entry(45.0, -4.0),
+            Map.entry(90.0, -4.0),
+            Map.entry(135.0, 4.0),
+            Map.entry(180.0, 4.0)
         );
     }
 
