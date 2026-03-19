@@ -33,7 +33,9 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeIOTalonFX;
+import frc.robot.subsystems.launcher.LaunchState;
 import frc.robot.subsystems.launcher.Launcher;
+import frc.robot.subsystems.launcher.flywheel.Flywheel;
 import frc.robot.subsystems.launcher.flywheel.FlywheelIO;
 import frc.robot.subsystems.launcher.flywheel.FlywheelIOSim;
 import frc.robot.subsystems.launcher.flywheel.FlywheelIOTalonFX;
@@ -175,7 +177,6 @@ public class RobotContainer {
         for (TestMode mode : TestMode.values()) this.testModeChooser.addOption(mode.getName(), mode);
         SmartDashboard.putData("Test Mode", this.testModeChooser);
         if (!SmartDashboard.containsKey("LauncherRPM")) SmartDashboard.putNumber("LauncherRPM", 1000);
-        SmartDashboard.putNumber("ClimberVolts", 2);
 
         // Setup autonomous features
         this.autonomous = new Autonomous(this);
@@ -216,31 +217,29 @@ public class RobotContainer {
     // configure teleop specific bindings here
     private void configureTeleopBindings() {
         driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onTrue(new SequentialCommandGroup(
-            launcher.startLaunching(),
-            new ConditionalCommand(
-                Commands.none(),
-                intake.agitate(),
-                driverController.leftBumper()
-            )
-        ).withName("Launch and Agitate"));
+            launcher.setState(LaunchState.DONT_LAUNCH)
+        ).withName("Don't Launch"));
 
         driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onFalse(new SequentialCommandGroup(
-            launcher.stopLaunching(),
+            launcher.setState(LaunchState.AUTOMATIC),
             new ConditionalCommand(
                 Commands.none(),
                 intake.retract().andThen(intake.stopRollers()),
                 driverController.leftBumper()
             )
-        ).withName("Stop Launching"));
+        ).withName("Re-enable Autofire"));
 
         launcher.isLaunching().and(RobotModeTriggers.teleop()).whileTrue(new SequentialCommandGroup(
-            // Commands.waitUntil(() -> launcher.getFlywheel().isWithinTarget(60)),
-            Commands.waitSeconds(0.4),
+            Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME),
             new SequentialCommandGroup(
                 indexer.run().repeatedly().onlyWhile(launcher.getTurret().isAtTarget()),
                 indexer.stop()
             ).repeatedly()
         ).withName("Run Indexer"));
+
+        launcher.isLaunching().and(RobotModeTriggers.teleop())
+            .whileTrue(new SequentialCommandGroup(intake.agitate())
+            .withName("Start Agitation"));
 
         launcher.isLaunching().and(RobotModeTriggers.teleop()).onFalse(new SequentialCommandGroup(
             indexer.stop(),
@@ -353,12 +352,11 @@ public class RobotContainer {
 
     public static RobotContainer getInstance() { return instance; }
 
-    public Command cancelEverything() {
+    public Command stopSubsystems() {
         return new SequentialCommandGroup(
             this.intake.stopRollers().ignoringDisable(true),
             this.indexer.stop().ignoringDisable(true),
-            this.launcher.stopLaunching().ignoringDisable(true),
-            this.launcher.setFlywheelVoltage(0).ignoringDisable(true)
+            this.launcher.setState(LaunchState.AUTOMATIC)
         );
     }
 }

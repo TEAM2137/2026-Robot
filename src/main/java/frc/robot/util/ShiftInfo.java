@@ -142,7 +142,8 @@ public enum ShiftInfo {
         String formatted = next.getName() + " in " + (int) Math.ceil(timeUntilNext) + "s";
         
         Logger.recordOutput("ShiftInfo/NextShiftFormatted", formatted);
-        Logger.recordOutput("ShiftInfo/NextShiftIn", (int) Math.ceil(timeUntilNext));
+        // Logger.recordOutput("ShiftInfo/NextShiftIn", (int) Math.ceil(timeUntilNext));
+        Logger.recordOutput("ShiftInfo/NextShiftIn", timeUntilNext);
 
         Logger.recordOutput("ShiftInfo/CurrentShift", current.getName());
         Logger.recordOutput("ShiftInfo/IsHubActive", current.isHubActive());

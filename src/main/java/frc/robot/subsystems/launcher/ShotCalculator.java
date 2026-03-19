@@ -65,30 +65,16 @@ public interface ShotCalculator {
 
     static final ShotCalculator HUB = robot -> {
         Translation2d target = AllianceFlipUtil.either(FieldConstants.blueHub, FieldConstants.redHub);
-        return simpleLookupShot(target, robot, FLYWHEEL_RPM_HUB, HOOD_ANGLE_HUB);
-    };
-
-    static final ShotCalculator SOTF_HUB = robot -> {
-        Translation2d target = AllianceFlipUtil.either(FieldConstants.blueHub, FieldConstants.redHub);
         return simpleSOTFShot(target, robot, FLYWHEEL_RPM_HUB, HOOD_ANGLE_HUB);
-    };
-
-    static final ShotCalculator PASS_LEFT_SOTF = robot -> {
-        Translation2d target = AllianceFlipUtil.either(FieldConstants.blueLeftCorner, FieldConstants.redLeftCorner);
-        return simpleSOTFShot(target, robot, FLYWHEEL_RPM_PASSING, HOOD_ANGLE_PASSING);
-    };
-    static final ShotCalculator PASS_RIGHT_SOTF = robot -> {
-        Translation2d target = AllianceFlipUtil.either(FieldConstants.blueRightCorner, FieldConstants.redRightCorner);
-        return simpleSOTFShot(target, robot, FLYWHEEL_RPM_PASSING, HOOD_ANGLE_PASSING);
     };
 
     static final ShotCalculator PASS_LEFT = robot -> {
         Translation2d target = AllianceFlipUtil.either(FieldConstants.blueLeftCorner, FieldConstants.redLeftCorner);
-        return simpleLookupShot(target, robot, FLYWHEEL_RPM_PASSING, HOOD_ANGLE_PASSING);
+        return simpleSOTFShot(target, robot, FLYWHEEL_RPM_PASSING, HOOD_ANGLE_PASSING);
     };
     static final ShotCalculator PASS_RIGHT = robot -> {
         Translation2d target = AllianceFlipUtil.either(FieldConstants.blueRightCorner, FieldConstants.redRightCorner);
-        return simpleLookupShot(target, robot, FLYWHEEL_RPM_PASSING, HOOD_ANGLE_PASSING);
+        return simpleSOTFShot(target, robot, FLYWHEEL_RPM_PASSING, HOOD_ANGLE_PASSING);
     };
 
     static ShotParameters simpleLookupShot(Translation2d target, RobotContainer robot, InterpolatingDoubleTreeMap flywheelRpm, InterpolatingDoubleTreeMap hoodAngle) {
