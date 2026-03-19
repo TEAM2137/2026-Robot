@@ -145,7 +145,7 @@ public class Launcher extends SubsystemBase {
             if (endOffset < 0 && timeUntilInactive >= 0) return timeUntilInactive > -endOffset;
             return true;
         }
-        if (endOffset > 0 && shift.previous().isHubActive()) return shift.timeSinceStart() < endOffset;
+        if (endOffset > 0 && shift.timeSinceStart() < endOffset) return true;
         return ShiftInfo.getTimeUntilActive() < timeOfFlight
             + FieldConstants.HUB_MIN_PROCESS_SECONDS + Flywheel.Constants.SPIN_UP_TIME;
     }
@@ -180,6 +180,11 @@ public class Launcher extends SubsystemBase {
         if (DriverStation.getRawAllianceStation().toString().contains("1")) return Optional.of(false);
         if (DriverStation.getRawAllianceStation().toString().contains("3")) return Optional.of(true);
         return Optional.empty();
+    }
+
+    public boolean shouldLimitDrive() {
+        return false;
+        // return this.isLaunching.getAsBoolean();
     }
 
     public Turret getTurret() {
@@ -232,9 +237,5 @@ public class Launcher extends SubsystemBase {
 
     public Command modifyManualFlywheelRPM(int rpmPerSec) {
         return run(() -> this.manualFlywheelRPM += rpmPerSec / 50.0);
-    }
-
-    public boolean shouldLimitDrive() {
-        return this.isLaunching.getAsBoolean();
     }
 }

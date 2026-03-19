@@ -237,6 +237,10 @@ public class RobotContainer {
             ).repeatedly()
         ).withName("Run Indexer"));
 
+        launcher.isLaunching().and(RobotModeTriggers.teleop())
+            .whileTrue(new SequentialCommandGroup(intake.agitate())
+            .withName("Start Agitation"));
+
         launcher.isLaunching().and(RobotModeTriggers.teleop()).onFalse(new SequentialCommandGroup(
             indexer.stop(),
             new ConditionalCommand(

@@ -12,7 +12,8 @@ public interface ModuleIO {
         public double driveVelocityMetersPerSec = 0.0;
         public double driveTargetVelocityRadPerSec = 0.0;
         public double driveAppliedVolts = 0.0;
-        public double driveCurrentAmps = 0.0;
+        public double driveStatorCurrentAmps = 0.0;
+        public double driveSupplyCurrentAmps = 0.0;
 
         public boolean turnConnected = false;
         public boolean turnEncoderConnected = false;
