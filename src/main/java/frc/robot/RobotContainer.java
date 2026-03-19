@@ -1,6 +1,5 @@
 package frc.robot;
 
-import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -192,11 +191,9 @@ public class RobotContainer {
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureControllerBindings() {
-        BooleanSupplier slowMode = () -> driverController.getRightTriggerAxis() > 0.25;
-
         // Default command, normal field-relative drive
         drive.setDefaultCommand(DriveCommands.joystickDrive(drive, joystickSupplier,
-                        slowMode, () -> -driverController.getRightX() * 0.75)
+                        () -> false, () -> -driverController.getRightX() * 0.75)
                 .withName("Default Drive"));
 
         // Reset gyro to 0°
@@ -216,6 +213,9 @@ public class RobotContainer {
 
     // configure teleop specific bindings here
     private void configureTeleopBindings() {
+        driverController.a().whileTrue(DriveCommands.joystickDriveFrontFirst(drive, joystickSupplier));
+        driverController.rightTrigger().whileTrue(DriveCommands.joystickDriveCardinalDirections(drive, joystickSupplier, () -> -driverController.getRightX() * 0.75));
+
         driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onTrue(new SequentialCommandGroup(
             launcher.setState(LaunchState.DONT_LAUNCH)
         ).withName("Don't Launch"));

@@ -4,6 +4,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class IndexerIOTalonFX implements IndexerIO {
     public static class Constants {
@@ -22,6 +23,7 @@ public class IndexerIOTalonFX implements IndexerIO {
     public IndexerIOTalonFX() {
         this.indexer = new TalonFX(Constants.indexerId, "turret");
         this.indexer.getConfigurator().apply(new MotorOutputConfigs()
+            .withNeutralMode(NeutralModeValue.Brake)
             .withInverted(InvertedValue.Clockwise_Positive));
 
         this.indexer.getConfigurator().apply(new CurrentLimitsConfigs()
@@ -30,6 +32,7 @@ public class IndexerIOTalonFX implements IndexerIO {
         
         this.feeder = new TalonFX(Constants.feederId, "turret");
         this.feeder.getConfigurator().apply(new MotorOutputConfigs()
+            .withNeutralMode(NeutralModeValue.Brake)
             .withInverted(InvertedValue.CounterClockwise_Positive));
 
         this.feeder.getConfigurator().apply(new CurrentLimitsConfigs()

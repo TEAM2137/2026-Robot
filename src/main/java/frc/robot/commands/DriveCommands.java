@@ -31,7 +31,7 @@ import org.littletonrobotics.junction.Logger;
 public class DriveCommands {
     public static final double DEADBAND = 0.1;
 
-    public static final double ANGLE_KP = 4.5;
+    public static final double ANGLE_KP = 6.0;
     public static final double ANGLE_KD = 0.2;
     public static final double ANGLE_MAX_VELOCITY = 5.5;
     public static final double ANGLE_MAX_ACCELERATION = 45.0;
@@ -117,10 +117,8 @@ public class DriveCommands {
             double velocityMultiplier = slowMode.getAsBoolean() ? 0.3 : 1.0;
 
             // Get linear velocity from controller values
-            Translation2d linearVelocity = getLinearVelocityFromJoysticks(
-                AllianceFlipUtil.shouldFlip() ? movementRaw.getX() : -movementRaw.getX(),
-                AllianceFlipUtil.shouldFlip() ? movementRaw.getY() : -movementRaw.getY()
-            ).times(velocityMultiplier * drive.getMaxLinearSpeedMetersPerSec());
+            Translation2d linearVelocity = getLinearVelocityFromJoysticks(movementRaw.getX(), movementRaw.getY())
+                .times(velocityMultiplier * drive.getMaxLinearSpeedMetersPerSec());
 
             // Calculate angular velocity from PID
             double omega = angleController.calculate(drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
@@ -133,6 +131,27 @@ public class DriveCommands {
         .beforeStarting(() -> angleController.reset(
             drive.getRotation().getRadians(),
             drive.getAngularVelocityRadsPerSec()), drive);
+    }
+
+    private static Rotation2d lastRotation = null;
+
+    public static Command joystickDriveFrontFirst(Drive drive, Supplier<Translation2d> movementSupplier) {
+        return joystickDriveAtAngle(drive, movementSupplier, () -> false, () -> {
+            Translation2d movement = movementSupplier.get();
+            if (AllianceFlipUtil.shouldFlip()) movement = AllianceFlipUtil.flip(movement);
+            if (lastRotation == null) lastRotation = drive.getRotation();
+            if (movement.getNorm() >= DEADBAND) lastRotation = movement.getAngle();
+            return lastRotation;
+        });
+    }
+    
+    public static Command joystickDriveCardinalDirections(Drive drive, Supplier<Translation2d> movementSupplier, DoubleSupplier omegaSupplier) {
+        return joystickDrive(drive, () -> {
+            Translation2d movement = movementSupplier.get();
+            if (Math.abs(movement.getX()) > Math.abs(movement.getY()))
+                return new Translation2d(movement.getX(), 0.0);
+            return new Translation2d(0.0, movement.getY());
+        }, () -> false, omegaSupplier);
     }
 
     public static void driveFieldRelative(Drive drive, Translation2d linearVelocity, double omega) {
