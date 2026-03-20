@@ -126,6 +126,8 @@ public class Launcher extends SubsystemBase {
     }
 
     public boolean shouldAutofire(Translation2d robot, double timeOfFlight) {
+        if (DriverStation.isAutonomous()) return false;
+        
         // should we try to score in the hub?
         if (this.inAllianceZone.getAsBoolean()) {
             if (!this.willFuelBeScored(timeOfFlight)) return false;
