@@ -1,7 +1,6 @@
 package frc.robot.subsystems.launcher;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -15,69 +14,63 @@ import frc.robot.util.FieldConstants;
 
 @FunctionalInterface
 public interface ShotCalculator {
-    static final int SOTF_MAX_ITERATIONS = 10;
-    static final double SOTF_TOF_ERROR_TOLERANCE = 0.01;
-    
-    static final InterpolatingDoubleTreeMap FLYWHEEL_RPM_HUB = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(1.172, 1911.0),
-        Map.entry(1.741, 1977.0),
-        Map.entry(2.224, 1900.0),
-        Map.entry(2.484, 1971.0),
-        Map.entry(2.801, 2031.0),
-        Map.entry(3.236, 2037.0),
-        Map.entry(3.794, 2118.0),
-        Map.entry(4.261, 2180.0),
-        Map.entry(4.655, 2283.0)
-    );
-    static final InterpolatingDoubleTreeMap HOOD_ANGLE_HUB = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(1.172, 1.5),
-        Map.entry(1.741, 6.2),
-        Map.entry(2.224, 12.9),
-        Map.entry(2.484, 14.7),
-        Map.entry(2.801, 16.8),
-        Map.entry(3.236, 22.5),
-        Map.entry(3.794, 25.4),
-        Map.entry(4.261, 26.0),
-        Map.entry(4.655, 26.0)
-    );
-
-    static final InterpolatingDoubleTreeMap TIME_OF_FLIGHT_HUB = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(1.172, 1.17),
-        Map.entry(1.741, 1.11),
-        Map.entry(2.224, 0.98),
-        Map.entry(2.484, 1.02),
-        Map.entry(2.801, 1.066),
-        Map.entry(3.236, 1.00),
-        Map.entry(3.794, 1.06),
-        Map.entry(4.261, 1.07),
-        Map.entry(4.655, 1.20)
-    );
-
-    static final InterpolatingDoubleTreeMap FLYWHEEL_RPM_PASSING = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(4.5000, 1861.0),
-        Map.entry(6.9200, 2207.0),
-        Map.entry(8.7000, 2450.0),
-        Map.entry(12.0000, 2770.0)
-    );
-    static final InterpolatingDoubleTreeMap HOOD_ANGLE_PASSING = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(0.0, 22.0)
-    );
-
     static final ShotCalculator HUB = robot -> {
         Translation2d target = AllianceFlipUtil.either(FieldConstants.blueHub, FieldConstants.redHub);
-        return simpleSOTFShot(target, robot, FLYWHEEL_RPM_HUB, HOOD_ANGLE_HUB);
+        return simpleSOTFShot(target, robot,
+            LookupTables.flywheelRpmHub,
+            LookupTables.hoodAngleHub, 
+            LookupTables.timeOfFlightHub
+        );
     };
 
     static final ShotCalculator PASS_LEFT = robot -> {
         Translation2d target = AllianceFlipUtil.either(FieldConstants.blueLeftCorner, FieldConstants.redLeftCorner);
-        return simpleSOTFShot(target, robot, FLYWHEEL_RPM_PASSING, HOOD_ANGLE_PASSING);
+        return simpleSOTFShot(target, robot,
+            LookupTables.flywheelRpmPassing,
+            LookupTables.hoodAnglePassing, 
+            LookupTables.timeOfFlightPassing
+        );
     };
     static final ShotCalculator PASS_RIGHT = robot -> {
         Translation2d target = AllianceFlipUtil.either(FieldConstants.blueRightCorner, FieldConstants.redRightCorner);
-        return simpleSOTFShot(target, robot, FLYWHEEL_RPM_PASSING, HOOD_ANGLE_PASSING);
+        return simpleSOTFShot(target, robot,
+            LookupTables.flywheelRpmPassing,
+            LookupTables.hoodAnglePassing, 
+            LookupTables.timeOfFlightPassing
+        );
     };
 
-    static ShotParameters simpleLookupShot(Translation2d target, RobotContainer robot, InterpolatingDoubleTreeMap flywheelRpm, InterpolatingDoubleTreeMap hoodAngle) {
+    static final ShotCalculator DYNAMIC_PASSING = robot -> {
+        Pose2d pose = robot.drive.getPose();
+        if (pose.getY() < FieldConstants.passingMidZoneY1) {
+            return simpleSOTFShot(
+                FieldConstants.leftPassTarget, robot,
+                LookupTables.flywheelRpmPassing,
+                LookupTables.hoodAnglePassing,
+                LookupTables.timeOfFlightPassing
+            );
+        }
+        if (pose.getY() > FieldConstants.passingMidZoneY2) {
+            return simpleSOTFShot(
+                FieldConstants.rightPassTarget, robot,
+                LookupTables.flywheelRpmPassing,
+                LookupTables.hoodAnglePassing,
+                LookupTables.timeOfFlightPassing
+            );
+        }
+        return simpleSOTFShot(
+            FieldConstants.midPassTarget, robot,
+            LookupTables.flywheelRpmPassing,
+            LookupTables.hoodAnglePassing,
+            LookupTables.timeOfFlightPassing
+        );
+    };
+    
+    static final int SOTF_MAX_ITERATIONS = 10;
+    static final double SOTF_TOF_ERROR_TOLERANCE = 0.01;
+
+    static ShotParameters simpleLookupShot(Translation2d target, RobotContainer robot,
+            InterpolatingDoubleTreeMap flywheelRpm, InterpolatingDoubleTreeMap hoodAngle, InterpolatingDoubleTreeMap tofLookup) {
         Translation2d turretPos = robot.launcher.getTurret().getFieldSpacePose(robot).getTranslation();
 
         double dst = target.getDistance(turretPos);
@@ -92,11 +85,12 @@ public interface ShotCalculator {
 
         return new ShotParameters(
             Rotation2d.fromRadians(theAngle).plus(Rotation2d.k180deg),
-            flywheelRpm.get(dst), hoodAngle.get(dst), TIME_OF_FLIGHT_HUB.get(dst)
+            flywheelRpm.get(dst), hoodAngle.get(dst), tofLookup.get(dst)
         );
     }
 
-    static ShotParameters simpleSOTFShot(Translation2d target, RobotContainer robot, InterpolatingDoubleTreeMap flywheelRpm, InterpolatingDoubleTreeMap hoodAngle) {
+    static ShotParameters simpleSOTFShot(Translation2d target, RobotContainer robot,
+            InterpolatingDoubleTreeMap flywheelRpm, InterpolatingDoubleTreeMap hoodAngle, InterpolatingDoubleTreeMap tofLookup) {
         Translation2d turretPos = robot.launcher.getTurret().getFieldSpacePose(robot).getTranslation();
         Translation2d turretVelocity = robot.launcher.getTurret().getFieldSpaceVelocity(robot);
 
@@ -113,7 +107,7 @@ public interface ShotCalculator {
         int i;
         for (i = 0; i < SOTF_MAX_ITERATIONS && tofError > SOTF_TOF_ERROR_TOLERANCE; i++) {
             double previousTof = timeOfFlight;
-            timeOfFlight = TIME_OF_FLIGHT_HUB.get(dst);
+            timeOfFlight = tofLookup.get(dst);
             tofError = Math.abs(previousTof - timeOfFlight);
             
             newTarget = target.minus(turretVelocity.times(timeOfFlight));
@@ -125,7 +119,7 @@ public interface ShotCalculator {
             iterationTofErrors.add(tofError);
        }
 
-        double finalTof = TIME_OF_FLIGHT_HUB.get(dst);
+        double finalTof = tofLookup.get(dst);
 
         Logger.recordOutput("ShotCalculator/SOTF/TargetPose", new Pose2d(newTarget, new Rotation2d()));
         Logger.recordOutput("ShotCalculator/SOTF/Distance", dst);

@@ -72,4 +72,13 @@ public class Utils {
         
         return outline;
     }
+
+    public static Translation2d[] createAxisLineAt(double value, boolean xAxis) {
+        Translation2d[] line = new Translation2d[2];
+        if (xAxis) {
+            line[0] = new Translation2d(0.0, value);
+            line[1] = new Translation2d(FieldConstants.fieldWidth, value);
+        }
+        return line;
+    }
 }

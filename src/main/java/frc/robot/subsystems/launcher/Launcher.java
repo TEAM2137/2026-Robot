@@ -141,7 +141,7 @@ public class Launcher extends SubsystemBase {
 
     public boolean willFuelBeScored(double timeOfFlight) {
         ShiftInfo shift = ShiftInfo.getCurrentShift();
-        double endOffset = FieldConstants.HUB_DEACTIVATION_SECONDS - timeOfFlight - FieldConstants.HUB_MAX_PROCESS_SECONDS;
+        double endOffset = FieldConstants.hubDeactivationSeconds - timeOfFlight - FieldConstants.hubMaxProcessSeconds;
         if (shift.isHubActive()) {
             double timeUntilInactive = ShiftInfo.getTimeUntilInactive();
             if (endOffset < 0 && timeUntilInactive >= 0) return timeUntilInactive > -endOffset;
@@ -149,17 +149,14 @@ public class Launcher extends SubsystemBase {
         }
         if (endOffset > 0 && shift.timeSinceStart() < endOffset) return true;
         return ShiftInfo.getTimeUntilActive() < timeOfFlight
-            + FieldConstants.HUB_MIN_PROCESS_SECONDS + Flywheel.Constants.SPIN_UP_TIME;
+            + FieldConstants.hubMinProcessSeconds + Flywheel.Constants.SPIN_UP_TIME;
     }
 
     public ShotCalculator selectTarget(Translation2d robot) {
         if (AllianceFlipUtil.shouldFlip()) robot = new Translation2d(AllianceFlipUtil.flipX(robot.getX()), robot.getY());
 
         if (robot.getX() < FieldConstants.allianceZoneX) return ShotCalculator.HUB;
-
-        double passingFlipY = this.getPassingFlipY();
-        if (robot.getY() < passingFlipY) return ShotCalculator.PASS_RIGHT;
-        return ShotCalculator.PASS_LEFT;
+        return ShotCalculator.DYNAMIC_PASSING;
     }
 
     public double getPassingFlipY() {

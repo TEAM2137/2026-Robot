@@ -11,9 +11,12 @@ import edu.wpi.first.math.geometry.Translation2d;
 public class FieldConstants {
     public static final double fieldWidth = 16.541;
     public static final double fieldHeight = 8.0692;
+    
+    public static final double midFieldY = fieldHeight / 2.0;
+    public static final double midFieldX = fieldWidth / 2.0;
 
-    public static final double cornerOffsetX = 1.5; // Adjustable distance from corner
-    public static final double cornerOffsetY = 2.0; // Adjustable distance from corner
+    public static final double cornerOffsetX = 1.5;
+    public static final double cornerOffsetY = 2.0;
 
     public static final Translation2d blueLeftCorner = new Translation2d(cornerOffsetX, fieldHeight - cornerOffsetY);
     public static final Translation2d blueRightCorner = new Translation2d(cornerOffsetX, cornerOffsetY);
@@ -33,30 +36,31 @@ public class FieldConstants {
     public static final Translation2d redHub = new Translation2d(fieldWidth / 2.0 + hubFromCenterX, fieldHeight / 2.0);
     
     public static final double allianceZoneX = hubFromLeftX - bumpWidth / 2.0;
-    public static final double passingFlipY = fieldHeight / 2.0;
 
     public static final double noFireZone1Height = bumpWidth * 1.25;
     public static final double noFireZone1Width = noFireZone1Height;
-
-    public static final double midPassY1 = fieldHeight / 2.0 + 1.6;
-    public static final double midPassY2 = fieldHeight / 2.0 - 1.6;
 
     public static final Rectangle2d noFireZone = new Rectangle2d(
         new Translation2d(hubFromLeftX + bumpWidth / 2.0, fieldHeight / 2.0 + noFireZone1Height / 2.0),
         new Translation2d(hubFromLeftX + bumpWidth / 2.0 + noFireZone1Width, fieldHeight / 2.0 - noFireZone1Height / 2.0));
 
-    // this is a no-fire zone in the opposing alliance's side
-    // it's unlikely that we'll need this
-    
-    // public static final double noFireZone2Height = bumpWidth * 1.25;
-    // public static final double noFireZone2Width = noFireZone1Height;
-    // public static final Rectangle2d noFireZone2 = new Rectangle2d(
-    //     new Translation2d(fieldWidth - hubFromLeftX + bumpWidth / 2.0, fieldHeight / 2.0 + noFireZone2Height / 2.0),
-    //     new Translation2d(fieldWidth - hubFromLeftX + bumpWidth / 2.0 + noFireZone2Width, fieldHeight / 2.0 - noFireZone2Height / 2.0));
+    public static final double passingMidZoneWidth = bumpWidth * 1.25;
+    public static final double passingMidZoneY1 = midFieldY - passingMidZoneWidth / 2.0;
+    public static final double passingMidZoneY2 = midFieldY + passingMidZoneWidth / 2.0;
 
-    public static final double HUB_MIN_PROCESS_SECONDS = 0.75;
-    public static final double HUB_MAX_PROCESS_SECONDS = 2.0;
-    public static final double HUB_DEACTIVATION_SECONDS = 3.0;
+    public static final double passingSideZoneWidth = (fieldHeight - passingMidZoneWidth) / 2.0;
+    public static final double passingSideZoneLeftCenter = passingSideZoneWidth / 2.0;
+    public static final double passingSideZoneRightCenter = fieldHeight - passingSideZoneWidth / 2.0;
+
+    public static final double passingDistanceFromWall = 1.0;
+    
+    public static final Translation2d midPassTarget = new Translation2d(passingDistanceFromWall, midFieldY);
+    public static final Translation2d leftPassTarget = new Translation2d(passingDistanceFromWall, passingSideZoneLeftCenter);
+    public static final Translation2d rightPassTarget = new Translation2d(passingDistanceFromWall, passingSideZoneRightCenter);
+
+    public static final double hubMinProcessSeconds = 0.75;
+    public static final double hubMaxProcessSeconds = 2.0;
+    public static final double hubDeactivationSeconds = 3.0;
 
     static {
         Logger.recordOutput("FieldConstants/BlueTowerLeftPost", new Pose2d(blueTowerLeftPost, new Rotation2d()));
@@ -64,5 +68,11 @@ public class FieldConstants {
 
         Logger.recordOutput("FieldConstants/NoFireZoneBlue", Utils.createRectOutline(noFireZone, false));
         Logger.recordOutput("FieldConstants/NoFireZoneRed", Utils.createRectOutline(noFireZone, true));
+
+        Logger.recordOutput("FieldConstants/PassingMidZone1", Utils.createAxisLineAt(passingMidZoneY1, true));
+        Logger.recordOutput("FieldConstants/PassingMidZone2", Utils.createAxisLineAt(passingMidZoneY2, true));
+
+        Logger.recordOutput("FieldConstants/BlueLeftCorner", blueLeftCorner);
+        Logger.recordOutput("FieldConstants/BlueRightCorner", blueRightCorner);
     }
 }
