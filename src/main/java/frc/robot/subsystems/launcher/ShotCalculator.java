@@ -42,24 +42,21 @@ public interface ShotCalculator {
 
     static final ShotCalculator DYNAMIC_PASSING = robot -> {
         Pose2d pose = robot.drive.getPose();
-        if (pose.getY() < FieldConstants.passingMidZoneY1) {
-            return simpleSOTFShot(
-                FieldConstants.leftPassTarget, robot,
-                LookupTables.flywheelRpmPassing,
-                LookupTables.hoodAnglePassing,
-                LookupTables.timeOfFlightPassing
-            );
-        }
-        if (pose.getY() > FieldConstants.passingMidZoneY2) {
-            return simpleSOTFShot(
-                FieldConstants.rightPassTarget, robot,
-                LookupTables.flywheelRpmPassing,
-                LookupTables.hoodAnglePassing,
-                LookupTables.timeOfFlightPassing
-            );
-        }
+        Translation2d target;
+        if (pose.getY() < FieldConstants.passingMidZoneY1) target = FieldConstants.leftPassTarget;
+        else if (pose.getY() > FieldConstants.passingMidZoneY2) target = FieldConstants.rightPassTarget;
+        else return simpleSOTFShot(
+            AllianceFlipUtil.shouldFlip()
+                ? AllianceFlipUtil.flip(FieldConstants.midPassTarget)
+                : FieldConstants.midPassTarget, robot,
+            LookupTables.flywheelRpmPassing,
+            LookupTables.hoodAnglePassing,
+            LookupTables.timeOfFlightPassing
+        );
+        double offset = (target.getY() - pose.getY()) * 0.5;
+        double flippedX = AllianceFlipUtil.shouldFlip() ? AllianceFlipUtil.flipX(target.getX()) : target.getX();
         return simpleSOTFShot(
-            FieldConstants.midPassTarget, robot,
+            new Translation2d(flippedX, target.getY() + offset), robot,
             LookupTables.flywheelRpmPassing,
             LookupTables.hoodAnglePassing,
             LookupTables.timeOfFlightPassing

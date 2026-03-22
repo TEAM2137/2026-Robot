@@ -156,8 +156,7 @@ public class Launcher extends SubsystemBase {
         if (AllianceFlipUtil.shouldFlip()) robot = new Translation2d(AllianceFlipUtil.flipX(robot.getX()), robot.getY());
 
         if (robot.getX() < FieldConstants.allianceZoneX) return ShotCalculator.HUB;
-        return ShotCalculator.PASS_RIGHT; // TODO fix
-        // return ShotCalculator.DYNAMIC_PASSING;
+        return ShotCalculator.DYNAMIC_PASSING;
     }
 
     public double getPassingFlipY() {
