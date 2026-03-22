@@ -38,24 +38,24 @@ public class FieldConstants {
     public static final double allianceZoneX = hubFromLeftX - bumpWidth / 2.0;
 
     public static final double noFireZone1Height = bumpWidth * 1.25;
-    public static final double noFireZone1Width = noFireZone1Height;
+    public static final double noFireZone1Width = noFireZone1Height * 1.25;
 
     public static final Rectangle2d noFireZone = new Rectangle2d(
         new Translation2d(hubFromLeftX + bumpWidth / 2.0, fieldHeight / 2.0 + noFireZone1Height / 2.0),
         new Translation2d(hubFromLeftX + bumpWidth / 2.0 + noFireZone1Width, fieldHeight / 2.0 - noFireZone1Height / 2.0));
 
-    public static final double passingMidZoneWidth = bumpWidth * 1.25;
+    public static final double passingMidZoneWidth = bumpWidth;
     public static final double passingMidZoneY1 = midFieldY - passingMidZoneWidth / 2.0;
     public static final double passingMidZoneY2 = midFieldY + passingMidZoneWidth / 2.0;
 
-    public static final double passingSideZoneWidth = (fieldHeight - passingMidZoneWidth) / 2.0;
+    public static final double passingSideZoneWidth = fieldHeight / 2.0; // (fieldHeight - passingMidZoneWidth) / 2.0;
     public static final double passingSideZoneLeftCenter = passingSideZoneWidth / 2.0;
     public static final double passingSideZoneRightCenter = fieldHeight - passingSideZoneWidth / 2.0;
 
     public static final double passingDistanceFromWall = 1.0;
-    public static final double passingOffsetTowardsMidField = 0.25;
+    public static final double passingOffsetTowardsMidField = 0;
     
-    public static final Translation2d midPassTarget = new Translation2d(passingDistanceFromWall, midFieldY);
+    // public static final Translation2d midPassTarget = new Translation2d(passingDistanceFromWall, midFieldY);
     public static final Translation2d leftPassTarget = new Translation2d(passingDistanceFromWall, passingSideZoneLeftCenter + passingOffsetTowardsMidField);
     public static final Translation2d rightPassTarget = new Translation2d(passingDistanceFromWall, passingSideZoneRightCenter - passingOffsetTowardsMidField);
 

@@ -136,7 +136,8 @@ public class Turret {
         });
     }
 
-    public Pose2d getFieldSpacePose(RobotContainer robot) {
+    public Pose2d getFieldSpacePose() {
+        RobotContainer robot = RobotContainer.getInstance();
         Pose2d robotPose = robot.drive.getPose();
         Transform2d transform = new Transform2d(
             Constants.turretOffset,
@@ -148,7 +149,8 @@ public class Turret {
         );
     }
 
-    public Translation2d getFieldSpaceVelocity(RobotContainer robot) {
+    public Translation2d getFieldSpaceVelocity() {
+        RobotContainer robot = RobotContainer.getInstance();
         Pose2d robotPose = robot.drive.getPose();
         double omega = robot.drive.getAngularVelocityRadsPerSec();
         Translation2d world = Constants.turretOffset.rotateBy(robotPose.getRotation());
@@ -172,7 +174,7 @@ public class Turret {
 
         Logger.recordOutput("Launcher/Turret/DidZero", this.didZero);
         Logger.recordOutput("Launcher/Turret/ManualOffset", this.manualOffset);
-        Logger.recordOutput("Launcher/Turret/FieldSpacePose", this.getFieldSpacePose(RobotContainer.getInstance()));
-        Logger.recordOutput("Launcher/Turret/FieldSpaceVelocity", this.getFieldSpaceVelocity(RobotContainer.getInstance()));
+        Logger.recordOutput("Launcher/Turret/FieldSpacePose", this.getFieldSpacePose());
+        Logger.recordOutput("Launcher/Turret/FieldSpaceVelocity", this.getFieldSpaceVelocity());
     }
 }

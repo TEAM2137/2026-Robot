@@ -41,18 +41,11 @@ public interface ShotCalculator {
     };
 
     static final ShotCalculator DYNAMIC_PASSING = robot -> {
-        Pose2d pose = robot.drive.getPose();
+        Pose2d pose = robot.launcher.getTurret().getFieldSpacePose();
         Translation2d target;
-        if (pose.getY() < FieldConstants.passingMidZoneY1) target = FieldConstants.leftPassTarget;
-        else if (pose.getY() > FieldConstants.passingMidZoneY2) target = FieldConstants.rightPassTarget;
-        else return simpleSOTFShot(
-            AllianceFlipUtil.shouldFlip()
-                ? AllianceFlipUtil.flip(FieldConstants.midPassTarget)
-                : FieldConstants.midPassTarget, robot,
-            LookupTables.flywheelRpmPassing,
-            LookupTables.hoodAnglePassing,
-            LookupTables.timeOfFlightPassing
-        );
+        if (pose.getY() < robot.launcher.getPassingFlipY()) target = FieldConstants.leftPassTarget;
+        else target = FieldConstants.rightPassTarget;
+
         double offset = (target.getY() - pose.getY()) * 0.5;
         double flippedX = AllianceFlipUtil.shouldFlip() ? AllianceFlipUtil.flipX(target.getX()) : target.getX();
         return simpleSOTFShot(
@@ -68,7 +61,7 @@ public interface ShotCalculator {
 
     static ShotParameters simpleLookupShot(Translation2d target, RobotContainer robot,
             InterpolatingDoubleTreeMap flywheelRpm, InterpolatingDoubleTreeMap hoodAngle, InterpolatingDoubleTreeMap tofLookup) {
-        Translation2d turretPos = robot.launcher.getTurret().getFieldSpacePose(robot).getTranslation();
+        Translation2d turretPos = robot.launcher.getTurret().getFieldSpacePose().getTranslation();
 
         double dst = target.getDistance(turretPos);
         double dx = target.getX() - turretPos.getX();
@@ -88,8 +81,8 @@ public interface ShotCalculator {
 
     static ShotParameters simpleSOTFShot(Translation2d target, RobotContainer robot,
             InterpolatingDoubleTreeMap flywheelRpm, InterpolatingDoubleTreeMap hoodAngle, InterpolatingDoubleTreeMap tofLookup) {
-        Translation2d turretPos = robot.launcher.getTurret().getFieldSpacePose(robot).getTranslation();
-        Translation2d turretVelocity = robot.launcher.getTurret().getFieldSpaceVelocity(robot);
+        Translation2d turretPos = robot.launcher.getTurret().getFieldSpacePose().getTranslation();
+        Translation2d turretVelocity = robot.launcher.getTurret().getFieldSpaceVelocity();
 
         ArrayList<Pose2d> iterationPoses = new ArrayList<>(SOTF_MAX_ITERATIONS);
         ArrayList<Double> iterationDistances = new ArrayList<>(SOTF_MAX_ITERATIONS);

@@ -135,7 +135,8 @@ public class Launcher extends SubsystemBase {
         }
 
         // should we try to pass?
-        Translation2d flipped = AllianceFlipUtil.shouldFlip() ? AllianceFlipUtil.flip(robot) : robot;
+        Translation2d turretPos = turret.getFieldSpacePose().getTranslation();
+        Translation2d flipped = AllianceFlipUtil.shouldFlip() ? AllianceFlipUtil.flip(turretPos) : turretPos;
         return !ShiftInfo.getCurrentShift().isHubActive() && !FieldConstants.noFireZone.contains(flipped);
     }
 
@@ -171,12 +172,13 @@ public class Launcher extends SubsystemBase {
                 SmartDashboard.putBoolean("PassingPriority", priority));
         }
         boolean priority = SmartDashboard.getBoolean("PassingPriority", false);
-        if (AllianceFlipUtil.shouldFlip()) return priority ? FieldConstants.passingMidZoneY2 : FieldConstants.passingMidZoneY1;
-        return priority ? FieldConstants.passingMidZoneY1 : FieldConstants.passingMidZoneY2;
+        if (AllianceFlipUtil.shouldFlip()) return priority ? FieldConstants.passingMidZoneY1 : FieldConstants.passingMidZoneY2;
+        return priority ? FieldConstants.passingMidZoneY2 : FieldConstants.passingMidZoneY1;
     }
 
     public Optional<Boolean> getDefaultPassingPriority() {
         if (DriverStation.getRawAllianceStation().toString().contains("1")) return Optional.of(false);
+        if (DriverStation.getRawAllianceStation().toString().contains("2")) return Optional.of(false);
         if (DriverStation.getRawAllianceStation().toString().contains("3")) return Optional.of(true);
         return Optional.empty();
     }
