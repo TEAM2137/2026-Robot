@@ -41,7 +41,7 @@ public class Robot extends LoggedRobot {
         // Set up data receivers & replay source
         switch (Constants.currentMode) {
             case REAL:
-                Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs/" + Constants.currentRobotType.name().toLowerCase()));
+                Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
                 Logger.addDataReceiver(new NT4Publisher());
             break;
 
@@ -62,8 +62,7 @@ public class Robot extends LoggedRobot {
         // Start AdvantageKit logger
         Logger.start();
 
-        // Instantiate our RobotContainer. This will perform all our button bindings,
-        // and put our autonomous chooser on the dashboard.
+        // Instantiate our RobotContainer
         robotContainer = new RobotContainer();
     }
 

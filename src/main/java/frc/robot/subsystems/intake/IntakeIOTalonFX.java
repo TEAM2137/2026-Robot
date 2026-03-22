@@ -7,16 +7,19 @@ import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class IntakeIOTalonFX implements IntakeIO {
     public static class Constants {
-        public static final int rollersId = 40;
-        public static final int pivotId = 41;
+        public static final int pivotId = 40;
+        public static final int rollerLeaderId = 41;
+        public static final int rollerFollowerId = 42;
         public static final double pivotGearing = 3753.0 / 1568.0;
 
         public static final double kP = 16.0;
@@ -30,7 +33,8 @@ public class IntakeIOTalonFX implements IntakeIO {
     }
 
     protected final TalonFX pivot;
-    protected final TalonFX rollers;
+    protected final TalonFX leader;
+    protected final TalonFX follower;
 
     protected double targetPositionRotations;
     protected double rollerTargetVelocity;
@@ -38,17 +42,28 @@ public class IntakeIOTalonFX implements IntakeIO {
     public IntakeIOTalonFX() {
         // roller configs
 
-        this.rollers = new TalonFX(Constants.rollersId);
-        this.rollers.getConfigurator().apply(new MotorOutputConfigs()
+        this.leader = new TalonFX(Constants.rollerLeaderId);
+        this.leader.getConfigurator().apply(new MotorOutputConfigs()
             .withNeutralMode(NeutralModeValue.Brake)
-            .withInverted(InvertedValue.CounterClockwise_Positive));
+            .withInverted(InvertedValue.Clockwise_Positive));
 
-        this.rollers.getConfigurator().apply(new Slot0Configs()
+        this.leader.getConfigurator().apply(new Slot0Configs()
             .withKP(Constants.rollerKP).withKV(Constants.rollerKV));
         
-        this.rollers.getConfigurator().apply(new CurrentLimitsConfigs()
-            .withSupplyCurrentLimit(50)
+        this.leader.getConfigurator().apply(new CurrentLimitsConfigs()
+            .withSupplyCurrentLimit(45)
             .withSupplyCurrentLimitEnable(true));
+
+        this.follower = new TalonFX(Constants.rollerFollowerId);
+        this.follower.getConfigurator().apply(new MotorOutputConfigs()
+            .withNeutralMode(NeutralModeValue.Brake)
+            .withInverted(InvertedValue.Clockwise_Positive));
+        
+        this.follower.getConfigurator().apply(new CurrentLimitsConfigs()
+            .withSupplyCurrentLimit(45)
+            .withSupplyCurrentLimitEnable(true));
+
+        this.follower.setControl(new Follower(this.leader.getDeviceID(), MotorAlignmentValue.Opposed));
 
         // pivot configs
 
@@ -73,13 +88,13 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     @Override
     public void setRollerVoltage(double volts) {
-        this.rollers.setVoltage(volts);
+        this.leader.setVoltage(volts);
     }
 
     @Override
     public void setRollerRPM(double rpm) {
         this.rollerTargetVelocity = rpm;
-        this.rollers.setControl(new VelocityVoltage(rpm / 60.0));
+        this.leader.setControl(new VelocityVoltage(rpm / 60.0));
     }
 
     @Override
@@ -110,12 +125,12 @@ public class IntakeIOTalonFX implements IntakeIO {
         inputs.pivotTempCelsius = this.pivot.getDeviceTemp().getValueAsDouble();
         inputs.pivotConnected = this.pivot.isConnected();
 
-        inputs.rollerAppliedVolts = this.rollers.getMotorVoltage().getValueAsDouble();
-        inputs.rollerStatorCurrentAmps = this.rollers.getStatorCurrent().getValueAsDouble();
-        inputs.rollerSupplyCurrentAmps = this.rollers.getSupplyCurrent().getValueAsDouble();
-        inputs.rollerTempCelsius = this.rollers.getDeviceTemp().getValueAsDouble();
-        inputs.rollerVelocityRpm = this.rollers.getVelocity().getValue().in(RPM);
+        inputs.rollerAppliedVolts = this.leader.getMotorVoltage().getValueAsDouble();
+        inputs.rollerStatorCurrentAmps = this.leader.getStatorCurrent().getValueAsDouble();
+        inputs.rollerSupplyCurrentAmps = this.leader.getSupplyCurrent().getValueAsDouble();
+        inputs.rollerTempCelsius = this.leader.getDeviceTemp().getValueAsDouble();
+        inputs.rollerVelocityRpm = this.leader.getVelocity().getValue().in(RPM);
         inputs.rollerTargetVelocityRpm = this.rollerTargetVelocity;
-        inputs.rollersConnected = this.rollers.isConnected();
+        inputs.rollersConnected = this.leader.isConnected();
     }
 }

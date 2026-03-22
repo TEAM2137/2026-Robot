@@ -19,7 +19,7 @@ public class IntakeIOSim extends IntakeIOTalonFX {
     );
 
     public IntakeIOSim() {
-        this.rollerSimState = this.rollers.getSimState();
+        this.rollerSimState = this.leader.getSimState();
     }
 
     @Override

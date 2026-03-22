@@ -18,36 +18,14 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.GyroIO;
-import frc.robot.subsystems.drive.GyroIOPigeon2;
-import frc.robot.subsystems.drive.ModuleIO;
-import frc.robot.subsystems.drive.ModuleIOTalonFX;
-import frc.robot.subsystems.drive.ModuleIOSim;
-import frc.robot.subsystems.indexer.Indexer;
-import frc.robot.subsystems.indexer.IndexerIO;
-import frc.robot.subsystems.indexer.IndexerIOSim;
-import frc.robot.subsystems.indexer.IndexerIOTalonFX;
-import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.intake.IntakeIO;
-import frc.robot.subsystems.intake.IntakeIOSim;
-import frc.robot.subsystems.intake.IntakeIOTalonFX;
-import frc.robot.subsystems.launcher.LaunchState;
-import frc.robot.subsystems.launcher.Launcher;
-import frc.robot.subsystems.launcher.flywheel.Flywheel;
-import frc.robot.subsystems.launcher.flywheel.FlywheelIO;
-import frc.robot.subsystems.launcher.flywheel.FlywheelIOSim;
-import frc.robot.subsystems.launcher.flywheel.FlywheelIOTalonFX;
-import frc.robot.subsystems.launcher.hood.HoodIO;
-import frc.robot.subsystems.launcher.hood.HoodIOSim;
-import frc.robot.subsystems.launcher.hood.HoodIOTalonFX;
-import frc.robot.subsystems.launcher.turret.TurretIO;
-import frc.robot.subsystems.launcher.turret.TurretIOSim;
-import frc.robot.subsystems.launcher.turret.TurretIOTalonFX;
-import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionConstants;
-import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.indexer.*;
+import frc.robot.subsystems.intake.*;
+import frc.robot.subsystems.launcher.*;
+import frc.robot.subsystems.launcher.hood.*;
+import frc.robot.subsystems.launcher.turret.*;
+import frc.robot.subsystems.launcher.flywheel.*;
+import frc.robot.subsystems.vision.*;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.ShiftInfo;
 import frc.robot.util.TestMode;
@@ -213,15 +191,15 @@ public class RobotContainer {
 
     // configure teleop specific bindings here
     private void configureTeleopBindings() {
-        driverController.a().whileTrue(DriveCommands.joystickDriveFrontFirst(drive, joystickSupplier));
-        driverController.rightTrigger().whileTrue(DriveCommands.joystickDriveCardinalDirections(drive, joystickSupplier, () -> -driverController.getRightX() * 0.75));
+        driverController.a().and(RobotModeTriggers.teleop()).whileTrue(DriveCommands.joystickDriveFrontFirst(drive, joystickSupplier));
+        driverController.rightTrigger().and(RobotModeTriggers.teleop()).whileTrue(DriveCommands.joystickDriveCardinalDirections(drive, joystickSupplier, () -> -driverController.getRightX() * 0.75));
 
         driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onTrue(new SequentialCommandGroup(
-            launcher.setState(LaunchState.DONT_LAUNCH)
+            launcher.setState(LaunchState.LAUNCH)
         ).withName("Don't Launch"));
 
         driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onFalse(new SequentialCommandGroup(
-            launcher.setState(LaunchState.AUTOMATIC),
+            launcher.setState(LaunchState.DONT_LAUNCH),
             new ConditionalCommand(
                 Commands.none(),
                 intake.retract().andThen(intake.stopRollers()),

@@ -7,7 +7,6 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.hal.AllianceStationID;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -40,7 +39,7 @@ public class Launcher extends SubsystemBase {
     private final Trigger inAllianceZone;
     private final Trigger inAllianceZoneDebounced;
 
-    private LaunchState state = LaunchState.AUTOMATIC;
+    private LaunchState state = LaunchState.DONT_LAUNCH;
     private boolean autofire = false;
 
     private double manualHoodAngle;
@@ -61,7 +60,7 @@ public class Launcher extends SubsystemBase {
         this.inAllianceZone = new Trigger(() -> this.shotCalculator == ShotCalculator.HUB);
         this.inAllianceZoneDebounced = this.inAllianceZone.debounce(1.0);
 
-        RobotModeTriggers.disabled().onTrue(this.runOnce(() -> this.state = LaunchState.AUTOMATIC).ignoringDisable(true));
+        RobotModeTriggers.disabled().onTrue(this.runOnce(() -> this.state = LaunchState.DONT_LAUNCH).ignoringDisable(true));
     }
 
     public Trigger isLaunching() {
@@ -92,10 +91,11 @@ public class Launcher extends SubsystemBase {
         boolean shouldLaunch = this.isLaunching.getAsBoolean();
 
         if (isTest && testMode == TestMode.TURRET) {
-            this.turret.setAngleFieldRelative(Rotation2d.fromRadians(Math.atan2(
-                MathUtil.applyDeadband(-robot.operatorController.getRightY(), 0.35),
-                MathUtil.applyDeadband(robot.operatorController.getRightX(), 0.35)
-            )));
+            Translation2d opManual = new Translation2d(
+                robot.operatorController.getRightY(),
+                -robot.operatorController.getRightX()
+            );
+            if (opManual.getNorm() > 0.5) this.turret.setAngleFieldRelative(opManual.getAngle().plus(Rotation2d.kCCW_90deg));
             if (!hoodManual) this.hood.setAngle(0);
             this.flywheel.setRPM(0);
         }
@@ -156,7 +156,8 @@ public class Launcher extends SubsystemBase {
         if (AllianceFlipUtil.shouldFlip()) robot = new Translation2d(AllianceFlipUtil.flipX(robot.getX()), robot.getY());
 
         if (robot.getX() < FieldConstants.allianceZoneX) return ShotCalculator.HUB;
-        return ShotCalculator.DYNAMIC_PASSING;
+        return ShotCalculator.PASS_RIGHT; // TODO fix
+        // return ShotCalculator.DYNAMIC_PASSING;
     }
 
     public double getPassingFlipY() {
@@ -171,8 +172,8 @@ public class Launcher extends SubsystemBase {
                 SmartDashboard.putBoolean("PassingPriority", priority));
         }
         boolean priority = SmartDashboard.getBoolean("PassingPriority", false);
-        if (AllianceFlipUtil.shouldFlip()) return priority ? FieldConstants.midPassY2 : FieldConstants.midPassY1;
-        return priority ? FieldConstants.midPassY1 : FieldConstants.midPassY2;
+        if (AllianceFlipUtil.shouldFlip()) return priority ? FieldConstants.passingMidZoneY2 : FieldConstants.passingMidZoneY1;
+        return priority ? FieldConstants.passingMidZoneY1 : FieldConstants.passingMidZoneY2;
     }
 
     public Optional<Boolean> getDefaultPassingPriority() {
