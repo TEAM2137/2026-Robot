@@ -78,9 +78,9 @@ public class IntakeIOTalonFX implements IntakeIO {
             .withMotionMagicCruiseVelocity(Constants.cruiseVelocity)
             .withMotionMagicAcceleration(Constants.acceleration));
         
-        this.pivot.getConfigurator().apply(new CurrentLimitsConfigs()
-            .withSupplyCurrentLimit(25)
-            .withSupplyCurrentLimitEnable(true));
+        // this.pivot.getConfigurator().apply(new CurrentLimitsConfigs()
+        //     .withSupplyCurrentLimit(25)
+        //     .withSupplyCurrentLimitEnable(true));
 
         // reset encoder on startup
         this.resetPosition();

@@ -17,7 +17,7 @@ public class Intake extends SubsystemBase {
         public static final double homePosition = 0.0;
         public static final double halfwayPosition = 1.0;
         public static final double deployPosition = 2.329;//1.995;
-        public static final double rollerRPM = 4200;
+        public static final double rollerRPM = 4800;
     }
 
     private final IntakeIO io;
@@ -51,7 +51,8 @@ public class Intake extends SubsystemBase {
     }
 
     public Command runRollers() {
-        return runOnce(() -> io.setRollerRPM(Constants.rollerRPM));
+        // return runOnce(() -> io.setRollerRPM(Constants.rollerRPM));
+        return runOnce(() -> io.setRollerVoltage(12));
     }
 
     public Command stopRollers() {
