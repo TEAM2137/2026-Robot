@@ -215,9 +215,8 @@ public class RobotContainer {
             ).repeatedly()
         ).withName("Run Indexer"));
 
-        launcher.isLaunching().and(RobotModeTriggers.teleop())
-            .whileTrue(new SequentialCommandGroup(intake.agitate())
-            .withName("Start Agitation"));
+        // launcher.isLaunching().and(RobotModeTriggers.teleop()).onTrue(intake.runRollers());
+        // launcher.isLaunching().and(RobotModeTriggers.teleop()).onFalse(intake.stopRollers());
 
         launcher.isLaunching().and(RobotModeTriggers.teleop()).onFalse(new SequentialCommandGroup(
             indexer.stop(),
@@ -258,8 +257,10 @@ public class RobotContainer {
             intake.stopRollers()
         ).withName("Retract Intake");
 
-        driverController.leftTrigger().and(RobotModeTriggers.teleop()).onTrue(retractIntake);
-        RobotModeTriggers.disabled().onFalse(retractIntake);
+        // RobotModeTriggers.disabled().onFalse(retractIntake);
+
+        driverController.leftTrigger().and(RobotModeTriggers.teleop()).whileTrue(intake.agitate());
+        driverController.leftTrigger().and(RobotModeTriggers.teleop()).onFalse(retractIntake);
 
         operatorController.b().onTrue(intake.deploy().andThen(intake.setRollerVoltage(-12)));
         operatorController.b().onFalse(intake.retract().andThen(intake.setRollerVoltage(0)));

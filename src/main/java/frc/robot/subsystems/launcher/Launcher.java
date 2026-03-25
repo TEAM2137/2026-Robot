@@ -184,8 +184,7 @@ public class Launcher extends SubsystemBase {
     }
 
     public boolean shouldLimitDrive() {
-        return false;
-        // return this.isLaunching.getAsBoolean();
+        return this.isLaunching.getAsBoolean();
     }
 
     public Turret getTurret() {
