@@ -215,14 +215,16 @@ public class RobotContainer {
             ).repeatedly()
         ).withName("Run Indexer"));
 
-        // launcher.isLaunching().and(RobotModeTriggers.teleop()).onTrue(intake.runRollers());
-        // launcher.isLaunching().and(RobotModeTriggers.teleop()).onFalse(intake.stopRollers());
+        launcher.isLaunching().and(RobotModeTriggers.teleop()).whileTrue(Commands.either(
+            Commands.none(), intake.agitate(),
+            driverController.leftBumper()
+        ));
 
         launcher.isLaunching().and(RobotModeTriggers.teleop()).onFalse(new SequentialCommandGroup(
             indexer.stop(),
             new ConditionalCommand(
                 Commands.none(),
-                intake.retract().andThen(intake.stopRollers()),
+                intake.deploy().andThen(intake.stopRollers()),
                 driverController.leftBumper()
             )
         ).withName("Stop Indexer"));
