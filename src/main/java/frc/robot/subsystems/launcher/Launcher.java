@@ -38,6 +38,8 @@ public class Launcher extends SubsystemBase {
     private final Trigger isLaunching;
     private final Trigger inAllianceZone;
     private final Trigger inAllianceZoneDebounced;
+    private final Trigger inNeutralZone;
+    private final Trigger inNeutralZoneDebounced;
 
     private LaunchState state = LaunchState.AUTOMATIC;
     private boolean autofire = false;
@@ -57,8 +59,12 @@ public class Launcher extends SubsystemBase {
         this.shotCalculator = ShotCalculator.HUB;
 
         this.isLaunching = new Trigger(() -> this.state == LaunchState.LAUNCH || (this.autofire && state != LaunchState.DONT_LAUNCH));
+
         this.inAllianceZone = new Trigger(() -> this.shotCalculator == ShotCalculator.HUB);
         this.inAllianceZoneDebounced = this.inAllianceZone.debounce(1.75);
+
+        this.inNeutralZone = this.inAllianceZone.negate();
+        this.inNeutralZoneDebounced = this.inNeutralZone.debounce(1.75);
 
         RobotModeTriggers.disabled().onTrue(this.runOnce(() -> this.state = LaunchState.AUTOMATIC).ignoringDisable(true));
     }
@@ -122,6 +128,11 @@ public class Launcher extends SubsystemBase {
         Logger.recordOutput("Launcher/Autofire", this.autofire);
         Logger.recordOutput("Launcher/IsLaunching", shouldLaunch);
 
+        Logger.recordOutput("Launcher/Triggers/InAllianceZone", this.inAllianceZone.getAsBoolean());
+        Logger.recordOutput("Launcher/Triggers/InAllianceZoneDB", this.inAllianceZoneDebounced.getAsBoolean());
+        Logger.recordOutput("Launcher/Triggers/InNeutralZone", this.inNeutralZone.getAsBoolean());
+        Logger.recordOutput("Launcher/Triggers/InNeutralZoneDB", this.inNeutralZoneDebounced.getAsBoolean());
+
         Utils.logActiveCommand("Launcher", this);
     }
 
@@ -137,7 +148,7 @@ public class Launcher extends SubsystemBase {
         // should we try to pass?
         Translation2d turretPos = turret.getFieldSpacePose().getTranslation();
         Translation2d flipped = AllianceFlipUtil.shouldFlip() ? AllianceFlipUtil.flip(turretPos) : turretPos;
-        return !FieldConstants.noFireZone.contains(flipped);
+        return this.inNeutralZoneDebounced.getAsBoolean() && !FieldConstants.noFireZone.contains(flipped);
     }
 
     public boolean willFuelBeScored(double timeOfFlight) {
