@@ -27,8 +27,9 @@ public class Turret {
 
         public static final Translation2d turretOffset = new Translation2d(Constants.offsetY / 39.37, -Constants.offsetX / 39.37);
 
-        public static final double magnetPosition = 0.004150390625 + 0.013888889; // rotations
-        
+        public static final double magnetPosition = 0.004150390625; // rotations
+        public static final double tempOffsetDegrees = -5;
+
         public static final InterpolatingDoubleTreeMap offsetLookup = InterpolatingDoubleTreeMap.ofEntries(
             // Map.entry(0.0, 0.0)
 
@@ -81,7 +82,7 @@ public class Turret {
         Rotation2d target = angle.unaryMinus().plus(Rotation2d.kCW_90deg)
             .plus(Rotation2d.fromDegrees(manualOffset));
         
-        double offsetDegrees = Constants.offsetLookup.get(target.getDegrees());
+        double offsetDegrees = Constants.offsetLookup.get(target.getDegrees()) + Constants.tempOffsetDegrees;
         // if (!SmartDashboard.containsKey("AimOffset")) SmartDashboard.putNumber("AimOffset", 0.0);
         // double offsetDegrees = SmartDashboard.getNumber("AimOffset", 0.0);
         
