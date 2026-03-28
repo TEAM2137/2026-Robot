@@ -27,7 +27,7 @@ public class Turret {
 
         public static final Translation2d turretOffset = new Translation2d(Constants.offsetY / 39.37, -Constants.offsetX / 39.37);
 
-        public static final double magnetPosition = 0.004150390625; // rotations
+        public static final double magnetPosition = 0.004150390625 + 0.013888889; // rotations
         
         public static final InterpolatingDoubleTreeMap offsetLookup = InterpolatingDoubleTreeMap.ofEntries(
             // Map.entry(0.0, 0.0)
