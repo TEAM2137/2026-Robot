@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -164,7 +165,7 @@ public class RobotContainer {
         configureControllerBindings();
 
         // necessary
-        Alerts.add("Robot is too tall, don't go under the trench!", AlertType.kWarning, () -> false);
+        Alerts.add("Robot is too tall, don't go under the trench!", AlertType.kWarning, () -> DriverStation.isDisabled());
     }
 
     /**
