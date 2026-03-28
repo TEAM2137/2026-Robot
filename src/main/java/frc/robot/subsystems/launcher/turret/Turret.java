@@ -32,13 +32,13 @@ public class Turret {
         public static final InterpolatingDoubleTreeMap offsetLookup = InterpolatingDoubleTreeMap.ofEntries(
             // Map.entry(0.0, 0.0)
 
-            Map.entry(-180.0, 2.0),
-            Map.entry(-135.0, 2.0),
-            Map.entry(-90.0, -2.0),
-            Map.entry(-45.0, -4.0),
-            Map.entry(0.0, -3.0),
-            Map.entry(45.0, -5.0),
-            Map.entry(90.0, -4.0),
+            Map.entry(-180.0, 4.0),
+            Map.entry(-135.0, 3.0),
+            Map.entry(-90.0, -1.0),
+            Map.entry(-45.0, -5.0),
+            Map.entry(0.0, -8.0),
+            Map.entry(45.0, -6.0),
+            Map.entry(90.0, -2.0),
             Map.entry(135.0, 1.0),
             Map.entry(180.0, 2.0)
         );

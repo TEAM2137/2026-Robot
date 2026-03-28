@@ -194,18 +194,11 @@ public class RobotContainer {
         driverController.a().and(RobotModeTriggers.teleop()).whileTrue(DriveCommands.joystickDriveFrontFirst(drive, joystickSupplier));
         driverController.rightTrigger().and(RobotModeTriggers.teleop()).whileTrue(DriveCommands.joystickDriveCardinalDirections(drive, joystickSupplier, () -> -driverController.getRightX() * 0.75));
 
-        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onTrue(new SequentialCommandGroup(
-            launcher.setState(LaunchState.DONT_LAUNCH)
-        ).withName("Don't Launch"));
+        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test()))
+            .onTrue(launcher.setState(LaunchState.DONT_LAUNCH).withName("Don't Launch"));
 
-        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onFalse(new SequentialCommandGroup(
-            launcher.setState(LaunchState.AUTOMATIC),
-            new ConditionalCommand(
-                Commands.none(),
-                intake.retract().andThen(intake.stopRollers()),
-                driverController.leftBumper()
-            )
-        ).withName("Re-enable Autofire"));
+        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test()))
+            .onFalse(launcher.setState(LaunchState.AUTOMATIC).withName("Re-enable Autofire"));
 
         launcher.isLaunching().and(RobotModeTriggers.teleop()).whileTrue(new SequentialCommandGroup(
             Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME),
@@ -281,10 +274,10 @@ public class RobotContainer {
         operatorController.povLeft().onFalse(launcher.getTurret().setVoltage(0));
         operatorController.povRight().onTrue(launcher.getTurret().setVoltage(0.5));
         operatorController.povRight().onFalse(launcher.getTurret().setVoltage(0));
-        operatorController.povDown().onTrue(launcher.getTurret().markAsUnzeroed());
+        operatorController.povDown().onTrue(launcher.getTurret().markAsUnzeroed().ignoringDisable(true));
 
         operatorController.start().onTrue(launcher.getTurret().resetPosition().ignoringDisable(true));
-        operatorController.back().onTrue(launcher.getHood().resetPosition().ignoringDisable(true));
+        operatorController.rightBumper().onTrue(launcher.getHood().resetPosition().ignoringDisable(true));
         operatorController.leftBumper().onTrue(intake.resetPosition().ignoringDisable(true));
     }
 
