@@ -165,7 +165,7 @@ public class RobotContainer {
         configureControllerBindings();
 
         // necessary
-        Alerts.add("Robot is too tall, don't go under the trench!", AlertType.kWarning, () -> DriverStation.isDisabled());
+        Alerts.add("Robot is too tall to fit under the trench!", AlertType.kWarning, () -> DriverStation.isDisabled());
     }
 
     /**
