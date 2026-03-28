@@ -61,7 +61,7 @@ public class Launcher extends SubsystemBase {
         this.isLaunching = new Trigger(() -> this.state == LaunchState.LAUNCH || (this.autofire && state != LaunchState.DONT_LAUNCH));
 
         this.inAllianceZone = new Trigger(() -> this.shotCalculator == ShotCalculator.HUB);
-        this.inAllianceZoneDebounced = this.inAllianceZone.debounce(1.35);
+        this.inAllianceZoneDebounced = this.inAllianceZone.debounce(1.0);
 
         this.inNeutralZone = this.inAllianceZone.negate();
         this.inNeutralZoneDebounced = this.inNeutralZone.debounce(1.75);
