@@ -138,17 +138,21 @@ public class Launcher extends SubsystemBase {
 
     public boolean shouldAutofire(Translation2d robot, double timeOfFlight) {
         if (DriverStation.isAutonomous()) return false;
+
+        // get flipped turret position
+        Translation2d turretPos = turret.getFieldSpacePose().getTranslation();
+        Translation2d flipped = AllianceFlipUtil.shouldFlip() ? AllianceFlipUtil.flip(turretPos) : turretPos;
         
         // should we try to score in the hub?
         if (this.inAllianceZone.getAsBoolean()) {
             if (!this.willFuelBeScored(timeOfFlight)) return false;
-            return this.inAllianceZoneDebounced.getAsBoolean();
+            return this.inAllianceZoneDebounced.getAsBoolean()
+                && !FieldConstants.noFireZoneTower.contains(flipped);
         }
 
         // should we try to pass?
-        Translation2d turretPos = turret.getFieldSpacePose().getTranslation();
-        Translation2d flipped = AllianceFlipUtil.shouldFlip() ? AllianceFlipUtil.flip(turretPos) : turretPos;
-        return this.inNeutralZoneDebounced.getAsBoolean() && !FieldConstants.noFireZone.contains(flipped);
+        return this.inNeutralZoneDebounced.getAsBoolean()
+            && !FieldConstants.noFireZoneNet.contains(flipped);
     }
 
     public boolean willFuelBeScored(double timeOfFlight) {

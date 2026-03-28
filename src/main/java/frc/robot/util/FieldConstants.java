@@ -2,9 +2,7 @@ package frc.robot.util;
 
 import org.littletonrobotics.junction.Logger;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rectangle2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 /** Field constants such as important poses, dimensions, or stats can be placed here */
@@ -40,9 +38,14 @@ public class FieldConstants {
     public static final double noFireZone1Height = bumpWidth * 1.25;
     public static final double noFireZone1Width = noFireZone1Height * 1.25;
 
-    public static final Rectangle2d noFireZone = new Rectangle2d(
+    public static final Rectangle2d noFireZoneNet = new Rectangle2d(
         new Translation2d(hubFromLeftX + bumpWidth / 2.0, fieldHeight / 2.0 + noFireZone1Height / 2.0),
         new Translation2d(hubFromLeftX + bumpWidth / 2.0 + noFireZone1Width, fieldHeight / 2.0 - noFireZone1Height / 2.0));
+
+    public static final double noFireZoneTowerPadding = 0.25;
+    public static final Rectangle2d noFireZoneTower = new Rectangle2d(
+        new Translation2d(0.0, blueTowerLeftPost.getY() + noFireZoneTowerPadding),
+        new Translation2d(blueTowerRightPost.getX(), blueTowerRightPost.getY() - noFireZoneTowerPadding));
 
     public static final double passingMidZoneWidth = bumpWidth;
     public static final double passingMidZoneY1 = midFieldY - passingMidZoneWidth / 2.0;
@@ -64,11 +67,11 @@ public class FieldConstants {
     public static final double hubDeactivationSeconds = 3.0;
 
     static {
-        Logger.recordOutput("FieldConstants/BlueTowerLeftPost", new Pose2d(blueTowerLeftPost, new Rotation2d()));
-        Logger.recordOutput("FieldConstants/BlueTowerRightPost", new Pose2d(blueTowerRightPost, new Rotation2d()));
+        Logger.recordOutput("FieldConstants/NoFireZoneBlueNet", Utils.createRectOutline(noFireZoneNet, false));
+        Logger.recordOutput("FieldConstants/NoFireZoneRedNet", Utils.createRectOutline(noFireZoneNet, true));
 
-        Logger.recordOutput("FieldConstants/NoFireZoneBlue", Utils.createRectOutline(noFireZone, false));
-        Logger.recordOutput("FieldConstants/NoFireZoneRed", Utils.createRectOutline(noFireZone, true));
+        Logger.recordOutput("FieldConstants/NoFireZoneBlueTower", Utils.createRectOutline(noFireZoneTower, false));
+        Logger.recordOutput("FieldConstants/NoFireZoneRedTower", Utils.createRectOutline(noFireZoneTower, true));
 
         Logger.recordOutput("FieldConstants/PassingMidZone1", Utils.createAxisLineAt(passingMidZoneY1, true));
         Logger.recordOutput("FieldConstants/PassingMidZone2", Utils.createAxisLineAt(passingMidZoneY2, true));
