@@ -165,7 +165,7 @@ public class DriveCommands {
         if (RobotContainer.getInstance().launcher.shouldLimitDrive()) {
             vx = MathUtil.clamp(vx, -drive.getMaxLinearSpeedMetersPerSec() * 0.3, drive.getMaxLinearSpeedMetersPerSec() * 0.3);
             vy = MathUtil.clamp(vy, -drive.getMaxLinearSpeedMetersPerSec() * 0.3, drive.getMaxLinearSpeedMetersPerSec() * 0.3);
-            omega = MathUtil.clamp(omega, -drive.getMaxAngularSpeedRadPerSec() * 0.5, drive.getMaxAngularSpeedRadPerSec() * 0.5);
+            omega = MathUtil.clamp(omega, -drive.getMaxAngularSpeedRadPerSec() * 0.3, drive.getMaxAngularSpeedRadPerSec() * 0.3);
             maxAngularAccel *= 0.7;
         }
 

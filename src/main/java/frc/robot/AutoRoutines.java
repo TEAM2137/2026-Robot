@@ -15,28 +15,25 @@ import frc.robot.subsystems.launcher.flywheel.Flywheel;
 public class AutoRoutines {
     public static UnregisteredAuto depotAuto(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
         AutoTrajectory overBump1 = trajectories[0];
-        AutoTrajectory lineupForIntake = trajectories[1];
-        AutoTrajectory intakePass = trajectories[2];
-        AutoTrajectory returnFromIntaking = trajectories[3];
-        AutoTrajectory overBump2 = trajectories[4];
-        AutoTrajectory lineupForDepot = trajectories[5];
-        AutoTrajectory backupIntoDepot = trajectories[6];
-        AutoTrajectory driveOverDepot = trajectories[7];
+        AutoTrajectory intakePass = trajectories[1];
+        AutoTrajectory returnFromIntaking = trajectories[2];
+        AutoTrajectory overBump2 = trajectories[3];
+        AutoTrajectory lineupForDepot = trajectories[4];
+        AutoTrajectory backupIntoDepot = trajectories[5];
+        AutoTrajectory driveOverDepot = trajectories[6];
+        AutoTrajectory driveOut = trajectories[7];
 
         auto.active().onTrue(overBump1.resetOdometry().andThen(overBump1.cmd()));
-        overBump1.done().onTrue(lineupForIntake.cmd());
-
-        lineupForIntake.atTimeBeforeEnd(0.7).onTrue(new SequentialCommandGroup(
+        auto.active().onTrue(new SequentialCommandGroup(
             robot.intake.deploy(),
             robot.intake.runRollers()
         ));
-        lineupForIntake.done().onTrue(intakePass.cmd());
+        overBump1.done().onTrue(intakePass.cmd());
 
         intakePass.done().onTrue(returnFromIntaking.cmd());
         returnFromIntaking.done().onTrue(overBump2.cmd());
-        overBump2.done().onTrue(lineupForDepot.cmd());
 
-        lineupForDepot.atTimeBeforeEnd(0.8).onTrue(new SequentialCommandGroup(
+        overBump2.done().onTrue(new SequentialCommandGroup(
             robot.launcher.setState(LaunchState.LAUNCH),
             Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME),
             robot.intake.runRollers(),
@@ -45,38 +42,34 @@ public class AutoRoutines {
                 robot.indexer.stop()
             ).repeatedly()
         ));
+        overBump2.done().onTrue(lineupForDepot.cmd());
 
         lineupForDepot.done().onTrue(backupIntoDepot.cmd());
 
-        backupIntoDepot.done().onTrue(new SequentialCommandGroup(
-            Commands.waitSeconds(2.5),
-            driveOverDepot.cmd().asProxy()
-        ));
+        backupIntoDepot.done().onTrue(driveOverDepot.cmd());
 
         driveOverDepot.done().onTrue(new SequentialCommandGroup(
-            Commands.waitSeconds(1.8),
-            robot.intake.agitate(0.95)
+            Commands.waitSeconds(0.3),
+            robot.intake.agitate()
         ));
+        driveOverDepot.done().onTrue(driveOut.cmd());
 
         return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
     }
     public static UnregisteredAuto cycleRight(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
         AutoTrajectory overBump1 = trajectories[0];
-        AutoTrajectory lineupForIntake = trajectories[1];
-        AutoTrajectory intakePass = trajectories[2];
-        AutoTrajectory returnFromIntaking = trajectories[3];
-        AutoTrajectory overBump2 = trajectories[4];
-        AutoTrajectory overBump3 = trajectories[5];
-        AutoTrajectory secondIntakePass = trajectories[6];
+        AutoTrajectory intakePass = trajectories[1];
+        AutoTrajectory returnFromIntaking = trajectories[2];
+        AutoTrajectory overBump2 = trajectories[3];
+        AutoTrajectory overBump3 = trajectories[4];
+        AutoTrajectory secondIntakePass = trajectories[5];
 
         auto.active().onTrue(overBump1.resetOdometry().andThen(overBump1.cmd()));
-        overBump1.done().onTrue(lineupForIntake.cmd());
-
-        lineupForIntake.atTimeBeforeEnd(0.7).onTrue(new SequentialCommandGroup(
+        auto.active().onTrue(new SequentialCommandGroup(
             robot.intake.deploy(),
             robot.intake.runRollers()
         ));
-        lineupForIntake.done().onTrue(intakePass.cmd());
+        overBump1.done().onTrue(intakePass.cmd());
 
         intakePass.done().onTrue(returnFromIntaking.cmd());
         returnFromIntaking.done().onTrue(overBump2.cmd());
@@ -90,7 +83,7 @@ public class AutoRoutines {
                     robot.indexer.stop()
                 ).repeatedly(),
                 robot.intake.agitate()
-            ).withTimeout(5.0),
+            ).withTimeout(6.0),
             robot.launcher.setState(LaunchState.AUTOMATIC),
             robot.intake.deploy(),
             robot.intake.runRollers(),
@@ -139,7 +132,7 @@ public class AutoRoutines {
         // comp autos
         autos.add("Outpost", "outpost", 6, false, AutoRoutines::outpostAuto);
         autos.add("Depot", "depot", 8, false, AutoRoutines::depotAuto);
-        autos.add("Cycle Right", "cycleRight", 7, false, AutoRoutines::cycleRight);
+        autos.add("Cycle Right", "cycleRight", 6, false, AutoRoutines::cycleRight);
     }
     
     @FunctionalInterface

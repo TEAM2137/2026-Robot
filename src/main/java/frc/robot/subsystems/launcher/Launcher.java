@@ -39,7 +39,7 @@ public class Launcher extends SubsystemBase {
     private final Trigger inAllianceZone;
     private final Trigger inAllianceZoneDebounced;
 
-    private LaunchState state = LaunchState.DONT_LAUNCH;
+    private LaunchState state = LaunchState.AUTOMATIC;
     private boolean autofire = false;
 
     private double manualHoodAngle;
@@ -58,9 +58,9 @@ public class Launcher extends SubsystemBase {
 
         this.isLaunching = new Trigger(() -> this.state == LaunchState.LAUNCH || (this.autofire && state != LaunchState.DONT_LAUNCH));
         this.inAllianceZone = new Trigger(() -> this.shotCalculator == ShotCalculator.HUB);
-        this.inAllianceZoneDebounced = this.inAllianceZone.debounce(1.0);
+        this.inAllianceZoneDebounced = this.inAllianceZone.debounce(1.75);
 
-        RobotModeTriggers.disabled().onTrue(this.runOnce(() -> this.state = LaunchState.DONT_LAUNCH).ignoringDisable(true));
+        RobotModeTriggers.disabled().onTrue(this.runOnce(() -> this.state = LaunchState.AUTOMATIC).ignoringDisable(true));
     }
 
     public Trigger isLaunching() {
@@ -137,7 +137,7 @@ public class Launcher extends SubsystemBase {
         // should we try to pass?
         Translation2d turretPos = turret.getFieldSpacePose().getTranslation();
         Translation2d flipped = AllianceFlipUtil.shouldFlip() ? AllianceFlipUtil.flip(turretPos) : turretPos;
-        return !ShiftInfo.getCurrentShift().isHubActive() && !FieldConstants.noFireZone.contains(flipped);
+        return !FieldConstants.noFireZone.contains(flipped);
     }
 
     public boolean willFuelBeScored(double timeOfFlight) {
@@ -184,7 +184,7 @@ public class Launcher extends SubsystemBase {
     }
 
     public boolean shouldLimitDrive() {
-        return this.isLaunching.getAsBoolean();
+        return this.isLaunching.getAsBoolean() && this.inAllianceZone.getAsBoolean();
     }
 
     public Turret getTurret() {

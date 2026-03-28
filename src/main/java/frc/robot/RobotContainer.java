@@ -195,11 +195,11 @@ public class RobotContainer {
         driverController.rightTrigger().and(RobotModeTriggers.teleop()).whileTrue(DriveCommands.joystickDriveCardinalDirections(drive, joystickSupplier, () -> -driverController.getRightX() * 0.75));
 
         driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onTrue(new SequentialCommandGroup(
-            launcher.setState(LaunchState.LAUNCH)
+            launcher.setState(LaunchState.DONT_LAUNCH)
         ).withName("Don't Launch"));
 
         driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test())).onFalse(new SequentialCommandGroup(
-            launcher.setState(LaunchState.DONT_LAUNCH),
+            launcher.setState(LaunchState.AUTOMATIC),
             new ConditionalCommand(
                 Commands.none(),
                 intake.retract().andThen(intake.stopRollers()),
