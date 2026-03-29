@@ -28,7 +28,7 @@ public class Turret {
         public static final Translation2d turretOffset = new Translation2d(Constants.offsetY / 39.37, -Constants.offsetX / 39.37);
 
         public static final double magnetPosition = 0.004150390625; // rotations
-        public static final double tempOffsetDegrees = -3;
+        public static final double tempOffsetDegrees = -2;
 
         public static final InterpolatingDoubleTreeMap offsetLookup = InterpolatingDoubleTreeMap.ofEntries(
             // Map.entry(0.0, 0.0)
@@ -114,11 +114,11 @@ public class Turret {
     }
 
     public Command increaseTurretOffset() {
-        return Commands.run(() -> manualOffset += 0.5);
+        return Commands.runOnce(() -> manualOffset += 1);
     }
 
     public Command decreaseTurretOffset() {
-        return Commands.run(() -> manualOffset -= 0.5);
+        return Commands.runOnce(() -> manualOffset -= 1);
     }
 
     public Command resetTurretOffset() {
@@ -137,6 +137,14 @@ public class Turret {
         return Commands.runOnce(() -> {
             if (!this.didZero) this.io.setVoltage(volts);
         });
+    }
+
+    public Trigger isZeroed() {
+        return new Trigger(() -> this.didZero);
+    }
+
+    public Trigger isNotZeroed() {
+        return new Trigger(() -> !this.didZero);
     }
 
     public Pose2d getFieldSpacePose() {

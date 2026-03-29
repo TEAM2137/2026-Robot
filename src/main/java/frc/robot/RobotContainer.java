@@ -236,10 +236,6 @@ public class RobotContainer {
 
         xLock.whileTrue(drive.xLockCommand().withName("X-Lock"));
 
-        driverController.povLeft().and(RobotModeTriggers.teleop()).whileTrue(launcher.getTurret().increaseTurretOffset());
-        driverController.povRight().and(RobotModeTriggers.teleop()).whileTrue(launcher.getTurret().decreaseTurretOffset());
-        driverController.povDown().and(RobotModeTriggers.teleop()).onTrue(launcher.getTurret().resetTurretOffset());
-
         driverController.leftBumper().and(RobotModeTriggers.teleop()).onTrue(new SequentialCommandGroup(
             intake.deploy(),
             intake.runRollers()
@@ -269,25 +265,29 @@ public class RobotContainer {
         operatorController.a().onTrue(indexer.reverse());
         operatorController.a().onFalse(indexer.stop());
 
-        operatorController.rightTrigger().whileTrue(Commands.runEnd(
+        operatorController.rightTrigger(0.98).whileTrue(Commands.runEnd(
             () -> launcher.getHood().setVoltage(-3),
             () -> launcher.getHood().resetPositionRaw()
         ));
 
-        operatorController.leftTrigger().whileTrue(new SequentialCommandGroup(
+        operatorController.leftTrigger(0.98).whileTrue(new SequentialCommandGroup(
             intake.setPivotVoltage(-3),
             Commands.runEnd(() -> {}, () -> intake.resetPosition().schedule())
         ));
 
-        operatorController.povLeft().onTrue(launcher.getTurret().setVoltage(-0.5));
-        operatorController.povLeft().onFalse(launcher.getTurret().setVoltage(0));
-        operatorController.povRight().onTrue(launcher.getTurret().setVoltage(0.5));
-        operatorController.povRight().onFalse(launcher.getTurret().setVoltage(0));
-        operatorController.povDown().onTrue(launcher.getTurret().markAsUnzeroed().ignoringDisable(true));
+        operatorController.povLeft().and(launcher.getTurret().isNotZeroed()).onTrue(launcher.getTurret().setVoltage(-0.5));
+        operatorController.povLeft().and(launcher.getTurret().isNotZeroed()).onFalse(launcher.getTurret().setVoltage(0));
+        operatorController.povRight().and(launcher.getTurret().isNotZeroed()).onTrue(launcher.getTurret().setVoltage(0.5));
+        operatorController.povRight().and(launcher.getTurret().isNotZeroed()).onFalse(launcher.getTurret().setVoltage(0));
+        operatorController.start().onTrue(launcher.getTurret().markAsUnzeroed().ignoringDisable(true));
 
-        operatorController.start().onTrue(launcher.getTurret().resetPosition().ignoringDisable(true));
+        // operatorController.start().onTrue(launcher.getTurret().resetPosition().ignoringDisable(true));
         operatorController.rightBumper().onTrue(launcher.getHood().resetPosition().ignoringDisable(true));
         operatorController.leftBumper().onTrue(intake.resetPosition().ignoringDisable(true));
+
+        operatorController.povLeft().and(RobotModeTriggers.teleop()).onTrue(launcher.getTurret().increaseTurretOffset());
+        operatorController.povRight().and(RobotModeTriggers.teleop()).onTrue(launcher.getTurret().decreaseTurretOffset());
+        operatorController.back().and(RobotModeTriggers.teleop()).onTrue(launcher.getTurret().resetTurretOffset());
     }
 
     // configure test mode specific bindings here
