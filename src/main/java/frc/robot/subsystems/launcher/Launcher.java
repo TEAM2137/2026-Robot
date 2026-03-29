@@ -41,7 +41,7 @@ public class Launcher extends SubsystemBase {
     private final Trigger inNeutralZone;
     private final Trigger inNeutralZoneDebounced;
 
-    private LaunchState state = LaunchState.AUTOMATIC;
+    private LaunchState state = LaunchState.DONT_LAUNCH;
     private boolean autofire = false;
 
     private double manualHoodAngle;
@@ -66,7 +66,7 @@ public class Launcher extends SubsystemBase {
         this.inNeutralZone = this.inAllianceZone.negate();
         this.inNeutralZoneDebounced = this.inNeutralZone.debounce(1.75);
 
-        RobotModeTriggers.disabled().onTrue(this.runOnce(() -> this.state = LaunchState.AUTOMATIC).ignoringDisable(true));
+        RobotModeTriggers.disabled().onTrue(this.runOnce(() -> this.state = LaunchState.DONT_LAUNCH).ignoringDisable(true));
     }
 
     public Trigger isLaunching() {
