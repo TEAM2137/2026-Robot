@@ -264,7 +264,7 @@ public class RobotContainer {
         driverController.leftTrigger().and(RobotModeTriggers.teleop()).onFalse(retractIntake);
 
         operatorController.b().onTrue(intake.deploy().andThen(intake.setRollerVoltage(-12)));
-        operatorController.b().onFalse(intake.stopRollers());
+        operatorController.b().onFalse(intake.runRollers());
 
         operatorController.a().onTrue(indexer.reverse());
         operatorController.a().onFalse(indexer.stop());
