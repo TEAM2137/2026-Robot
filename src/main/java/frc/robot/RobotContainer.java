@@ -85,9 +85,9 @@ public class RobotContainer {
             indexer = new Indexer(new IndexerIOTalonFX());
 
             launcher = new Launcher(
-                new TurretIOTalonFX(),
-                new HoodIOTalonFX(),
-                new FlywheelIOTalonFX()
+                new TurretIO() {},
+                new HoodIO() {},
+                new FlywheelIO() {}
             );
 
             break;
