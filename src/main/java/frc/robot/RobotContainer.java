@@ -84,7 +84,7 @@ public class RobotContainer {
             intake = new Intake(new IntakeIO() {});
             indexer = new Indexer(new IndexerIO() {});
 
-            launcher = new Launcher(3
+            launcher = new Launcher(
                 new TurretIO() {},
                 new HoodIO() {},
                 new FlywheelIO() {}
