@@ -81,7 +81,7 @@ public class RobotContainer {
                 new VisionIOPhotonVision("Camera3", VisionConstants.robotToCamera3)
             );
 
-            intake = new Intake(new IntakeIO() {});
+            intake = new Intake(new IntakeIOTalonFX() {});
             indexer = new Indexer(new IndexerIOTalonFX() {});
 
             launcher = new Launcher(
