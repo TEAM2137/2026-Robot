@@ -82,7 +82,7 @@ public class RobotContainer {
             );
 
             intake = new Intake(new IntakeIO() {});
-            indexer = new Indexer(new IndexerIO() {});
+            indexer = new Indexer(new IndexerIOTalonFX() {});
 
             launcher = new Launcher(
                 new TurretIO() {},
