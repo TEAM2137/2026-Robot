@@ -46,7 +46,7 @@ public interface ShotCalculator {
         if (pose.getY() < robot.launcher.getPassingFlipY()) target = FieldConstants.leftPassTarget;
         else target = FieldConstants.rightPassTarget;
 
-        double offset = (target.getY() - pose.getY()) * 0.5;
+        double offset = (target.getY() - pose.getY()) * 0.45;
         double flippedX = AllianceFlipUtil.shouldFlip() ? AllianceFlipUtil.flipX(target.getX()) : target.getX();
         return simpleSOTFShot(
             new Translation2d(flippedX, target.getY() + offset), robot,

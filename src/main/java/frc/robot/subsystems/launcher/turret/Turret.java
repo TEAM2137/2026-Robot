@@ -28,18 +28,19 @@ public class Turret {
         public static final Translation2d turretOffset = new Translation2d(Constants.offsetY / 39.37, -Constants.offsetX / 39.37);
 
         public static final double magnetPosition = 0.004150390625; // rotations
-        
+        public static final double tempOffsetDegrees = -3;
+
         public static final InterpolatingDoubleTreeMap offsetLookup = InterpolatingDoubleTreeMap.ofEntries(
             // Map.entry(0.0, 0.0)
 
-            Map.entry(-180.0, 2.0),
-            Map.entry(-135.0, 2.0),
-            Map.entry(-90.0, -2.0),
-            Map.entry(-45.0, -4.0),
-            Map.entry(0.0, -3.0),
-            Map.entry(45.0, -5.0),
-            Map.entry(90.0, -4.0),
-            Map.entry(135.0, 1.0),
+            Map.entry(-180.0, 4.0),
+            Map.entry(-135.0, 3.0),
+            Map.entry(-90.0, -1.0),
+            Map.entry(-45.0, -5.0),
+            Map.entry(0.0, -8.0),
+            Map.entry(45.0, -6.0),
+            Map.entry(90.0, -3.0),
+            Map.entry(135.0, 0.0),
             Map.entry(180.0, 2.0)
         );
     }
@@ -81,7 +82,7 @@ public class Turret {
         Rotation2d target = angle.unaryMinus().plus(Rotation2d.kCW_90deg)
             .plus(Rotation2d.fromDegrees(manualOffset));
         
-        double offsetDegrees = Constants.offsetLookup.get(target.getDegrees());
+        double offsetDegrees = Constants.offsetLookup.get(target.getDegrees()) + Constants.tempOffsetDegrees;
         // if (!SmartDashboard.containsKey("AimOffset")) SmartDashboard.putNumber("AimOffset", 0.0);
         // double offsetDegrees = SmartDashboard.getNumber("AimOffset", 0.0);
         
@@ -113,11 +114,11 @@ public class Turret {
     }
 
     public Command increaseTurretOffset() {
-        return Commands.run(() -> manualOffset += 0.5);
+        return Commands.runOnce(() -> manualOffset += 1);
     }
 
     public Command decreaseTurretOffset() {
-        return Commands.run(() -> manualOffset -= 0.5);
+        return Commands.runOnce(() -> manualOffset -= 1);
     }
 
     public Command resetTurretOffset() {
@@ -136,6 +137,14 @@ public class Turret {
         return Commands.runOnce(() -> {
             if (!this.didZero) this.io.setVoltage(volts);
         });
+    }
+
+    public Trigger isZeroed() {
+        return new Trigger(() -> this.didZero);
+    }
+
+    public Trigger isNotZeroed() {
+        return new Trigger(() -> !this.didZero);
     }
 
     public Pose2d getFieldSpacePose() {

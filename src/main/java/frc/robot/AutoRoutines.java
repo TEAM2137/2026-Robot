@@ -45,7 +45,6 @@ public class AutoRoutines {
         overBump2.done().onTrue(lineupForDepot.cmd());
 
         lineupForDepot.done().onTrue(backupIntoDepot.cmd());
-
         backupIntoDepot.done().onTrue(driveOverDepot.cmd());
 
         driveOverDepot.done().onTrue(new SequentialCommandGroup(
@@ -83,7 +82,7 @@ public class AutoRoutines {
                     robot.indexer.stop()
                 ).repeatedly(),
                 robot.intake.agitate()
-            ).withTimeout(6.0),
+            ).withTimeout(7.0),
             robot.launcher.setState(LaunchState.AUTOMATIC),
             robot.intake.deploy(),
             robot.intake.runRollers(),

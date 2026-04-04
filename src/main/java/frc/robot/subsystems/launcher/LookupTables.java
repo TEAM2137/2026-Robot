@@ -42,11 +42,11 @@ public class LookupTables {
         Map.entry(3.236, 0.90),
         Map.entry(3.794, 0.96),
         Map.entry(4.261, 0.97),
-        Map.entry(4.655, 1.10),
-        Map.entry(5.009, 1.20),
-        Map.entry(6.065, 1.30),
-        Map.entry(7.045, 1.40),
-        Map.entry(8.000, 1.60)
+        Map.entry(4.655, 1.08),
+        Map.entry(5.009, 1.15),
+        Map.entry(6.065, 1.25),
+        Map.entry(7.045, 1.35),
+        Map.entry(8.000, 1.55)
     );
 
     public static final InterpolatingDoubleTreeMap flywheelRpmPassing = InterpolatingDoubleTreeMap.ofEntries(
