@@ -50,11 +50,12 @@ public class LookupTables {
     );
 
     public static final InterpolatingDoubleTreeMap flywheelRpmPassing = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(4.5, 1947.0),
-        Map.entry(7.5, 2520.0),
-        Map.entry(10.0, 2874.0),
-        Map.entry(12.5, 3400.0),
-        Map.entry(15.3, 3995.0)
+        Map.entry(4.5, 1500.0)
+        //Map.entry(4.5, 1947.0),
+        //Map.entry(7.5, 2520.0),
+        //Map.entry(10.0, 2874.0),
+        //Map.entry(12.5, 3400.0),
+        //Map.entry(15.3, 3995.0)
     );
 
     public static final InterpolatingDoubleTreeMap hoodAnglePassing = InterpolatingDoubleTreeMap.ofEntries(
