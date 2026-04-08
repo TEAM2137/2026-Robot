@@ -43,7 +43,7 @@ public class DriveCommands {
     public static final double WHEEL_RADIUS_MAX_VELOCITY = 1.0; // Rad/Sec
     public static final double WHEEL_RADIUS_RAMP_RATE = 0.5; // Rad/Sec^2
 
-    public static final double MAX_LINEAR_ACCELERATION = 13.0; // Meters/Sec^2
+    public static final double MAX_LINEAR_ACCELERATION = 10.0; // Meters/Sec^2
     public static final double MAX_ANGULAR_ACCELERATION = 1.8; // Rad/Sec^2
 
     private DriveCommands() {}
@@ -318,8 +318,9 @@ public class DriveCommands {
     public static Translation2d limitAccelerationFor(Translation2d currentVelocity, Translation2d wantedVelocity, double maxAcceleration) {
         Translation2d flippedVelocity = AllianceFlipUtil.shouldFlip() ? new Translation2d().minus(currentVelocity) : currentVelocity;
         Translation2d desiredAccel = wantedVelocity.minus(flippedVelocity);
-        if (desiredAccel.getNorm() > maxAcceleration * 0.04)
-            return flippedVelocity.plus(Utils.normalize(desiredAccel).times(maxAcceleration * 0.04));
+        double step = maxAcceleration * 0.2;
+        if (desiredAccel.getNorm() > step)
+            return flippedVelocity.plus(Utils.normalize(desiredAccel).times(step));
         else return wantedVelocity;
     }
 
