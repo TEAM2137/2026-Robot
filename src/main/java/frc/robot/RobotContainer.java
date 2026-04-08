@@ -5,10 +5,8 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,7 +26,6 @@ import frc.robot.subsystems.launcher.hood.*;
 import frc.robot.subsystems.launcher.turret.*;
 import frc.robot.subsystems.launcher.flywheel.*;
 import frc.robot.subsystems.vision.*;
-import frc.robot.util.Alerts;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.ShiftInfo;
 import frc.robot.util.TestMode;
@@ -163,9 +160,6 @@ public class RobotContainer {
         
         // Configure the controller bindings
         configureControllerBindings();
-
-        // necessary
-        Alerts.add("Robot is too tall to fit under the trench!", AlertType.kWarning, () -> DriverStation.isDisabled());
     }
 
     /**
