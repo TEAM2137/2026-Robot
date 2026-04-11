@@ -82,9 +82,9 @@ public class RobotContainer {
             indexer = new Indexer(new IndexerIOTalonFX() {});
 
             launcher = new Launcher(
-                new TurretIO() {},
-                new HoodIOTalonFX() {},
-                new FlywheelIOTalonFX() {}
+                new TurretIOTalonFX(),
+                new HoodIOTalonFX(),
+                new FlywheelIOTalonFX()
             );
 
             break;
@@ -235,11 +235,12 @@ public class RobotContainer {
             intake.runRollers()
         ).withName("Intake"));
 
-        driverController.leftBumper().and(RobotModeTriggers.teleop()).onFalse(new ConditionalCommand(
-            intake.agitate(),
-            intake.stopIntakeSequence(),
-            launcher.isLaunching()
-        ).withName("Stop Intaking"));
+        driverController.leftBumper().and(RobotModeTriggers.teleop().or(TestMode.LOOKUP_TABLES.isActive()))
+            .onFalse(new ConditionalCommand(
+                intake.agitate(),
+                intake.stopIntakeSequence(),
+                launcher.isLaunching()
+            ).withName("Stop Intaking"));
         
         Command retractIntake = new SequentialCommandGroup(
             intake.retract(),
@@ -250,8 +251,8 @@ public class RobotContainer {
 
         // RobotModeTriggers.disabled().onFalse(retractIntake);
 
-        driverController.leftTrigger().and(RobotModeTriggers.teleop()).whileTrue(intake.agitate());
-        driverController.leftTrigger().and(RobotModeTriggers.teleop()).onFalse(retractIntake);
+        driverController.leftTrigger().and(RobotModeTriggers.teleop().or(TestMode.LOOKUP_TABLES.isActive())).whileTrue(intake.agitate());
+        driverController.leftTrigger().and(RobotModeTriggers.teleop().or(TestMode.LOOKUP_TABLES.isActive())).onFalse(retractIntake);
 
         operatorController.b().onTrue(intake.deploy().andThen(intake.setRollerVoltage(-12)));
         operatorController.b().onFalse(intake.runRollers());
