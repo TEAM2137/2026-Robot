@@ -29,7 +29,7 @@ public class IntakeIOTalonFX implements IntakeIO {
         public static final double rollerKV = 0.117;//0.19;
 
         public static final double cruiseVelocity = 16;
-        public static final double acceleration = 50;
+        public static final double acceleration = 42;
     }
 
     protected final TalonFX pivot;

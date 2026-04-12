@@ -66,10 +66,10 @@ public class Intake extends SubsystemBase {
     public Command agitate(double deployPercent) {
         return this.runRollers()
             .andThen(new SequentialCommandGroup(
-                runOnce(() -> io.setPosition(Constants.deployPosition * deployPercent)),
-                Commands.waitSeconds(0.4),
                 runOnce(() -> io.setPosition(Constants.homePosition)),
-                Commands.waitSeconds(0.4)
+                Commands.waitSeconds(0.6),
+                runOnce(() -> io.setPosition(Constants.deployPosition * deployPercent)),
+                Commands.waitSeconds(0.6)
             ).repeatedly());
     }
 

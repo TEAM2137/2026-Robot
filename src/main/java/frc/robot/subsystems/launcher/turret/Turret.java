@@ -19,10 +19,10 @@ import frc.robot.util.Utils;
 
 public class Turret {
     public static class Constants {
-        public static final double cwBound = 230;
-        public static final double cwMinBound = 210;
-        public static final double ccwBound = 180;
-        public static final double ccwMinBound = 160;
+        public static final double cwBound = 165;
+        public static final double cwMinBound = 160;
+        public static final double ccwBound = 215;
+        public static final double ccwMinBound = 210;
 
         public static final double offsetX = 6.375; // inches, positive towards robot right
         public static final double offsetY = -5.875; // inches, positive towards robot front
@@ -30,20 +30,19 @@ public class Turret {
         public static final Translation2d turretOffset = new Translation2d(Constants.offsetY / 39.37, -Constants.offsetX / 39.37);
 
         public static final double magnetPosition = 0.004150390625; // rotations
-        public static final double tempOffsetDegrees = -3;
 
         public static final InterpolatingDoubleTreeMap offsetLookup = InterpolatingDoubleTreeMap.ofEntries(
-            // Map.entry(0.0, 0.0)
+            Map.entry(0.0, 0.0)
 
-            Map.entry(-180.0, 4.0),
-            Map.entry(-135.0, 3.0),
-            Map.entry(-90.0, -1.0),
-            Map.entry(-45.0, -5.0),
-            Map.entry(0.0, -8.0),
-            Map.entry(45.0, -6.0),
-            Map.entry(90.0, -3.0),
-            Map.entry(135.0, 0.0),
-            Map.entry(180.0, 2.0)
+            // Map.entry(-180.0, 4.0),
+            // Map.entry(-135.0, 3.0),
+            // Map.entry(-90.0, -1.0),
+            // Map.entry(-45.0, -5.0),
+            // Map.entry(0.0, -8.0),
+            // Map.entry(45.0, -6.0),
+            // Map.entry(90.0, -3.0),
+            // Map.entry(135.0, 0.0),
+            // Map.entry(180.0, 2.0)
         );
     }
 
@@ -85,12 +84,13 @@ public class Turret {
             .plus(Rotation2d.fromDegrees(manualOffset));
         
         // offset the target based on a lookup table
-        double offsetDegrees = Constants.offsetLookup.get(target.getDegrees()) + Constants.tempOffsetDegrees;
+        double offsetDegrees = Constants.offsetLookup.get(target.getDegrees());
         // if (!SmartDashboard.containsKey("AimOffset")) SmartDashboard.putNumber("AimOffset", 0.0);
         // double offsetDegrees = SmartDashboard.getNumber("AimOffset", 0.0);
-        target = target.plus(Rotation2d.fromDegrees(offsetDegrees));
         Logger.recordOutput("Launcher/Turret/AimOffsetDegrees", offsetDegrees);
         Logger.recordOutput("Launcher/Turret/AimOffsetInput", target.getDegrees());
+
+        target = target.plus(Rotation2d.fromDegrees(offsetDegrees));
         Logger.recordOutput("Launcher/Turret/TargetAngle", target);
 
         // use smaller bounds if the robot isn't launching fuel
