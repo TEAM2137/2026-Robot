@@ -13,8 +13,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.LimitingProfile;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.Utils;
 
@@ -22,7 +22,6 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -68,26 +67,24 @@ public class DriveCommands {
     public static Command joystickDrive(
             Drive drive,
             Supplier<Translation2d> movementSupplier,
-            BooleanSupplier slowMode,
-            DoubleSupplier omegaSupplier) {
+            DoubleSupplier omegaSupplier,
+            Supplier<LimitingProfile> profileSupplier) {
         return Commands.run(() -> {
             // Get controller drive inputs
             Translation2d movementRaw = movementSupplier.get();
-            double velocityMultiplier = slowMode.getAsBoolean() ? 0.3 : 1.0;
 
             // Get linear velocity from controller values
             Translation2d linearVelocity = getLinearVelocityFromJoysticks(movementRaw.getX(), movementRaw.getY())
-                .times(velocityMultiplier * drive.getMaxLinearSpeedMetersPerSec());
+                .times(drive.getMaxLinearSpeedMetersPerSec());
 
             // Apply rotation deadband
             double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
-            double omegaMultiplier = slowMode.getAsBoolean() ? 0.75 : 1.0;
 
             // Square rotation value for more precise control
-            omega = Math.copySign(omega * omega, omega) * drive.getMaxAngularSpeedRadPerSec() * omegaMultiplier;
+            omega = Math.copySign(omega * omega, omega) * drive.getMaxAngularSpeedRadPerSec();
 
             // Drive the robot
-            DriveCommands.driveFieldRelative(drive, linearVelocity, omega);
+            DriveCommands.driveFieldRelative(drive, linearVelocity, omega, profileSupplier.get());
         }, drive);
     }
 
@@ -99,8 +96,8 @@ public class DriveCommands {
     public static Command joystickDriveAtAngle(
             Drive drive,
             Supplier<Translation2d> movementSupplier,
-            BooleanSupplier slowMode,
-            Supplier<Rotation2d> rotationSupplier) {
+            Supplier<Rotation2d> rotationSupplier,
+            Supplier<LimitingProfile> profileSupplier) {
         // Create PID controller
         ProfiledPIDController angleController =
             new ProfiledPIDController(
@@ -114,18 +111,17 @@ public class DriveCommands {
         return Commands.run(() -> {
             // Get controller drive inputs
             Translation2d movementRaw = movementSupplier.get();
-            double velocityMultiplier = slowMode.getAsBoolean() ? 0.3 : 1.0;
 
             // Get linear velocity from controller values
             Translation2d linearVelocity = getLinearVelocityFromJoysticks(movementRaw.getX(), movementRaw.getY())
-                .times(velocityMultiplier * drive.getMaxLinearSpeedMetersPerSec());
+                .times(drive.getMaxLinearSpeedMetersPerSec());
 
             // Calculate angular velocity from PID
             double omega = angleController.calculate(drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
             if (Math.abs(angleController.getPositionError()) < ANGLE_DEADBAND) omega = 0.0;
             
             // Drive the robot
-            DriveCommands.driveFieldRelative(drive, linearVelocity, omega);
+            DriveCommands.driveFieldRelative(drive, linearVelocity, omega, profileSupplier.get());
         }, drive)
         // Reset PID controller when command starts
         .beforeStarting(() -> angleController.reset(
@@ -135,48 +131,53 @@ public class DriveCommands {
 
     private static Rotation2d lastRotation = null;
 
-    public static Command joystickDriveFrontFirst(Drive drive, Supplier<Translation2d> movementSupplier) {
-        return joystickDriveAtAngle(drive, movementSupplier, () -> false, () -> {
+    public static Command joystickDriveSnake(Drive drive, Supplier<Translation2d> movementSupplier, Supplier<LimitingProfile> profileSupplier) {
+        return joystickDriveAtAngle(drive, movementSupplier, () -> {
             Translation2d movement = movementSupplier.get();
             if (AllianceFlipUtil.shouldFlip()) movement = AllianceFlipUtil.flip(movement);
             if (lastRotation == null) lastRotation = drive.getRotation();
             if (movement.getNorm() >= DEADBAND) lastRotation = movement.getAngle();
             return lastRotation;
-        });
+        }, profileSupplier);
     }
     
-    public static Command joystickDriveCardinalDirections(Drive drive, Supplier<Translation2d> movementSupplier, DoubleSupplier omegaSupplier) {
+    public static Command joystickDriveCardinalLock(Drive drive, Supplier<Translation2d> movementSupplier, DoubleSupplier omegaSupplier, Supplier<LimitingProfile> profileSupplier) {
         return joystickDrive(drive, () -> {
             Translation2d movement = movementSupplier.get();
             if (Math.abs(movement.getX()) > Math.abs(movement.getY()))
                 return new Translation2d(movement.getX(), 0.0);
             return new Translation2d(0.0, movement.getY());
-        }, () -> false, omegaSupplier);
+        }, omegaSupplier, profileSupplier);
     }
 
-    public static void driveFieldRelative(Drive drive, Translation2d linearVelocity, double omega) {
+    public static void driveFieldRelative(Drive drive, Translation2d velocity, double omega, LimitingProfile profile) {
         // Apply linear velocity multiplier
-        double vx = linearVelocity.getX();
-        double vy = linearVelocity.getY();
-        double maxLinearAccel = MAX_LINEAR_ACCELERATION;
-        double maxAngularAccel = MAX_ANGULAR_ACCELERATION;
+        double maxAccel = MAX_LINEAR_ACCELERATION;
+        double maxAlpha = MAX_ANGULAR_ACCELERATION;
 
-        // Limit drivetrain if SOTF is active
-        if (RobotContainer.getInstance().launcher.shouldLimitDrive()) {
-            vx = MathUtil.clamp(vx, -drive.getMaxLinearSpeedMetersPerSec() * 0.3, drive.getMaxLinearSpeedMetersPerSec() * 0.3);
-            vy = MathUtil.clamp(vy, -drive.getMaxLinearSpeedMetersPerSec() * 0.3, drive.getMaxLinearSpeedMetersPerSec() * 0.3);
-            omega = MathUtil.clamp(omega, -drive.getMaxAngularSpeedRadPerSec() * 0.3, drive.getMaxAngularSpeedRadPerSec() * 0.3);
-            maxAngularAccel *= 0.7;
-        }
+        // Limit linear acceleration
+        maxAccel *= profile.accelerationLimitMultiplier();
+
+        // Limit angular acceleration
+        maxAlpha *= profile.alphaLimitMultiplier();
+
+        // Limit linear velocity
+        velocity = velocity.times(profile.speedMultiplier());
+        velocity = Utils.normalize(velocity).times(Math.min(
+            velocity.getNorm(), drive.getMaxLinearSpeedMetersPerSec() * profile.speedLimitMultiplier()));
+
+        // Limit angular velocity
+        omega *= profile.omegaMultiplier();
+        omega = MathUtil.clamp(omega, -drive.getMaxAngularSpeedRadPerSec() * profile.alphaLimitMultiplier(),
+            drive.getMaxAngularSpeedRadPerSec() * profile.alphaLimitMultiplier());
 
         // Record commanded velocities
-        Translation2d commanded = new Translation2d(vx, vy);
-        Logger.recordOutput("Drive/CommandedVelocity", commanded);
+        Logger.recordOutput("Drive/CommandedVelocity", velocity);
         Logger.recordOutput("Drive/CommandedOmega", omega);
 
         // Apply acceleration limits
-        Translation2d finalVelocity = limitAccelerationFor(drive.getLinearSpeedsVector(), commanded, maxLinearAccel);
-        double finalOmega = limitAngularAccelerationFor(drive.getAngularVelocityRadsPerSec(), omega, maxAngularAccel);
+        Translation2d finalVelocity = limitAccelerationFor(drive.getLinearSpeedsVector(), velocity, maxAccel);
+        double finalOmega = limitAngularAccelerationFor(drive.getAngularVelocityRadsPerSec(), omega, maxAlpha);
         Logger.recordOutput("Drive/FinalLimitedVelocity", finalVelocity);
         Logger.recordOutput("Drive/FinalLimitedOmega", finalOmega);
 

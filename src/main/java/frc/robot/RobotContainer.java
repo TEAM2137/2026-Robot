@@ -1,5 +1,6 @@
 package frc.robot;
 
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -46,10 +47,14 @@ public class RobotContainer {
     // Controllers
     public final CommandXboxController driverController = new CommandXboxController(0);
     public final CommandXboxController operatorController = new CommandXboxController(1);
-    private final Supplier<Translation2d> joystickSupplier = () -> new Translation2d(-driverController.getLeftY(), -driverController.getLeftX());
 
     // Auto
     public Autonomous autonomous;
+
+    // Utilities
+    private final Supplier<LimitingProfile> limitingProfileSupplier;
+    private final Supplier<Translation2d> joystickSupplier;
+    private final DoubleSupplier rotationSupplier;
 
     /** The container for the robot. Contains subsystems, IO devices, and commands. */
     public RobotContainer() {
@@ -157,6 +162,11 @@ public class RobotContainer {
 
         // Setup autonomous features
         this.autonomous = new Autonomous(this);
+
+        // Create utility suppliers
+        this.limitingProfileSupplier = () -> launcher.shouldLimitDrive() ? LimitingProfile.SOTF : LimitingProfile.DEFAULT;
+        this.joystickSupplier = () -> new Translation2d(-driverController.getLeftY(), -driverController.getLeftX());
+        this.rotationSupplier = () -> -driverController.getRightX() * 0.75;
         
         // Configure the controller bindings
         configureControllerBindings();
@@ -170,20 +180,19 @@ public class RobotContainer {
      */
     private void configureControllerBindings() {
         // Default command, normal field-relative drive
-        drive.setDefaultCommand(DriveCommands.joystickDrive(drive, joystickSupplier,
-                        () -> false, () -> -driverController.getRightX() * 0.75)
-                .withName("Default Drive"));
+        drive.setDefaultCommand(DriveCommands.joystickDrive(drive, joystickSupplier, rotationSupplier, limitingProfileSupplier)
+            .withName("Default Drive Command"));
 
         // Reset gyro to 0°
         driverController.start().onTrue(Commands.runOnce(() ->
-                drive.setPose(new Pose2d(
-                        drive.getPose().getTranslation(),
-                        AllianceFlipUtil.shouldFlip()
-                            ? AllianceFlipUtil.flip(new Rotation2d())
-                            : new Rotation2d()
-                )), drive)
-                .ignoringDisable(true)
-                .withName("Reset Gyro"));
+            drive.setPose(new Pose2d(
+                    drive.getPose().getTranslation(),
+                    AllianceFlipUtil.shouldFlip()
+                        ? AllianceFlipUtil.flip(new Rotation2d())
+                        : new Rotation2d()
+            )), drive)
+            .ignoringDisable(true)
+            .withName("Reset Gyro"));
 
         this.configureTeleopBindings();
         this.configureTestBindings();
@@ -191,8 +200,10 @@ public class RobotContainer {
 
     // configure teleop specific bindings here
     private void configureTeleopBindings() {
-        driverController.a().and(RobotModeTriggers.teleop()).whileTrue(DriveCommands.joystickDriveFrontFirst(drive, joystickSupplier));
-        driverController.rightTrigger().and(RobotModeTriggers.teleop()).whileTrue(DriveCommands.joystickDriveCardinalDirections(drive, joystickSupplier, () -> -driverController.getRightX() * 0.75));
+        driverController.a().and(RobotModeTriggers.teleop()).whileTrue(DriveCommands.joystickDriveSnake(
+            drive, joystickSupplier, limitingProfileSupplier));
+        driverController.rightTrigger().and(RobotModeTriggers.teleop()).whileTrue(DriveCommands.joystickDriveCardinalLock(
+            drive, joystickSupplier, rotationSupplier, limitingProfileSupplier));
 
         driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test()))
             .onTrue(launcher.setState(LaunchState.DONT_LAUNCH).withName("Don't Launch"));
