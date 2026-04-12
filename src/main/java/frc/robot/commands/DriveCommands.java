@@ -44,7 +44,7 @@ public class DriveCommands {
     public static final double WHEEL_RADIUS_RAMP_RATE = 0.5; // Rad/Sec^2
 
     public static final double MAX_LINEAR_ACCELERATION = 10.0; // Meters/Sec^2
-    public static final double MAX_ANGULAR_ACCELERATION = 1.8; // Rad/Sec^2
+    public static final double MAX_ANGULAR_ACCELERATION = 9.0; // Rad/Sec^2
 
     private DriveCommands() {}
 
@@ -326,8 +326,9 @@ public class DriveCommands {
 
     public static double limitAngularAccelerationFor(double currentVelocity, double wantedVelocity, double maxAcceleration) {
         double desiredAccel = wantedVelocity - currentVelocity;
-        if (Math.abs(desiredAccel) > maxAcceleration)
-            return currentVelocity + Math.signum(desiredAccel) * maxAcceleration;
+        double step = maxAcceleration * 0.2;
+        if (Math.abs(desiredAccel) > step)
+            return currentVelocity + Math.signum(desiredAccel) * step;
         else return wantedVelocity;
     }
 }
