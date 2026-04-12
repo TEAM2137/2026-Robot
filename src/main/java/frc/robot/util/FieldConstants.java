@@ -28,7 +28,10 @@ public class FieldConstants {
 
     public static final double hubFromCenterX = 3.6449;
     public static final double hubFromLeftX = 4.6256;
+    
     public static final double bumpWidth = 1.12776;
+    public static final double bottomBumpCenterY = 2.5;
+    public static final double topBumpCenterY = fieldHeight - bottomBumpCenterY;
 
     public static final Translation2d blueHub = new Translation2d(fieldWidth / 2.0 - hubFromCenterX, fieldHeight / 2.0);
     public static final Translation2d redHub = new Translation2d(fieldWidth / 2.0 + hubFromCenterX, fieldHeight / 2.0);

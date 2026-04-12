@@ -204,6 +204,7 @@ public class RobotContainer {
             drive, joystickSupplier, limitingProfileSupplier));
         driverController.rightTrigger().and(RobotModeTriggers.teleop()).whileTrue(DriveCommands.joystickDriveCardinalLock(
             drive, joystickSupplier, rotationSupplier, limitingProfileSupplier));
+        driverController.leftTrigger().and(RobotModeTriggers.teleop()).whileTrue(DriveCommands.joystickDriveBumpAlign(drive, joystickSupplier));
 
         driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test()))
             .onTrue(launcher.setState(LaunchState.DONT_LAUNCH).withName("Don't Launch"));
@@ -233,13 +234,15 @@ public class RobotContainer {
             )
         ).withName("Stop Indexer"));
 
+        Command xLockCommand = drive.xLockCommand().withName("X-Lock");
         Trigger xLock = launcher.isLaunching()
+            .and(RobotModeTriggers.teleop())
             .and(() -> this.joystickSupplier.get().getNorm() < DriveCommands.DEADBAND)
             .and(() -> Math.abs(this.driverController.getRightX() * 0.75) < DriveCommands.DEADBAND)
-            .and(RobotModeTriggers.teleop())
+            .and(() -> drive.getDefaultCommand().isScheduled() || xLockCommand.isScheduled())
             .debounce(0.25);
 
-        xLock.whileTrue(drive.xLockCommand().withName("X-Lock"));
+        xLock.whileTrue(xLockCommand);
 
         driverController.leftBumper().and(RobotModeTriggers.teleop()).onTrue(new SequentialCommandGroup(
             intake.deploy(),

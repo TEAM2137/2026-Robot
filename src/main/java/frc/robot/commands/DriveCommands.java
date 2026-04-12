@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.LimitingProfile;
 import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.FieldConstants;
 import frc.robot.util.Utils;
 
 import java.text.DecimalFormat;
@@ -149,6 +150,22 @@ public class DriveCommands {
             return new Translation2d(0.0, movement.getY());
         }, omegaSupplier, profileSupplier);
     }
+    
+    public static Command joystickDriveBumpAlign(Drive drive, Supplier<Translation2d> movementSupplier) {
+        Supplier<Translation2d> newMovementSupplier = () -> {
+            double robotY = drive.getPose().getTranslation().getY();
+            double targetY = robotY > FieldConstants.fieldHeight / 2.0
+                ? FieldConstants.topBumpCenterY : FieldConstants.bottomBumpCenterY;
+            return new Translation2d(movementSupplier.get().getX(), (targetY - robotY) * 2f);
+        };
+        Supplier<Rotation2d> angleSupplier = () -> {
+            Rotation2d rotation = drive.getRotation();
+            double angle = MathUtil.inputModulus(rotation.getDegrees(), -180, 180);
+            if (angle >= 0) return Rotation2d.fromDegrees((angle < 90) ? 45 : 135);
+            else return Rotation2d.fromDegrees((angle > -90) ? -45 : -135);
+        };
+        return joystickDriveAtAngle(drive, newMovementSupplier, angleSupplier, () -> LimitingProfile.BUMP);
+    }
 
     public static void driveFieldRelative(Drive drive, Translation2d velocity, double omega, LimitingProfile profile) {
         // Apply linear velocity multiplier
@@ -163,12 +180,12 @@ public class DriveCommands {
 
         // Limit linear velocity
         velocity = velocity.times(profile.speedMultiplier());
-        velocity = Utils.normalize(velocity).times(Math.min(
+        if (velocity.getNorm() != 0) velocity = Utils.normalize(velocity).times(Math.min(
             velocity.getNorm(), drive.getMaxLinearSpeedMetersPerSec() * profile.speedLimitMultiplier()));
 
         // Limit angular velocity
         omega *= profile.omegaMultiplier();
-        omega = MathUtil.clamp(omega, -drive.getMaxAngularSpeedRadPerSec() * profile.alphaLimitMultiplier(),
+        if (omega != 0) omega = MathUtil.clamp(omega, -drive.getMaxAngularSpeedRadPerSec() * profile.alphaLimitMultiplier(),
             drive.getMaxAngularSpeedRadPerSec() * profile.alphaLimitMultiplier());
 
         // Record commanded velocities
