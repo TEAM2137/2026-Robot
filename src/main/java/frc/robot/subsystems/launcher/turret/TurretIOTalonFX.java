@@ -23,6 +23,8 @@ public class TurretIOTalonFX implements TurretIO {
         public static final double kD = 1.5;
         public static final double kV = 8.0; //8 in sim, 5.52 calculated
         public static final double kS = 0.22; 
+
+        public static final double maxErrorRotations = 0.035;
     }
 
     protected final TalonFX motor;
@@ -68,7 +70,7 @@ public class TurretIOTalonFX implements TurretIO {
 
     @Override
     public boolean isAtTarget() {
-        return Math.abs(this.motor.getClosedLoopError().getValueAsDouble()) < 0.025;
+        return Math.abs(this.motor.getClosedLoopError().getValueAsDouble()) < Constants.maxErrorRotations;
     }
 
     @Override

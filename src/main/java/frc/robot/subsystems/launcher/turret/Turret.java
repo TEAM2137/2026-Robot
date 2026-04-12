@@ -20,7 +20,9 @@ import frc.robot.util.Utils;
 public class Turret {
     public static class Constants {
         public static final double cwBound = 230;
+        public static final double cwMinBound = 210;
         public static final double ccwBound = 180;
+        public static final double ccwMinBound = 160;
 
         public static final double offsetX = 6.375; // inches, positive towards robot right
         public static final double offsetY = -5.875; // inches, positive towards robot front
@@ -82,25 +84,28 @@ public class Turret {
         Rotation2d target = angle.unaryMinus().plus(Rotation2d.kCW_90deg)
             .plus(Rotation2d.fromDegrees(manualOffset));
         
+        // offset the target based on a lookup table
         double offsetDegrees = Constants.offsetLookup.get(target.getDegrees()) + Constants.tempOffsetDegrees;
         // if (!SmartDashboard.containsKey("AimOffset")) SmartDashboard.putNumber("AimOffset", 0.0);
         // double offsetDegrees = SmartDashboard.getNumber("AimOffset", 0.0);
-        
+        target = target.plus(Rotation2d.fromDegrees(offsetDegrees));
         Logger.recordOutput("Launcher/Turret/AimOffsetDegrees", offsetDegrees);
         Logger.recordOutput("Launcher/Turret/AimOffsetInput", target.getDegrees());
-        target = target.plus(Rotation2d.fromDegrees(offsetDegrees));
-
-        Rotation2d current = Rotation2d.fromDegrees(io.getAngle());
-
         Logger.recordOutput("Launcher/Turret/TargetAngle", target);
 
+        // use smaller bounds if the robot isn't launching fuel
+        boolean isLaunching = RobotContainer.getInstance().launcher.isLaunching().getAsBoolean();
+        double cwBound = isLaunching ? Constants.cwBound : Constants.cwMinBound;
+        double ccwBound = isLaunching ? Constants.ccwBound : Constants.ccwMinBound;
+
+        Rotation2d current = Rotation2d.fromDegrees(io.getAngle());
         double difference = target.getDegrees() - current.getDegrees();
         double output = target.getDegrees();
-        if (difference > 180 && (target.getDegrees() - 360) > -Constants.cwBound) {
+        if (difference > 180 && (target.getDegrees() - 360) > -cwBound) {
             output -= 360;
             Logger.recordOutput("Launcher/Turret/AdjustedTarget", target.getDegrees() - 360);
         }
-        else if (difference < -180 && (target.getDegrees() + 360) < Constants.ccwBound) {
+        else if (difference < -180 && (target.getDegrees() + 360) < ccwBound) {
             output += 360;
             Logger.recordOutput("Launcher/Turret/AdjustedTarget", target.getDegrees() + 360);
         }
