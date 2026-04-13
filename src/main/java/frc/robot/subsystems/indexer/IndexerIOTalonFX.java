@@ -10,7 +10,6 @@ public class IndexerIOTalonFX implements IndexerIO {
     public static class Constants {
         public static final int indexerId = 26;
         public static final int feederId = 25;
-        public static final int reverserId = 27;
         public static final double indexerGearing = 1.0;
         public static final double feederGearing = 1.0;
 
@@ -20,7 +19,6 @@ public class IndexerIOTalonFX implements IndexerIO {
     }
 
     protected final TalonFX indexer;
-    protected final TalonFX reverser;
     protected final TalonFX feeder;
 
     public IndexerIOTalonFX() {
@@ -41,21 +39,11 @@ public class IndexerIOTalonFX implements IndexerIO {
         this.feeder.getConfigurator().apply(new CurrentLimitsConfigs()
             .withStatorCurrentLimit(Constants.feederStatorCurrentLimit)
             .withStatorCurrentLimitEnable(true));
-
-        this.reverser = new TalonFX(Constants.reverserId);
-        this.reverser.getConfigurator().apply(new MotorOutputConfigs()
-            .withNeutralMode(NeutralModeValue.Brake)
-            .withInverted(InvertedValue.CounterClockwise_Positive));
-
-        this.reverser.getConfigurator().apply(new CurrentLimitsConfigs()
-            .withStatorCurrentLimit(Constants.reverserStatorCurrentLimit)
-            .withStatorCurrentLimitEnable(true));
     }
 
     @Override
     public void runIndexer(double volts) {
         this.indexer.setVoltage(volts);
-        this.reverser.setVoltage(volts);
     }
 
     @Override
