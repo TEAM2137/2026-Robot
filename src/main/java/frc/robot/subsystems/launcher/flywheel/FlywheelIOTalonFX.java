@@ -18,9 +18,9 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         // public static final int feederId = 32;
         public static final double gearing = 11.0 / 12.0;
 
-        public static final double kP = 0.25;
-        public static final double kS = 0.19;
-        public static final double kV = 0.119;
+        public static final double kP = 0.50;
+        public static final double kS = 0.45;
+        public static final double kV = 0.125;
     }
 
     protected final TalonFX leader;

@@ -325,7 +325,7 @@ public class RobotContainer {
         driverController.b().and(TestMode.INTAKE.isActive()).onTrue(intake.runRollers());
         driverController.b().and(TestMode.INTAKE.isActive()).onFalse(intake.stopRollers());
 
-        driverController.b().and(TestMode.HOOD.isActive()).onTrue(launcher.setHoodAngle(18));
+        driverController.b().and(TestMode.HOOD.isActive()).onTrue(launcher.setHoodAngle(20));
         driverController.b().and(TestMode.HOOD.isActive()).onFalse(launcher.setHoodAngle(0));
 
         driverController.b().and(TestMode.FLYWHEEL.isActive()).onTrue(launcher.setFlywheelSpeed(() -> SmartDashboard.getNumber("LauncherRPM", 1000)));

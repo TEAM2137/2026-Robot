@@ -19,7 +19,7 @@ public class HoodIOTalonFX implements HoodIO {
         public static final double kP = 80.0;
         public static final double kI = 0.0;
         public static final double kD = 0.0;
-        public static final double kS = 0.24;
+        public static final double kS = 0.32;
     }
 
     protected final TalonFX motor;

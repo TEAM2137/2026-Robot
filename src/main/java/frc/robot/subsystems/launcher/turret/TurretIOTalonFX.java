@@ -22,7 +22,7 @@ public class TurretIOTalonFX implements TurretIO {
         public static final double kP = 80.0;
         public static final double kD = 1.5;
         public static final double kV = 8.0; //8 in sim, 5.52 calculated
-        public static final double kS = 0.22; 
+        public static final double kS = 0.23; 
 
         public static final double maxErrorRotations = 0.035;
     }

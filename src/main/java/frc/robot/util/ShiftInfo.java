@@ -92,8 +92,8 @@ public enum ShiftInfo {
             .debounce(0.5);
         Alerts.add("Auto winner not received from FMS", AlertType.kWarning, autoWinnerMissing);
 
-        RobotModeTriggers.teleop().onTrue(Commands.runOnce(() -> preciseTeleopTimer.restart()));
-        RobotModeTriggers.teleop().onFalse(Commands.runOnce(() -> preciseTeleopTimer.stop()));
+        RobotModeTriggers.teleop().onTrue(Commands.runOnce(() -> preciseTeleopTimer.restart()).ignoringDisable(true));
+        RobotModeTriggers.teleop().onFalse(Commands.runOnce(() -> preciseTeleopTimer.stop()).ignoringDisable(true));
     }
 
     public static double getMatchTimePrecise() {
