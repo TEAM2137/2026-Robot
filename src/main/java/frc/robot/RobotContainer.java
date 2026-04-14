@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -297,6 +298,15 @@ public class RobotContainer {
         operatorController.povLeft().and(RobotModeTriggers.teleop()).onTrue(launcher.getTurret().increaseTurretOffset());
         operatorController.povRight().and(RobotModeTriggers.teleop()).onTrue(launcher.getTurret().decreaseTurretOffset());
         operatorController.back().and(RobotModeTriggers.teleop()).onTrue(launcher.getTurret().resetTurretOffset());
+
+        // controller rumble (TODO: test this, it doesn't seem to work in sim)
+        ShiftInfo.loseAutoTrigger().whileTrue(Commands.runEnd(() -> {
+            driverController.setRumble(RumbleType.kBothRumble, 1);
+            operatorController.setRumble(RumbleType.kBothRumble, 1);
+        }, () -> {
+            driverController.setRumble(RumbleType.kBothRumble, 0);
+            operatorController.setRumble(RumbleType.kBothRumble, 0);
+        }).withTimeout(0.25));
     }
 
     // configure test mode specific bindings here

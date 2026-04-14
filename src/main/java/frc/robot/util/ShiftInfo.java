@@ -5,7 +5,9 @@ import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -50,14 +52,16 @@ public enum ShiftInfo {
     }
 
     public double timeUntilStart() {
-        if (DriverStation.isAutonomous()) return DriverStation.getMatchTime();
-        if (this.getStartTime() > DriverStation.getMatchTime()) return 0.0;
-        return DriverStation.getMatchTime() - this.getStartTime();
+        double matchTime = getMatchTimePrecise();
+        if (DriverStation.isAutonomous()) return matchTime;
+        if (this.getStartTime() > matchTime) return 0.0;
+        return matchTime - this.getStartTime();
     }
 
     public double timeSinceStart() {
-        if (this.getStartTime() < DriverStation.getMatchTime()) return 0.0;
-        return this.getStartTime() - DriverStation.getMatchTime();
+        double matchTime = getMatchTimePrecise();
+        if (this.getStartTime() < matchTime) return 0.0;
+        return this.getStartTime() - matchTime;
     }
 
     public boolean hasNext() {
@@ -77,16 +81,35 @@ public enum ShiftInfo {
         if (!this.hasPrevious()) return ShiftInfo.AUTO;
         return values()[this.ordinal() - 1];
     }
+    
+    private static final Trigger loseAuto = RobotModeTriggers.teleop()
+        .and(new Trigger(() -> !didWinAuto().orElse(true)));
+    private static final Timer preciseTeleopTimer = new Timer();
 
     static {
         Trigger autoWinnerMissing = RobotModeTriggers.teleop()
             .and(() -> !hasAutoWinner() && DriverStation.isFMSAttached())
             .debounce(0.5);
         Alerts.add("Auto winner not received from FMS", AlertType.kWarning, autoWinnerMissing);
+
+        RobotModeTriggers.teleop().onTrue(Commands.runOnce(() -> preciseTeleopTimer.restart()));
+        RobotModeTriggers.teleop().onFalse(Commands.runOnce(() -> preciseTeleopTimer.stop()));
+    }
+
+    public static double getMatchTimePrecise() {
+        double matchTime = DriverStation.getMatchTime();
+        if (RobotModeTriggers.teleop().getAsBoolean() && matchTime > 0)
+            matchTime = 140.0 - preciseTeleopTimer.get();
+        Logger.recordOutput("ShiftInfo/PreciseMatchTime", matchTime);
+        return matchTime;
+    }
+
+    public static Trigger loseAutoTrigger() {
+        return loseAuto;
     }
 
     public static ShiftInfo getCurrentShift() {
-        double matchTime = DriverStation.getMatchTime();
+        double matchTime = getMatchTimePrecise();
         if (DriverStation.isAutonomous()) return AUTO;
         for (int i = 2; i < values().length; i++) {
             ShiftInfo shift = values()[i];
