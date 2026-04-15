@@ -15,7 +15,7 @@ public record LimitingProfile(
     );
 
     public static final LimitingProfile BUMP = new LimitingProfile(
-        1.0, 0.6, 1.0,
+        1.0, 0.4, 1.0,
         1.0, 1.0, 1.0
     );
 }

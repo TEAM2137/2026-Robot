@@ -165,7 +165,7 @@ public class RobotContainer {
         this.autonomous = new Autonomous(this);
 
         // Create utility suppliers
-        this.limitingProfileSupplier = () -> launcher.shouldLimitDrive() ? LimitingProfile.SOTF : LimitingProfile.DEFAULT;
+        this.limitingProfileSupplier = () -> launcher.shouldLimitDrive() && !operatorController.x().getAsBoolean() ? LimitingProfile.SOTF : LimitingProfile.DEFAULT;
         this.joystickSupplier = () -> new Translation2d(-driverController.getLeftY(), -driverController.getLeftX());
         this.rotationSupplier = () -> -driverController.getRightX() * 0.75;
         
@@ -195,7 +195,7 @@ public class RobotContainer {
             .ignoringDisable(true)
             .withName("Reset Gyro"));
             
-        launcher.isLaunching().whileTrue(new SequentialCommandGroup(
+        launcher.isLaunching().and(RobotModeTriggers.autonomous().negate()).whileTrue(new SequentialCommandGroup(
             Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME),
             new SequentialCommandGroup(
                 indexer.run().repeatedly().onlyWhile(launcher.getTurret().isAtTarget()),
@@ -203,12 +203,12 @@ public class RobotContainer {
             ).repeatedly()
         ).withName("Run Indexer"));
 
-        launcher.isLaunching().whileTrue(Commands.either(
+        launcher.isLaunching().and(RobotModeTriggers.autonomous().negate()).whileTrue(Commands.either(
             Commands.none(), intake.agitate(),
             driverController.leftBumper()
         ).withName("Intake Agitation"));
 
-        launcher.isLaunching().onFalse(new SequentialCommandGroup(
+        launcher.isLaunching().and(RobotModeTriggers.autonomous().negate()).onFalse(new SequentialCommandGroup(
             indexer.stop(),
             new ConditionalCommand(
                 Commands.none(),
@@ -268,8 +268,8 @@ public class RobotContainer {
 
         // RobotModeTriggers.disabled().onFalse(retractIntake);
 
-        operatorController.x().whileTrue(intake.agitate());
-        operatorController.x().onFalse(retractIntake);
+        operatorController.y().whileTrue(intake.agitate());
+        operatorController.y().onFalse(retractIntake);
 
         operatorController.b().onTrue(intake.deploy().andThen(intake.setRollerVoltage(-12)));
         operatorController.b().onFalse(intake.runRollers());
