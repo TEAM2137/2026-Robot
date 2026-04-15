@@ -163,6 +163,7 @@ public class DriveCommands {
             double angle = MathUtil.inputModulus(rotation.getDegrees(), -180, 180);
             if (angle >= 45) return Rotation2d.fromDegrees((angle < 135) ? 90 : 180);
             else return Rotation2d.fromDegrees((angle > -45) ? 0 : -90); //This now locks to 90 degree angles, to revert just subtract 45 from every number in the conditional
+            //TODO change this to only lock to 180 degree angles (intake forward/back only)
         };
         return joystickDriveAtAngle(drive, newMovementSupplier, angleSupplier, () -> LimitingProfile.BUMP);
     }
