@@ -10,12 +10,12 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
 import frc.robot.util.Alerts;
+import frc.robot.util.TestMode;
 import frc.robot.util.Utils;
 
 public class Turret {
@@ -33,17 +33,17 @@ public class Turret {
         public static final double magnetPosition = 0.004150390625; // rotations
 
         public static final InterpolatingDoubleTreeMap offsetLookup = InterpolatingDoubleTreeMap.ofEntries(
-            Map.entry(0.0, 0.0)
+            // Map.entry(0.0, 0.0)
 
-            // Map.entry(-180.0, 4.0),
-            // Map.entry(-135.0, 3.0),
-            // Map.entry(-90.0, -1.0),
-            // Map.entry(-45.0, -5.0),
-            // Map.entry(0.0, -8.0),
-            // Map.entry(45.0, -6.0),
-            // Map.entry(90.0, -3.0),
-            // Map.entry(135.0, 0.0),
-            // Map.entry(180.0, 2.0)
+            Map.entry(-180.0, 0.0),
+            Map.entry(-135.0, 0.0),
+            Map.entry(-90.0, -2.0),
+            Map.entry(-45.0, 0.0),
+            Map.entry(0.0, 0.0),
+            Map.entry(45.0, 0.0),
+            Map.entry(90.0, 0.0),
+            Map.entry(135.0, 0.0),
+            Map.entry(180.0, 0.0)
         );
     }
 
@@ -52,7 +52,7 @@ public class Turret {
 
     private final Trigger isAtTargetTrigger;
 
-    public double manualOffset = 0.0;
+    public double manualOffsetDegrees = 0.0;
     public boolean didZero = false;
 
     public Turret(TurretIO io) {
@@ -81,17 +81,17 @@ public class Turret {
     public void setAngleRobotRelative(Rotation2d angle) {
         if (!this.didZero && !Utils.isSim()) return;
 
-        Rotation2d target = angle.unaryMinus().plus(Rotation2d.kCW_90deg)
-            .plus(Rotation2d.fromDegrees(manualOffset));
+        Rotation2d target = angle.unaryMinus().plus(Rotation2d.kCW_90deg);
         
-        // offset the target based on a lookup table
-        // double offsetDegrees = Constants.offsetLookup.get(target.getDegrees());
-        if (!SmartDashboard.containsKey("AimOffset")) SmartDashboard.putNumber("AimOffset", 0.0);
-        double offsetDegrees = SmartDashboard.getNumber("AimOffset", 0.0);
-        Logger.recordOutput("Launcher/Turret/AimOffsetDegrees", offsetDegrees);
+        double offsetDegrees = 0.0;
+        if (!TestMode.TURRET_OFFSETS.isActive().getAsBoolean()) {
+            // offset the target angle based on a lookup table
+            offsetDegrees = Constants.offsetLookup.get(target.getDegrees());
+        }
         Logger.recordOutput("Launcher/Turret/AimOffsetInput", target.getDegrees());
+        Logger.recordOutput("Launcher/Turret/AimOffsetDegrees", offsetDegrees);
 
-        target = target.plus(Rotation2d.fromDegrees(offsetDegrees));
+        target = target.plus(Rotation2d.fromDegrees(offsetDegrees + manualOffsetDegrees));
         Logger.recordOutput("Launcher/Turret/TargetAngle", target);
 
         // use smaller bounds if the robot isn't launching fuel
@@ -120,15 +120,15 @@ public class Turret {
     }
 
     public Command increaseTurretOffset() {
-        return Commands.runOnce(() -> manualOffset += 1);
+        return Commands.runOnce(() -> manualOffsetDegrees += 1);
     }
 
     public Command decreaseTurretOffset() {
-        return Commands.runOnce(() -> manualOffset -= 1);
+        return Commands.runOnce(() -> manualOffsetDegrees -= 1);
     }
 
     public Command resetTurretOffset() {
-        return Commands.runOnce(() -> manualOffset = 0);
+        return Commands.runOnce(() -> manualOffsetDegrees = 0);
     }
 
     public Command resetPosition() {
@@ -190,7 +190,7 @@ public class Turret {
         }
 
         Logger.recordOutput("Launcher/Turret/DidZero", this.didZero);
-        Logger.recordOutput("Launcher/Turret/ManualOffset", this.manualOffset);
+        Logger.recordOutput("Launcher/Turret/ManualOffset", this.manualOffsetDegrees);
         Logger.recordOutput("Launcher/Turret/FieldSpacePose", this.getFieldSpacePose());
         Logger.recordOutput("Launcher/Turret/FieldSpaceVelocity", this.getFieldSpaceVelocity());
     }

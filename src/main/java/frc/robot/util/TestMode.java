@@ -5,13 +5,13 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotContainer;
 
 public enum TestMode {
-    ALL("All"),
-    INTAKE("Intake"),
-    CLIMBER("Climber"),
+    NONE("None"),
+    TURRET_OFFSETS("Turret Offsets"),
+    LOOKUP_TABLES("Lookup Tables"),
     TURRET("Turret"),
     HOOD("Hood"),
     FLYWHEEL("Flywheel"),
-    LOOKUP_TABLES("Lookup Tables");
+    INTAKE("Intake");
 
     private final String name;
     private final Trigger isActive;

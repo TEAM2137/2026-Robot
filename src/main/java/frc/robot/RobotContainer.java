@@ -156,7 +156,7 @@ public class RobotContainer {
 
         // Setup test mode chooser
         this.testModeChooser = new SendableChooser<>();
-        this.testModeChooser.setDefaultOption("All", TestMode.ALL);
+        this.testModeChooser.setDefaultOption("None", TestMode.NONE);
         for (TestMode mode : TestMode.values()) this.testModeChooser.addOption(mode.getName(), mode);
         SmartDashboard.putData("Test Mode", this.testModeChooser);
         if (!SmartDashboard.containsKey("LauncherRPM")) SmartDashboard.putNumber("LauncherRPM", 1000);
@@ -194,6 +194,39 @@ public class RobotContainer {
             )), drive)
             .ignoringDisable(true)
             .withName("Reset Gyro"));
+            
+        launcher.isLaunching().whileTrue(new SequentialCommandGroup(
+            Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME),
+            new SequentialCommandGroup(
+                indexer.run().repeatedly().onlyWhile(launcher.getTurret().isAtTarget()),
+                indexer.stop()
+            ).repeatedly()
+        ).withName("Run Indexer"));
+
+        launcher.isLaunching().whileTrue(Commands.either(
+            Commands.none(), intake.agitate(),
+            driverController.leftBumper()
+        ).withName("Intake Agitation"));
+
+        launcher.isLaunching().onFalse(new SequentialCommandGroup(
+            indexer.stop(),
+            new ConditionalCommand(
+                Commands.none(),
+                intake.deploy().andThen(intake.stopRollers()),
+                driverController.leftBumper()
+            )
+        ).withName("Stop Indexer"));
+
+        driverController.leftBumper().onTrue(new SequentialCommandGroup(
+            intake.deploy(),
+            intake.runRollers()
+        ).withName("Intake"));
+
+        driverController.leftBumper().onFalse(new ConditionalCommand(
+            intake.agitate(),
+            intake.stopIntakeSequence(),
+            launcher.isLaunching()
+        ).withName("Stop Intaking"));
 
         this.configureTeleopBindings();
         this.configureTestBindings();
@@ -216,28 +249,6 @@ public class RobotContainer {
         driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test()))
             .onFalse(launcher.setState(LaunchState.AUTOMATIC).withName("Re-enable Autofire"));
 
-        launcher.isLaunching().and(RobotModeTriggers.teleop()).whileTrue(new SequentialCommandGroup(
-            Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME),
-            new SequentialCommandGroup(
-                indexer.run().repeatedly().onlyWhile(launcher.getTurret().isAtTarget()),
-                indexer.stop()
-            ).repeatedly()
-        ).withName("Run Indexer"));
-
-        launcher.isLaunching().and(RobotModeTriggers.teleop()).whileTrue(Commands.either(
-            Commands.none(), intake.agitate(),
-            driverController.leftBumper()
-        ));
-
-        launcher.isLaunching().and(RobotModeTriggers.teleop()).onFalse(new SequentialCommandGroup(
-            indexer.stop(),
-            new ConditionalCommand(
-                Commands.none(),
-                intake.deploy().andThen(intake.stopRollers()),
-                driverController.leftBumper()
-            )
-        ).withName("Stop Indexer"));
-
         Command xLockCommand = drive.xLockCommand().withName("X-Lock");
         Trigger xLock = launcher.isLaunching()
             .and(RobotModeTriggers.teleop())
@@ -247,18 +258,6 @@ public class RobotContainer {
             .debounce(0.25);
 
         xLock.whileTrue(xLockCommand);
-
-        driverController.leftBumper().and(RobotModeTriggers.teleop()).onTrue(new SequentialCommandGroup(
-            intake.deploy(),
-            intake.runRollers()
-        ).withName("Intake"));
-
-        driverController.leftBumper().and(RobotModeTriggers.teleop().or(TestMode.LOOKUP_TABLES.isActive()))
-            .onFalse(new ConditionalCommand(
-                intake.agitate(),
-                intake.stopIntakeSequence(),
-                launcher.isLaunching()
-            ).withName("Stop Intaking"));
         
         Command retractIntake = new SequentialCommandGroup(
             intake.retract(),
@@ -269,8 +268,8 @@ public class RobotContainer {
 
         // RobotModeTriggers.disabled().onFalse(retractIntake);
 
-        driverController.leftTrigger().and(RobotModeTriggers.teleop().or(TestMode.LOOKUP_TABLES.isActive())).whileTrue(intake.agitate());
-        driverController.leftTrigger().and(RobotModeTriggers.teleop().or(TestMode.LOOKUP_TABLES.isActive())).onFalse(retractIntake);
+        operatorController.x().whileTrue(intake.agitate());
+        operatorController.x().onFalse(retractIntake);
 
         operatorController.b().onTrue(intake.deploy().andThen(intake.setRollerVoltage(-12)));
         operatorController.b().onFalse(intake.runRollers());
@@ -314,17 +313,21 @@ public class RobotContainer {
 
     // configure test mode specific bindings here
     private void configureTestBindings() {
-        driverController.leftBumper().and(TestMode.ALL.isActive()).onTrue(intake.startIntakeSequence());
-        driverController.leftBumper().and(TestMode.ALL.isActive()).onFalse(intake.stopIntakeSequence());
-        driverController.a().and(TestMode.ALL.isActive()).onTrue(indexer.run().andThen(intake.agitate()));
-        driverController.a().and(TestMode.ALL.isActive()).onFalse(indexer.stop().andThen(intake.retract().andThen(intake.stopRollers())));
-        driverController.b().and(TestMode.ALL.isActive()).onTrue(launcher.setFlywheelSpeed(() -> SmartDashboard.getNumber("LauncherRPM", 1000)));
-        driverController.b().and(TestMode.ALL.isActive()).onFalse(launcher.setFlywheelVoltage(() -> 0));
-        driverController.y().and(TestMode.ALL.isActive()).onTrue(launcher.setHoodAngle(18));
-        driverController.x().and(TestMode.ALL.isActive()).onTrue(launcher.setHoodAngle(0));
+        driverController.povLeft().and(TestMode.TURRET_OFFSETS.isActive()).onTrue(launcher.getTurret().increaseTurretOffset());
+        driverController.povRight().and(TestMode.TURRET_OFFSETS.isActive()).onTrue(launcher.getTurret().decreaseTurretOffset());
+        driverController.back().and(TestMode.TURRET_OFFSETS.isActive()).onTrue(launcher.getTurret().resetTurretOffset());
+        driverController.rightBumper().and(TestMode.TURRET_OFFSETS.isActive()).onTrue(launcher.setState(LaunchState.LAUNCH));
+        driverController.rightBumper().and(TestMode.TURRET_OFFSETS.isActive()).onFalse(launcher.setState(LaunchState.AUTOMATIC));
 
-        driverController.leftBumper().and(TestMode.INTAKE.isActive()).onTrue(intake.deploy());
-        driverController.leftBumper().and(TestMode.INTAKE.isActive()).onFalse(intake.retract());
+        driverController.povUp().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualHoodAngle(5));
+        driverController.povDown().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualHoodAngle(-5));
+        driverController.povRight().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualFlywheelRPM(150));
+        driverController.povLeft().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualFlywheelRPM(-150));
+        driverController.a().and(TestMode.LOOKUP_TABLES.isActive()).onTrue(indexer.run());
+        driverController.a().and(TestMode.LOOKUP_TABLES.isActive()).onFalse(indexer.stop());
+
+        driverController.a().and(TestMode.INTAKE.isActive()).onTrue(intake.deploy());
+        driverController.a().and(TestMode.INTAKE.isActive()).onFalse(intake.retract());
         driverController.b().and(TestMode.INTAKE.isActive()).onTrue(intake.runRollers());
         driverController.b().and(TestMode.INTAKE.isActive()).onFalse(intake.stopRollers());
 
@@ -333,13 +336,6 @@ public class RobotContainer {
 
         driverController.b().and(TestMode.FLYWHEEL.isActive()).onTrue(launcher.setFlywheelSpeed(() -> SmartDashboard.getNumber("LauncherRPM", 1000)));
         driverController.b().and(TestMode.FLYWHEEL.isActive()).onFalse(launcher.setFlywheelVoltage(0));
-        
-        driverController.povUp().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualHoodAngle(5));
-        driverController.povDown().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualHoodAngle(-5));
-        driverController.povRight().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualFlywheelRPM(150));
-        driverController.povLeft().and(TestMode.LOOKUP_TABLES.isActive()).whileTrue(launcher.modifyManualFlywheelRPM(-150));
-        driverController.a().and(TestMode.LOOKUP_TABLES.isActive()).onTrue(indexer.run());
-        driverController.a().and(TestMode.LOOKUP_TABLES.isActive()).onFalse(indexer.stop());
     }
 
     public Supplier<Translation2d> joystickMotionSupplier() {

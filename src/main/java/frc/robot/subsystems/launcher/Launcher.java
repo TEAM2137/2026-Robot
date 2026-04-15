@@ -113,7 +113,7 @@ public class Launcher extends SubsystemBase {
             Logger.recordOutput("ShotCalculator/ManualHoodAngle", this.manualHoodAngle);
             Logger.recordOutput("ShotCalculator/ManualFlywheelRPM", this.manualFlywheelRPM);
         }
-        else if (!isTest) {
+        else {
             this.turret.setAngleFieldRelative(params.turretAngle());
             if (!hoodManual) this.hood.setAngle(params.hoodAngle());
             if (shouldLaunch) this.flywheel.setRPM(params.flywheelRpm());
@@ -137,7 +137,7 @@ public class Launcher extends SubsystemBase {
     }
 
     public boolean shouldAutofire(Translation2d robot, double timeOfFlight) {
-        if (DriverStation.isAutonomous()) return false;
+        if (DriverStation.isAutonomous() || DriverStation.isTestEnabled()) return false;
 
         // get flipped turret position
         Translation2d turretPos = turret.getFieldSpacePose().getTranslation();
