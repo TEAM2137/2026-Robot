@@ -32,15 +32,14 @@ public class LookupTables {
     );
 
     public static final InterpolatingDoubleTreeMap timeOfFlightHub = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(1.172, 1.07), // TODO: verify all values
-        Map.entry(1.741, 1.01),
-        Map.entry(2.224, 0.88),
-        Map.entry(2.484, 0.92),
-        Map.entry(2.801, 0.966),
-        Map.entry(3.236, 0.90),
-        Map.entry(3.794, 0.96),
-        Map.entry(4.261, 0.97),
-        Map.entry(4.655, 1.08),
+        Map.entry(1.00, 1.03),
+        Map.entry(1.50, 1.00),
+        Map.entry(2.00, 1.00),
+        Map.entry(2.50, 0.98),
+        Map.entry(3.00, 1.03),
+        Map.entry(3.50, 1.08),
+        Map.entry(4.00, 1.05),
+        Map.entry(4.655, 1.10),
         Map.entry(5.009, 1.15),
         Map.entry(6.065, 1.25),
         Map.entry(7.045, 1.35),
