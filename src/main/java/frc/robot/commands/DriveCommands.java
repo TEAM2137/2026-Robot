@@ -185,8 +185,8 @@ public class DriveCommands {
 
         // Limit angular velocity
         omega *= profile.omegaMultiplier();
-        if (omega != 0) omega = MathUtil.clamp(omega, -drive.getMaxAngularSpeedRadPerSec() * profile.alphaLimitMultiplier(),
-            drive.getMaxAngularSpeedRadPerSec() * profile.alphaLimitMultiplier());
+        if (omega != 0) omega = MathUtil.clamp(omega, -drive.getMaxAngularSpeedRadPerSec() * profile.omegaLimitMultiplier(),
+            drive.getMaxAngularSpeedRadPerSec() * profile.omegaLimitMultiplier());
 
         // Record commanded velocities
         Logger.recordOutput("Drive/CommandedVelocity", velocity);

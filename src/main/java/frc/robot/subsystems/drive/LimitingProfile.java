@@ -10,8 +10,8 @@ public record LimitingProfile(
     );
 
     public static final LimitingProfile SOTF = new LimitingProfile(
-        1.0, 0.4, 0.9,
-        1.0, 0.3, 0.6
+        1.0, 0.4, 0.7,
+        1.0, 0.2, 0.4
     );
 
     public static final LimitingProfile BUMP = new LimitingProfile(

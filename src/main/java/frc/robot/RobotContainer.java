@@ -213,8 +213,6 @@ public class RobotContainer {
         operatorController.x().and(RobotModeTriggers.teleop()).whileTrue(launcher.setState(LaunchState.DONT_LAUNCH));
         operatorController.x().and(RobotModeTriggers.teleop()).onFalse(launcher.setState(LaunchState.AUTOMATIC));
 
-        //TODO Neil wants this version to not change anything about the speed limits applied when used but I don't know how to manually set the limiting profile or if the current version does that already anyway
-
         driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test()))
             .onFalse(launcher.setState(LaunchState.AUTOMATIC).withName("Re-enable Autofire"));
 

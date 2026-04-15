@@ -6,35 +6,33 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 
 public class LookupTables {
     public static final InterpolatingDoubleTreeMap flywheelRpmHub = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(1.172, 1931.0),
-        Map.entry(1.741, 1997.0),
-        Map.entry(2.224, 1920.0),
-        Map.entry(2.484, 1991.0),
-        Map.entry(2.801, 2051.0),
-        Map.entry(3.236, 2057.0),
-        Map.entry(3.794, 2138.0),
-        Map.entry(4.261, 2200.0),
-        Map.entry(4.655, 2303.0),
-        Map.entry(5.009, 2340.0),
-        Map.entry(6.065, 2520.0),
-        Map.entry(7.045, 2720.0),
-        Map.entry(8.000, 2879.0)
+        Map.entry(1.09, 1800.0),
+        Map.entry(1.50, 1800.0),
+        Map.entry(2.00, 1800.0),
+        Map.entry(2.50, 1850.0),
+        Map.entry(3.00, 1900.0),
+        Map.entry(3.50, 1950.0),
+        Map.entry(4.00, 2050.0),
+        Map.entry(4.50, 2145.0), // TODO: verify all values past 4.5m
+        Map.entry(5.01, 2240.0),
+        Map.entry(6.07, 2420.0),
+        Map.entry(7.05, 2620.0),
+        Map.entry(8.00, 2779.0)
     );
 
     public static final InterpolatingDoubleTreeMap hoodAngleHub = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(1.172, 1.5),
-        Map.entry(1.741, 6.2),
-        Map.entry(2.224, 12.9),
-        Map.entry(2.484, 14.7),
-        Map.entry(2.801, 16.8),
-        Map.entry(3.236, 22.5),
-        Map.entry(3.794, 25.4),
-        Map.entry(4.261, 26.0),
-        Map.entry(4.655, 26.0)
+        Map.entry(1.09, 4.0),
+        Map.entry(1.50, 8.8),
+        Map.entry(2.00, 12.0),
+        Map.entry(2.50, 16.9),
+        Map.entry(3.00, 19.3),
+        Map.entry(3.50, 24.6),
+        Map.entry(4.00, 26.0),
+        Map.entry(4.50, 26.0)
     );
 
     public static final InterpolatingDoubleTreeMap timeOfFlightHub = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(1.172, 1.07),
+        Map.entry(1.172, 1.07), // TODO: verify all values
         Map.entry(1.741, 1.01),
         Map.entry(2.224, 0.88),
         Map.entry(2.484, 0.92),

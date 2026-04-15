@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -84,9 +85,9 @@ public class Turret {
             .plus(Rotation2d.fromDegrees(manualOffset));
         
         // offset the target based on a lookup table
-        double offsetDegrees = Constants.offsetLookup.get(target.getDegrees());
-        // if (!SmartDashboard.containsKey("AimOffset")) SmartDashboard.putNumber("AimOffset", 0.0);
-        // double offsetDegrees = SmartDashboard.getNumber("AimOffset", 0.0);
+        // double offsetDegrees = Constants.offsetLookup.get(target.getDegrees());
+        if (!SmartDashboard.containsKey("AimOffset")) SmartDashboard.putNumber("AimOffset", 0.0);
+        double offsetDegrees = SmartDashboard.getNumber("AimOffset", 0.0);
         Logger.recordOutput("Launcher/Turret/AimOffsetDegrees", offsetDegrees);
         Logger.recordOutput("Launcher/Turret/AimOffsetInput", target.getDegrees());
 
