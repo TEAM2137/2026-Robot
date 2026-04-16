@@ -14,10 +14,15 @@ public class LookupTables {
         Map.entry(3.50, 1950.0),
         Map.entry(4.00, 2050.0),
         Map.entry(4.50, 2145.0), // TODO: verify all values past 4.5m
-        Map.entry(5.01, 2280.0),
-        Map.entry(6.07, 2460.0),
-        Map.entry(7.05, 2660.0),
-        Map.entry(8.00, 2839.0)
+        Map.entry(5.00, 2250.0),
+        Map.entry(5.50, 2350.0),
+        Map.entry(6.00, 2460.0),
+        Map.entry(7.00, 2715.0),
+        Map.entry(8.00, 2950.0)
+        // Map.entry(5.01, 2280.0),
+        // Map.entry(6.07, 2460.0),
+        // Map.entry(7.05, 2660.0),
+        // Map.entry(8.00, 2839.0)
     );
 
     public static final InterpolatingDoubleTreeMap hoodAngleHub = InterpolatingDoubleTreeMap.ofEntries(
@@ -27,8 +32,7 @@ public class LookupTables {
         Map.entry(2.50, 16.9),
         Map.entry(3.00, 19.3),
         Map.entry(3.50, 24.6),
-        Map.entry(4.00, 26.0),
-        Map.entry(4.50, 26.0)
+        Map.entry(4.00, 26.0)
     );
 
     public static final InterpolatingDoubleTreeMap timeOfFlightHub = InterpolatingDoubleTreeMap.ofEntries(
@@ -39,11 +43,12 @@ public class LookupTables {
         Map.entry(3.00, 1.03),
         Map.entry(3.50, 1.08),
         Map.entry(4.00, 1.05),
-        Map.entry(4.655, 1.10),
-        Map.entry(5.009, 1.15),
-        Map.entry(6.065, 1.25),
-        Map.entry(7.045, 1.35),
-        Map.entry(8.000, 1.55)
+        Map.entry(4.66, 1.10),
+        Map.entry(5.00, 1.23),
+        Map.entry(5.50, 1.30),
+        Map.entry(6.00, 1.35),
+        Map.entry(7.00, 1.55),
+        Map.entry(8.00, 1.72)
     );
 
     public static final InterpolatingDoubleTreeMap flywheelRpmPassing = InterpolatingDoubleTreeMap.ofEntries(
