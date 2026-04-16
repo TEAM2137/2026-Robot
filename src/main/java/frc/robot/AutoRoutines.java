@@ -24,10 +24,7 @@ public class AutoRoutines {
         AutoTrajectory driveOut = trajectories[7];
 
         auto.active().onTrue(overBump1.resetOdometry().andThen(overBump1.cmd()));
-        auto.active().onTrue(new SequentialCommandGroup(
-            robot.intake.deploy(),
-            robot.intake.runRollers()
-        ));
+        auto.active().onTrue(robot.intake.startIntakeSequence());
         overBump1.done().onTrue(intakePass.cmd());
 
         intakePass.done().onTrue(returnFromIntaking.cmd());
@@ -43,8 +40,11 @@ public class AutoRoutines {
             ).repeatedly()
         ));
         overBump2.done().onTrue(lineupForDepot.cmd());
+        overBump2.doneDelayed(Flywheel.Constants.SPIN_UP_TIME + 0.5).onTrue(robot.intake.agitate());
 
+        lineupForDepot.done().onTrue(robot.intake.startIntakeSequence());
         lineupForDepot.done().onTrue(backupIntoDepot.cmd());
+
         backupIntoDepot.done().onTrue(driveOverDepot.cmd());
 
         driveOverDepot.done().onTrue(new SequentialCommandGroup(
