@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation.MatchType;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -82,6 +83,9 @@ public class Autonomous {
         RobotModeTriggers.autonomous().onTrue(Commands.runOnce(() -> this.saveSetupScore(robot)));
         RobotModeTriggers.autonomous().onFalse(robot.stopSubsystems().ignoringDisable(true));
         Alerts.add("No Auto Selected", AlertType.kWarning, this::isNoAutoSelected);
+
+        AutoRoutine fakeAuto = this.factory.newRoutine("fakeAuto");
+        CommandScheduler.getInstance().schedule(fakeAuto.cmd().ignoringDisable(true));
     }
 
     public AutoTrajectory[] loadTrajectories(AutoRoutine routine, String id, int numSplits) {
