@@ -6,23 +6,19 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 
 public class LookupTables {
     public static final InterpolatingDoubleTreeMap flywheelRpmHub = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(1.09, 1800.0),
-        Map.entry(1.50, 1800.0),
-        Map.entry(2.00, 1800.0),
-        Map.entry(2.50, 1850.0),
-        Map.entry(3.00, 1900.0),
-        Map.entry(3.50, 1950.0),
-        Map.entry(4.00, 2050.0),
-        Map.entry(4.50, 2145.0), // TODO: verify all values past 4.5m
-        Map.entry(5.00, 2250.0),
-        Map.entry(5.50, 2350.0),
-        Map.entry(6.00, 2460.0),
-        Map.entry(7.00, 2715.0),
-        Map.entry(8.00, 2950.0)
-        // Map.entry(5.01, 2280.0),
-        // Map.entry(6.07, 2460.0),
-        // Map.entry(7.05, 2660.0),
-        // Map.entry(8.00, 2839.0)
+        Map.entry(1.09, 1750.0),
+        Map.entry(1.50, 1750.0),
+        Map.entry(2.00, 1750.0),
+        Map.entry(2.50, 1800.0),
+        Map.entry(3.00, 1850.0),
+        Map.entry(3.50, 1900.0),
+        Map.entry(4.00, 2000.0),
+        Map.entry(4.50, 2100.0),
+        Map.entry(5.00, 2180.0),
+        Map.entry(5.50, 2250.0),
+        Map.entry(6.00, 2360.0),
+        Map.entry(7.00, 2615.0),
+        Map.entry(8.00, 2850.0)
     );
 
     public static final InterpolatingDoubleTreeMap hoodAngleHub = InterpolatingDoubleTreeMap.ofEntries(
