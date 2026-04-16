@@ -156,8 +156,11 @@ public class DriveCommands {
             double robotY = drive.getPose().getTranslation().getY();
             double targetY = robotY > FieldConstants.fieldHeight / 2.0
                 ? FieldConstants.topBumpCenterY : FieldConstants.bottomBumpCenterY;
-            return new Translation2d(movementSupplier.get().getX(), (targetY - robotY) * 2f);
-        };
+            return new Translation2d(
+                movementSupplier.get().getX(),
+                (targetY - robotY) * 2f * (AllianceFlipUtil.shouldFlip() ? -1 : 1)
+            );
+        };       
         Supplier<Rotation2d> angleSupplier = () -> {
             Rotation2d rotation = drive.getRotation();
             double angle = MathUtil.inputModulus(rotation.getDegrees(), -180, 180);

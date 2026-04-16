@@ -99,7 +99,7 @@ public enum ShiftInfo {
     public static double getMatchTimePrecise() {
         double matchTime = DriverStation.getMatchTime();
         if (RobotModeTriggers.teleop().getAsBoolean() && matchTime > 0)
-            matchTime = 140.0 - preciseTeleopTimer.get();
+            matchTime = 140.25 - preciseTeleopTimer.get();
         return matchTime;
     }
 
