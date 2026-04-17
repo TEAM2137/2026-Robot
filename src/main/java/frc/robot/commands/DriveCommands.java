@@ -171,9 +171,10 @@ public class DriveCommands {
     }
 
     public static void driveFieldRelative(Drive drive, Translation2d velocity, double omega, LimitingProfile profile) {
-        // Apply linear velocity multiplier
         double maxAccel = MAX_LINEAR_ACCELERATION;
         double maxAlpha = MAX_ANGULAR_ACCELERATION;
+
+        Logger.recordOutput("Drive/LimitingProfile", profile.name());
 
         // Limit linear acceleration
         maxAccel *= profile.accelerationLimitMultiplier();
