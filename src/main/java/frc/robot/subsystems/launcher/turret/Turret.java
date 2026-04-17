@@ -20,10 +20,10 @@ import frc.robot.util.Utils;
 
 public class Turret {
     public static class Constants {
-        public static final double cwBound = 165;
+        public static final double cwBound = 170;
         public static final double cwMinBound = 160;
-        public static final double ccwBound = 215;
-        public static final double ccwMinBound = 210;
+        public static final double ccwBound = 235;
+        public static final double ccwMinBound = 225;
 
         public static final double offsetX = 6.375; // inches, positive towards robot right
         public static final double offsetY = -5.875; // inches, positive towards robot front

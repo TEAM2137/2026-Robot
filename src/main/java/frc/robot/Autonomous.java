@@ -84,8 +84,9 @@ public class Autonomous {
         RobotModeTriggers.autonomous().onFalse(robot.stopSubsystems().ignoringDisable(true));
         Alerts.add("No Auto Selected", AlertType.kWarning, this::isNoAutoSelected);
 
-        // run a "fake auto" to load the choreo libraries or something
+        // run a "fake auto" to force-load the choreo libraries
         AutoRoutine fakeAuto = this.factory.newRoutine("fakeAuto");
+        fakeAuto.active().onTrue(fakeAuto.trajectory("warmup").cmd());
         CommandScheduler.getInstance().schedule(fakeAuto.cmd().ignoringDisable(true));
     }
 
