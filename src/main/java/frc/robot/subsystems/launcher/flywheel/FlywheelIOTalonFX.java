@@ -37,14 +37,14 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         this.leader.getConfigurator().apply(new Slot0Configs()
             .withKP(Constants.kP).withKS(Constants.kS).withKV(Constants.kV));
         this.leader.getConfigurator().apply(new CurrentLimitsConfigs()
-            .withSupplyCurrentLimit(70)
+            .withSupplyCurrentLimit(65)
             .withSupplyCurrentLimitEnable(true));
 
         this.follower = new TalonFX(Constants.followerId, "turret");
         this.follower.getConfigurator().apply(new MotorOutputConfigs()
             .withInverted(InvertedValue.Clockwise_Positive));
         this.follower.getConfigurator().apply(new CurrentLimitsConfigs()
-            .withSupplyCurrentLimit(70)
+            .withSupplyCurrentLimit(65)
             .withSupplyCurrentLimitEnable(true));
         
         this.follower.setControl(new Follower(this.leader.getDeviceID(), MotorAlignmentValue.Opposed));

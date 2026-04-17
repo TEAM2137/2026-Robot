@@ -217,12 +217,14 @@ public class RobotContainer {
             )
         ).withName("Stop Indexer"));
 
-        driverController.leftBumper().onTrue(new SequentialCommandGroup(
+        Trigger teleopOrTest = RobotModeTriggers.teleop().or(RobotModeTriggers.test());
+
+        driverController.leftBumper().and(teleopOrTest).onTrue(new SequentialCommandGroup(
             intake.deploy(),
             intake.runRollers()
         ).withName("Intake"));
 
-        driverController.leftBumper().onFalse(new ConditionalCommand(
+        driverController.leftBumper().and(teleopOrTest).onFalse(new ConditionalCommand(
             intake.agitate(),
             intake.stopIntakeSequence(),
             launcher.isLaunching()
