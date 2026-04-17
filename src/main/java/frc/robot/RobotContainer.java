@@ -242,12 +242,11 @@ public class RobotContainer {
 
         driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test()))
             .onTrue(launcher.setState(LaunchState.DONT_LAUNCH).withName("Don't Launch"));
+        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test()))
+            .onFalse(launcher.setState(LaunchState.AUTOMATIC).withName("Re-enable Autofire"));
 
         operatorController.x().and(RobotModeTriggers.teleop()).whileTrue(launcher.setState(LaunchState.DONT_LAUNCH));
         operatorController.x().and(RobotModeTriggers.teleop()).onFalse(launcher.setState(LaunchState.AUTOMATIC));
-
-        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test()))
-            .onFalse(launcher.setState(LaunchState.AUTOMATIC).withName("Re-enable Autofire"));
 
         Command xLockCommand = drive.xLockCommand().withName("X-Lock");
         Trigger xLock = launcher.isLaunching()

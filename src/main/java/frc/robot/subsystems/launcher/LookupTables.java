@@ -13,12 +13,12 @@ public class LookupTables {
         Map.entry(3.00, 1850.0),
         Map.entry(3.50, 1900.0),
         Map.entry(4.00, 2000.0),
-        Map.entry(4.50, 2100.0),
-        Map.entry(5.00, 2180.0),
-        Map.entry(5.50, 2250.0),
-        Map.entry(6.00, 2360.0),
-        Map.entry(7.00, 2615.0),
-        Map.entry(8.00, 2850.0)
+        Map.entry(4.50, 2120.0),
+        Map.entry(5.00, 2230.0),
+        Map.entry(5.50, 2300.0),
+        Map.entry(6.00, 2410.0),
+        Map.entry(7.00, 2665.0),
+        Map.entry(8.00, 2900.0)
     );
 
     public static final InterpolatingDoubleTreeMap hoodAngleHub = InterpolatingDoubleTreeMap.ofEntries(
