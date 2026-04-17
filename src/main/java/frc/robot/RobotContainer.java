@@ -167,7 +167,7 @@ public class RobotContainer {
         // Create utility suppliers
         this.limitingProfileSupplier = () -> launcher.shouldLimitDrive() && !operatorController.x().getAsBoolean() ? LimitingProfile.SOTF : LimitingProfile.DEFAULT;
         this.joystickSupplier = () -> new Translation2d(-driverController.getLeftY(), -driverController.getLeftX());
-        this.rotationSupplier = () -> -driverController.getRightX() * 0.75;
+        this.rotationSupplier = () -> -driverController.getRightX() * 0.85;
         
         // Configure the controller bindings
         configureControllerBindings();
