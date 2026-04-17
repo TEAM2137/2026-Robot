@@ -36,9 +36,9 @@ public class Turret {
             // Map.entry(0.0, 0.0)
 
             Map.entry(-180.0, -3.0),
-            Map.entry(-135.0, -4.0),
-            Map.entry(-90.0, -5.0),
-            Map.entry(-45.0, -5.0),
+            Map.entry(-135.0, -3.0),
+            Map.entry(-90.0, -4.0),
+            Map.entry(-45.0, -4.0),
             Map.entry(0.0, -4.0),
             Map.entry(45.0, -4.0),
             Map.entry(90.0, -3.0),

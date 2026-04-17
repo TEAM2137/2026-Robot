@@ -80,14 +80,8 @@ public class Autonomous {
 
         // Assign auto commands to autonomous trigger
         RobotModeTriggers.autonomous().whileTrue(this.getAutoCommand());
-        // RobotModeTriggers.autonomous().onTrue(Commands.runOnce(() -> this.saveSetupScore(robot)));
         RobotModeTriggers.autonomous().onFalse(robot.stopSubsystems().ignoringDisable(true));
         Alerts.add("No Auto Selected", AlertType.kWarning, this::isNoAutoSelected);
-
-        // run a "fake auto" to force-load the choreo libraries
-        AutoRoutine fakeAuto = this.factory.newRoutine("fakeAuto");
-        fakeAuto.active().onTrue(fakeAuto.trajectory("warmup").cmd());
-        CommandScheduler.getInstance().schedule(fakeAuto.cmd().ignoringDisable(true));
     }
 
     public AutoTrajectory[] loadTrajectories(AutoRoutine routine, String id, int numSplits) {
