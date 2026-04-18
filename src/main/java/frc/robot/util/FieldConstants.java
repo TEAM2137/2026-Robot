@@ -59,7 +59,7 @@ public class FieldConstants {
     public static final double passingSideZoneRightCenter = fieldHeight - passingSideZoneWidth / 2.0;
 
     public static final double passingDistanceFromWall = 1.0;
-    public static final double passingOffsetTowardsMidField = 0;
+    public static final double passingOffsetTowardsMidField = 0.5;
     
     // public static final Translation2d midPassTarget = new Translation2d(passingDistanceFromWall, midFieldY);
     public static final Translation2d leftPassTarget = new Translation2d(passingDistanceFromWall, passingSideZoneLeftCenter + passingOffsetTowardsMidField);
