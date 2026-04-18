@@ -198,8 +198,8 @@ public class RobotContainer {
         launcher.isLaunching().and(RobotModeTriggers.autonomous().negate()).whileTrue(new SequentialCommandGroup(
             Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME),
             new SequentialCommandGroup(
-                indexer.run().repeatedly().onlyWhile(launcher.getTurret().isAtTarget()),
-                indexer.stop()
+                indexer.run().asProxy().repeatedly().onlyWhile(launcher.getTurret().isAtTarget().and(operatorController.a().negate())),
+                Commands.either(Commands.waitUntil(operatorController.a().negate()), indexer.stop().asProxy(), operatorController.a())
             ).repeatedly()
         ).withName("Run Indexer"));
 
