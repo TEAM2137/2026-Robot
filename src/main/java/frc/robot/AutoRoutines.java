@@ -152,7 +152,7 @@ public class AutoRoutines {
             robot.launcher.setState(LaunchState.LAUNCH),
             Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME),
             new SequentialCommandGroup(
-                robot.indexer.run().repeatedly().onlyWhile(robot.launcher.getTurret().isAtTarget()),
+                robot.indexer.run().repeatedly(),
                 robot.indexer.stop()
             ).repeatedly()
         ));
