@@ -167,7 +167,7 @@ public class RobotContainer {
         // Create utility suppliers
         this.limitingProfileSupplier = () -> launcher.shouldLimitDrive() && !operatorController.x().getAsBoolean() ? LimitingProfile.SOTF : LimitingProfile.DEFAULT;
         this.joystickSupplier = () -> new Translation2d(-driverController.getLeftY(), -driverController.getLeftX());
-        this.rotationSupplier = () -> -driverController.getRightX() * 0.75;
+        this.rotationSupplier = () -> -driverController.getRightX() * 0.87;
         
         // Configure the controller bindings
         configureControllerBindings();
@@ -198,8 +198,9 @@ public class RobotContainer {
         launcher.isLaunching().and(RobotModeTriggers.autonomous().negate()).whileTrue(new SequentialCommandGroup(
             Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME),
             new SequentialCommandGroup(
-                indexer.run().repeatedly().onlyWhile(launcher.getTurret().isAtTarget()),
-                indexer.stop()
+                indexer.run().asProxy(),
+                Commands.waitUntil(launcher.getTurret().isAtTarget().negate().or(operatorController.a())),
+                Commands.either(Commands.waitUntil(operatorController.a().negate()), indexer.stop().asProxy(), operatorController.a())
             ).repeatedly()
         ).withName("Run Indexer"));
 
@@ -217,12 +218,14 @@ public class RobotContainer {
             )
         ).withName("Stop Indexer"));
 
-        driverController.leftBumper().onTrue(new SequentialCommandGroup(
+        Trigger teleopOrTest = RobotModeTriggers.teleop().or(RobotModeTriggers.test());
+
+        driverController.leftBumper().and(teleopOrTest).onTrue(new SequentialCommandGroup(
             intake.deploy(),
             intake.runRollers()
         ).withName("Intake"));
 
-        driverController.leftBumper().onFalse(new ConditionalCommand(
+        driverController.leftBumper().and(teleopOrTest).onFalse(new ConditionalCommand(
             intake.agitate(),
             intake.stopIntakeSequence(),
             launcher.isLaunching()
@@ -242,12 +245,11 @@ public class RobotContainer {
 
         driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test()))
             .onTrue(launcher.setState(LaunchState.DONT_LAUNCH).withName("Don't Launch"));
+        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test()))
+            .onFalse(launcher.setState(LaunchState.AUTOMATIC).withName("Re-enable Autofire"));
 
         operatorController.x().and(RobotModeTriggers.teleop()).whileTrue(launcher.setState(LaunchState.DONT_LAUNCH));
         operatorController.x().and(RobotModeTriggers.teleop()).onFalse(launcher.setState(LaunchState.AUTOMATIC));
-
-        driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test()))
-            .onFalse(launcher.setState(LaunchState.AUTOMATIC).withName("Re-enable Autofire"));
 
         Command xLockCommand = drive.xLockCommand().withName("X-Lock");
         Trigger xLock = launcher.isLaunching()

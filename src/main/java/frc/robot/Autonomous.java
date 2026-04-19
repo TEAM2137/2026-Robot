@@ -79,7 +79,6 @@ public class Autonomous {
 
         // Assign auto commands to autonomous trigger
         RobotModeTriggers.autonomous().whileTrue(this.getAutoCommand());
-        RobotModeTriggers.autonomous().onTrue(Commands.runOnce(() -> this.saveSetupScore(robot)));
         RobotModeTriggers.autonomous().onFalse(robot.stopSubsystems().ignoringDisable(true));
         Alerts.add("No Auto Selected", AlertType.kWarning, this::isNoAutoSelected);
     }

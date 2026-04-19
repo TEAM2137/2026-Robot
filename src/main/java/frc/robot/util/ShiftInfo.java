@@ -99,8 +99,7 @@ public enum ShiftInfo {
     public static double getMatchTimePrecise() {
         double matchTime = DriverStation.getMatchTime();
         if (RobotModeTriggers.teleop().getAsBoolean() && matchTime > 0)
-            matchTime = 140.0 - preciseTeleopTimer.get();
-        Logger.recordOutput("ShiftInfo/PreciseMatchTime", matchTime);
+            matchTime = 140.25 - preciseTeleopTimer.get();
         return matchTime;
     }
 
@@ -165,8 +164,8 @@ public enum ShiftInfo {
         String formatted = next.getName() + " in " + (int) Math.ceil(timeUntilNext) + "s";
         
         Logger.recordOutput("ShiftInfo/NextShiftFormatted", formatted);
-        // Logger.recordOutput("ShiftInfo/NextShiftIn", (int) Math.ceil(timeUntilNext));
         Logger.recordOutput("ShiftInfo/NextShiftIn", timeUntilNext);
+        Logger.recordOutput("ShiftInfo/PreciseMatchTime", getMatchTimePrecise());
 
         Logger.recordOutput("ShiftInfo/CurrentShift", current.getName());
         Logger.recordOutput("ShiftInfo/IsHubActive", current.isHubActive());

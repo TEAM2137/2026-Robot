@@ -24,10 +24,7 @@ public class AutoRoutines {
         AutoTrajectory driveOut = trajectories[7];
 
         auto.active().onTrue(overBump1.resetOdometry().andThen(overBump1.cmd()));
-        auto.active().onTrue(new SequentialCommandGroup(
-            robot.intake.deploy(),
-            robot.intake.runRollers()
-        ));
+        auto.active().onTrue(robot.intake.startIntakeSequence());
         overBump1.done().onTrue(intakePass.cmd());
 
         intakePass.done().onTrue(returnFromIntaking.cmd());
@@ -43,8 +40,11 @@ public class AutoRoutines {
             ).repeatedly()
         ));
         overBump2.done().onTrue(lineupForDepot.cmd());
+        overBump2.doneDelayed(Flywheel.Constants.SPIN_UP_TIME + 0.5).onTrue(robot.intake.agitate());
 
+        lineupForDepot.done().onTrue(robot.intake.startIntakeSequence());
         lineupForDepot.done().onTrue(backupIntoDepot.cmd());
+
         backupIntoDepot.done().onTrue(driveOverDepot.cmd());
 
         driveOverDepot.done().onTrue(new SequentialCommandGroup(
@@ -138,10 +138,41 @@ public class AutoRoutines {
         return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
     }
 
+    public static UnregisteredAuto depotOnlyAuto(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
+        AutoTrajectory lineupForDepot = trajectories[0];
+        AutoTrajectory backupIntoDepot = trajectories[1];
+        AutoTrajectory driveOverDepot = trajectories[2];
+        AutoTrajectory driveOut = trajectories[3];
+
+        auto.active().onTrue(lineupForDepot.resetOdometry().andThen(lineupForDepot.cmd()));
+        auto.active().onTrue(robot.intake.startIntakeSequence());
+
+        lineupForDepot.done().onTrue(backupIntoDepot.cmd());
+        lineupForDepot.done().onTrue(new SequentialCommandGroup(
+            robot.launcher.setState(LaunchState.LAUNCH),
+            Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME),
+            new SequentialCommandGroup(
+                robot.indexer.run().repeatedly().onlyWhile(robot.launcher.getTurret().isAtTarget()),
+                robot.indexer.stop()
+            ).repeatedly()
+        ));
+
+        backupIntoDepot.done().onTrue(driveOverDepot.cmd());
+
+        driveOverDepot.done().onTrue(new SequentialCommandGroup(
+            Commands.waitSeconds(0.3),
+            robot.intake.agitate()
+        ));
+        driveOverDepot.done().onTrue(driveOut.cmd());
+
+        return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
+    }
+
     /** register all the autos defined above */
     public static void registerAutos(AutoFactory factory, AutoRegistry autos) {
         // comp autos
         autos.add("Depot", "depot", 8, false, AutoRoutines::depotAuto);
+        autos.add("Depot Only", "depotOnly", 4, false, AutoRoutines::depotOnlyAuto);
         autos.add("Right Depot", "rightDepot", 8, false, AutoRoutines::rightDepot);
         autos.add("Cycle Right", "cycleRight", 6, false, AutoRoutines::cycleRight);
     }

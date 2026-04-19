@@ -2,6 +2,7 @@ package frc.robot.subsystems.launcher.flywheel;
 
 import static edu.wpi.first.units.Units.RPM;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.Follower;
@@ -35,10 +36,16 @@ public class FlywheelIOTalonFX implements FlywheelIO {
             .withInverted(InvertedValue.Clockwise_Positive));
         this.leader.getConfigurator().apply(new Slot0Configs()
             .withKP(Constants.kP).withKS(Constants.kS).withKV(Constants.kV));
+        this.leader.getConfigurator().apply(new CurrentLimitsConfigs()
+            .withSupplyCurrentLimit(50)
+            .withSupplyCurrentLimitEnable(true));
 
         this.follower = new TalonFX(Constants.followerId, "turret");
         this.follower.getConfigurator().apply(new MotorOutputConfigs()
             .withInverted(InvertedValue.Clockwise_Positive));
+        this.follower.getConfigurator().apply(new CurrentLimitsConfigs()
+            .withSupplyCurrentLimit(50)
+            .withSupplyCurrentLimitEnable(true));
         
         this.follower.setControl(new Follower(this.leader.getDeviceID(), MotorAlignmentValue.Opposed));
     }
