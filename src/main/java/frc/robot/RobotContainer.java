@@ -332,6 +332,8 @@ public class RobotContainer {
         driverController.a().and(TestMode.INTAKE.isActive()).onFalse(intake.retract());
         driverController.b().and(TestMode.INTAKE.isActive()).onTrue(intake.runRollers());
         driverController.b().and(TestMode.INTAKE.isActive()).onFalse(intake.stopRollers());
+        driverController.x().and(TestMode.INTAKE.isActive()).whileTrue(intake.deployButJank());
+        driverController.x().and(TestMode.INTAKE.isActive()).onFalse(intake.retract());
 
         driverController.b().and(TestMode.HOOD.isActive()).onTrue(launcher.setHoodAngle(20));
         driverController.b().and(TestMode.HOOD.isActive()).onFalse(launcher.setHoodAngle(0));

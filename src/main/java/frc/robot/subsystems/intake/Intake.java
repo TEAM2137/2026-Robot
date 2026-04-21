@@ -77,6 +77,14 @@ public class Intake extends SubsystemBase {
         return runOnce(() -> io.setPosition(Constants.deployPosition));
     }
 
+    public Command deployButJank() {
+        return runOnce(() -> new SequentialCommandGroup(
+            setPivotVoltage(5.0),
+            Commands.waitSeconds(1),
+            setPivotVoltage(1)
+            ));
+    }
+
     public Command retract() {
         return runOnce(() -> io.setPosition(Constants.homePosition));
             // .andThen(Commands.waitSeconds(1))
