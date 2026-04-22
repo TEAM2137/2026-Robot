@@ -25,6 +25,7 @@ public interface IntakeIO {
     default void setRollerVoltage(double volts) {}
     default void setRollerRPM(double rpm) {}
     default void setPosition(double position) {}
+    default void setPositionAndHold(double position) {}
     default void setPivotVoltage(double volts) {}
     default void resetPosition() {}
 

@@ -74,7 +74,7 @@ public class Intake extends SubsystemBase {
     }
 
     public Command deploy() {
-        return runOnce(() -> io.setPosition(Constants.deployPosition));
+        return runOnce(() -> io.setPositionAndHold(Constants.deployPosition));
     }
 
     public Command deployButJank() {
@@ -87,8 +87,6 @@ public class Intake extends SubsystemBase {
 
     public Command retract() {
         return runOnce(() -> io.setPosition(Constants.homePosition));
-            // .andThen(Commands.waitSeconds(1))
-            // .andThen(runOnce(() -> io.holdCurrentPosition()));
     }
 
     public Command startIntakeSequence() {
