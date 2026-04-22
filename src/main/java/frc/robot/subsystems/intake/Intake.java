@@ -82,7 +82,7 @@ public class Intake extends SubsystemBase {
             setPivotVoltage(5.0),
             Commands.waitSeconds(1),
             setPivotVoltage(1)
-            ));
+        ));
     }
 
     public Command retract() {
