@@ -288,7 +288,7 @@ public class AutoRoutines {
         return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
     }
 
-    public static UnregisteredAuto leftAvoid(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
+    public static UnregisteredAuto blockRightReverse(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
         auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[0].cmd()));
         auto.active().onTrue(robot.intake.startIntakeSequence());
         trajectories[0].done().onTrue(trajectories[1].cmd());
@@ -312,6 +312,50 @@ public class AutoRoutines {
 
         return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
     }
+
+    public static UnregisteredAuto leftAvoid(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
+        auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[0].cmd()));
+        auto.active().onTrue(robot.intake.startIntakeSequence());
+        trajectories[0].done().onTrue(trajectories[1].cmd());
+        trajectories[1].done().onTrue(Commands.waitSeconds(2).andThen(trajectories[2].cmd()));
+        trajectories[2].done().onTrue(trajectories[3].cmd());
+        trajectories[3].done().onTrue(trajectories[4].cmd());
+        trajectories[4].done().onTrue(trajectories[5].cmd());
+        trajectories[5].done().onTrue(new SequentialCommandGroup(
+            robot.launcher.setState(LaunchState.LAUNCH),
+            Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME),
+            new SequentialCommandGroup(
+                robot.intake.agitate(),
+                robot.indexer.run().repeatedly().onlyWhile(robot.launcher.getTurret().isAtTarget()),
+                robot.indexer.stop()
+            ).repeatedly()
+        ));
+
+        return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
+    }
+
+     public static UnregisteredAuto rightAvoid(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
+        auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[0].cmd()));
+        auto.active().onTrue(robot.intake.startIntakeSequence());
+        trajectories[0].done().onTrue(trajectories[1].cmd());
+        trajectories[1].done().onTrue(Commands.waitSeconds(2).andThen(trajectories[2].cmd()));
+        trajectories[2].done().onTrue(trajectories[3].cmd());
+        trajectories[3].done().onTrue(trajectories[4].cmd());
+        trajectories[4].done().onTrue(trajectories[5].cmd());
+        trajectories[5].done().onTrue(new SequentialCommandGroup(
+            robot.launcher.setState(LaunchState.LAUNCH),
+            Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME),
+            new SequentialCommandGroup(
+                robot.intake.agitate(),
+                robot.indexer.run().repeatedly().onlyWhile(robot.launcher.getTurret().isAtTarget()),
+                robot.indexer.stop()
+            ).repeatedly()
+        ));
+
+        return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
+    }
+    
+    
     /** register all the autos defined above */
     public static void registerAutos(AutoFactory factory, AutoRegistry autos) {
         // comp autos
@@ -322,12 +366,12 @@ public class AutoRoutines {
         //Test autos 
         autos.add("Block Left Reverse", "blockLeftReverse", 10, false, AutoRoutines::blockLeftReverse);
         autos.add("Delayed Deepot", "delayedDeepot", 8, false, AutoRoutines::delayedDeepot);
-        //autos.add("Left Avoid", "leftAvoid", 7, false, AutoRoutines::leftavoid);
+        autos.add("Left Avoid", "leftAvoid", 6, false, AutoRoutines::leftAvoid);
         //autos.add("Left Avoid Depotless", "leftAvoidDepotless", 999, false, AutoRoutines::leftAvoidDepotless);
         //autos.add("Left Two Cycle", "leftTwoCycle", 999, false, AutoRoutines::leftTwoCycle);
         autos.add("Reverse Left Depot", "reverseLeftDepot", 8, false, AutoRoutines::reverseLeftDepot);
-        //autos.add("Right Avoid", "rightAvoid", 999, false, AutoRoutines::rightAvoid);
-        //autos.add("Block Right Reverse", "rightAvoid", 999, false, AutoRoutines::blockRightReverse);
+        //autos.add("Right Avoid", "rightAvoid", 6, false, AutoRoutines::rightAvoid);
+        autos.add("Block Right Reverse", "rightAvoid", 10, false, AutoRoutines::blockRightReverse);
     }
     
     @FunctionalInterface
