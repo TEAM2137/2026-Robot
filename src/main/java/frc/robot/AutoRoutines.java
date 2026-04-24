@@ -367,11 +367,11 @@ public class AutoRoutines {
         autos.add("Block Left Reverse", "blockLeftReverse", 10, false, AutoRoutines::blockLeftReverse);
         autos.add("Delayed Deepot", "delayedDeepot", 8, false, AutoRoutines::delayedDeepot);
         autos.add("Left Avoid", "leftAvoid", 6, false, AutoRoutines::leftAvoid);
-        //autos.add("Left Avoid Depotless", "leftAvoidDepotless", 999, false, AutoRoutines::leftAvoidDepotless);
-        //autos.add("Left Two Cycle", "leftTwoCycle", 999, false, AutoRoutines::leftTwoCycle);
         autos.add("Reverse Left Depot", "reverseLeftDepot", 8, false, AutoRoutines::reverseLeftDepot);
-        //autos.add("Right Avoid", "rightAvoid", 6, false, AutoRoutines::rightAvoid);
+        autos.add("Right Avoid", "rightAvoid", 6, false, AutoRoutines::rightAvoid);
         autos.add("Block Right Reverse", "rightAvoid", 10, false, AutoRoutines::blockRightReverse);
+        //autos.add("Left Avoid Depotless", "leftAvoidDepotless", 3, false, AutoRoutines::leftAvoidDepotless);
+        //autos.add("Left Two Cycle", "leftTwoCycle", 999, false, AutoRoutines::leftTwoCycle);
     }
     
     @FunctionalInterface
