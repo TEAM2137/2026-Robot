@@ -12,14 +12,22 @@ public interface IntakeIO {
         public double pivotPositionRotations;
         public double pivotTargetPositionRotations;
         public boolean pivotConnected;
-        
-        public double rollerAppliedVolts;
-        public double rollerStatorCurrentAmps;
-        public double rollerSupplyCurrentAmps;
-        public double rollerTempCelsius;
-        public double rollerVelocityRpm;
+
         public double rollerTargetVelocityRpm;
-        public boolean rollersConnected;
+        
+        public double rollerLeaderAppliedVolts;
+        public double rollerLeaderStatorCurrentAmps;
+        public double rollerLeaderSupplyCurrentAmps;
+        public double rollerLeaderTempCelsius;
+        public double rollerLeaderVelocityRpm;
+        public boolean rollerLeaderConnected;
+        
+        public double rollerFollowerAppliedVolts;
+        public double rollerFollowerStatorCurrentAmps;
+        public double rollerFollowerSupplyCurrentAmps;
+        public double rollerFollowerTempCelsius;
+        public double rollerFollowerVelocityRpm;
+        public boolean rollerFollowerConnected;
     }
 
     default void setRollerVoltage(double volts) {}

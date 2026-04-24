@@ -16,7 +16,6 @@ public class FlywheelIOTalonFX implements FlywheelIO {
     public static class Constants {
         public static final int leaderId = 30;
         public static final int followerId = 31;
-        // public static final int feederId = 32;
         public static final double gearing = 11.0 / 12.0;
 
         public static final double kP = 0.50;
@@ -69,13 +68,20 @@ public class FlywheelIOTalonFX implements FlywheelIO {
 
     @Override
     public void updateInputs(FlywheelIOInputs inputs) {
-        inputs.appliedVolts = this.leader.getMotorVoltage().getValueAsDouble();
-        inputs.statorCurrentAmps = this.leader.getStatorCurrent().getValueAsDouble();
-        inputs.supplyCurrentAmps = this.leader.getSupplyCurrent().getValueAsDouble();
-        inputs.motorTempCelsius = this.leader.getDeviceTemp().getValueAsDouble();
+        inputs.leaderVelocityRpm = this.leader.getVelocity().getValue().in(RPM);
+        inputs.leaderAppliedVolts = this.leader.getMotorVoltage().getValueAsDouble();
+        inputs.leaderStatorCurrentAmps = this.leader.getStatorCurrent().getValueAsDouble();
+        inputs.leaderSupplyCurrentAmps = this.leader.getSupplyCurrent().getValueAsDouble();
+        inputs.leaderMotorTempCelsius = this.leader.getDeviceTemp().getValueAsDouble();
+        inputs.leaderConnected = this.leader.isConnected() && this.follower.isConnected();
 
-        inputs.velocityRpm = this.leader.getVelocity().getValue().in(RPM);
+        inputs.followerVelocityRpm = this.follower.getVelocity().getValue().in(RPM);
+        inputs.followerAppliedVolts = this.follower.getMotorVoltage().getValueAsDouble();
+        inputs.followerStatorCurrentAmps = this.follower.getStatorCurrent().getValueAsDouble();
+        inputs.followerSupplyCurrentAmps = this.follower.getSupplyCurrent().getValueAsDouble();
+        inputs.followerMotorTempCelsius = this.follower.getDeviceTemp().getValueAsDouble();
+        inputs.followerConnected = this.follower.isConnected() && this.follower.isConnected();
+
         inputs.targetVelocityRpm = this.targetVelocityRpm;
-        inputs.flywheelConnected = this.leader.isConnected() && this.follower.isConnected();
     }
 }

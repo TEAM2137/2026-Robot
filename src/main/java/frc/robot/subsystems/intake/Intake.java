@@ -28,7 +28,7 @@ public class Intake extends SubsystemBase {
         this.inputs = new IntakeIOInputsAutoLogged();
 
         Alerts.add("Intake pivot disconnected", AlertType.kError, () -> !inputs.pivotConnected);
-        Alerts.add("Intake rollers disconnected", AlertType.kError, () -> !inputs.rollersConnected);
+        Alerts.add("Intake rollers disconnected", AlertType.kError, () -> !(inputs.rollerLeaderConnected && inputs.rollerFollowerConnected));
     }
 
     @Override

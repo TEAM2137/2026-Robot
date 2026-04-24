@@ -136,12 +136,20 @@ public class IntakeIOTalonFX implements IntakeIO {
         inputs.pivotTempCelsius = this.pivot.getDeviceTemp().getValueAsDouble();
         inputs.pivotConnected = this.pivot.isConnected();
 
-        inputs.rollerAppliedVolts = this.leader.getMotorVoltage().getValueAsDouble();
-        inputs.rollerStatorCurrentAmps = this.leader.getStatorCurrent().getValueAsDouble();
-        inputs.rollerSupplyCurrentAmps = this.leader.getSupplyCurrent().getValueAsDouble();
-        inputs.rollerTempCelsius = this.leader.getDeviceTemp().getValueAsDouble();
-        inputs.rollerVelocityRpm = this.leader.getVelocity().getValue().in(RPM);
         inputs.rollerTargetVelocityRpm = this.rollerTargetVelocity;
-        inputs.rollersConnected = this.leader.isConnected();
+
+        inputs.rollerLeaderAppliedVolts = this.leader.getMotorVoltage().getValueAsDouble();
+        inputs.rollerLeaderStatorCurrentAmps = this.leader.getStatorCurrent().getValueAsDouble();
+        inputs.rollerLeaderSupplyCurrentAmps = this.leader.getSupplyCurrent().getValueAsDouble();
+        inputs.rollerLeaderTempCelsius = this.leader.getDeviceTemp().getValueAsDouble();
+        inputs.rollerLeaderVelocityRpm = this.leader.getVelocity().getValue().in(RPM);
+        inputs.rollerLeaderConnected = this.leader.isConnected();
+
+        inputs.rollerFollowerAppliedVolts = this.follower.getMotorVoltage().getValueAsDouble();
+        inputs.rollerFollowerStatorCurrentAmps = this.follower.getStatorCurrent().getValueAsDouble();
+        inputs.rollerFollowerSupplyCurrentAmps = this.follower.getSupplyCurrent().getValueAsDouble();
+        inputs.rollerFollowerTempCelsius = this.follower.getDeviceTemp().getValueAsDouble();
+        inputs.rollerFollowerVelocityRpm = this.follower.getVelocity().getValue().in(RPM);
+        inputs.rollerFollowerConnected = this.follower.isConnected();
     }
 }
