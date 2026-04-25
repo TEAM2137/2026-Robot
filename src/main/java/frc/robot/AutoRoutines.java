@@ -334,7 +334,7 @@ public class AutoRoutines {
         return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
     }
 
-     public static UnregisteredAuto rightAvoid(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
+    public static UnregisteredAuto rightAvoid(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
         auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[0].cmd()));
         auto.active().onTrue(robot.intake.startIntakeSequence());
         trajectories[0].done().onTrue(trajectories[1].cmd());
@@ -355,7 +355,46 @@ public class AutoRoutines {
         return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
     }
     
+    public static UnregisteredAuto leftAvoidDepotless(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
+        auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[0].cmd()));
+        auto.active().onTrue(robot.intake.startIntakeSequence());
+        trajectories[0].done().onTrue(Commands.waitSeconds(2).andThen(trajectories[1].cmd()));
+        trajectories[1].done().onTrue(trajectories[2].cmd());
+        trajectories[1].done().onTrue(robot.intake.stopIntakeSequence());
+        trajectories[2].done().onTrue(new SequentialCommandGroup(
+            robot.launcher.setState(LaunchState.LAUNCH),
+            Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME),
+            new SequentialCommandGroup(
+                robot.intake.agitate(),
+                robot.indexer.run().repeatedly().onlyWhile(robot.launcher.getTurret().isAtTarget()),
+                robot.indexer.stop()
+            ).repeatedly()
+        ));
+
+        return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
+    }
     
+    public static UnregisteredAuto leftTwoCycle(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
+        auto.active().onTrue(trajectories[0].resetOdometry().andThen(trajectories[0].cmd()));
+        auto.active().onTrue(robot.intake.startIntakeSequence());
+        trajectories[0].done().onTrue(trajectories[1].cmd());
+        trajectories[0].done().onTrue(robot.launcher.setState(LaunchState.LAUNCH).andThen(Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME)).andThen(robot.indexer.run().andThen(robot.intake.agitate()).repeatedly().onlyWhile(robot.launcher.getTurret().isAtTarget())));
+        trajectories[1].done().onTrue(Commands.waitSeconds(5).andThen(new ParallelCommandGroup(robot.indexer.stop(), robot.launcher.setState(LaunchState.DONT_LAUNCH))).andThen(trajectories[2].cmd()));
+        trajectories[2].done().onTrue(trajectories[3].cmd());
+        trajectories[3].done().onTrue(trajectories[4].cmd());
+        trajectories[4].done().onTrue(trajectories[5].cmd());
+        trajectories[5].done().onTrue(new SequentialCommandGroup(
+            robot.launcher.setState(LaunchState.LAUNCH),
+            Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME),
+            new SequentialCommandGroup(
+                robot.intake.agitate(),
+                robot.indexer.run().repeatedly().onlyWhile(robot.launcher.getTurret().isAtTarget()),
+                robot.indexer.stop()
+            ).repeatedly()));
+        
+        return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
+    }
+
     /** register all the autos defined above */
     public static void registerAutos(AutoFactory factory, AutoRegistry autos) {
         // comp autos
@@ -370,8 +409,8 @@ public class AutoRoutines {
         autos.add("Reverse Left Depot", "reverseLeftDepot", 8, false, AutoRoutines::reverseLeftDepot);
         autos.add("Right Avoid", "rightAvoid", 6, false, AutoRoutines::rightAvoid);
         autos.add("Block Right Reverse", "rightAvoid", 10, false, AutoRoutines::blockRightReverse);
-        //autos.add("Left Avoid Depotless", "leftAvoidDepotless", 3, false, AutoRoutines::leftAvoidDepotless);
-        //autos.add("Left Two Cycle", "leftTwoCycle", 999, false, AutoRoutines::leftTwoCycle);
+        autos.add("Left Avoid Depotless", "leftAvoidDepotless", 3, false, AutoRoutines::leftAvoidDepotless);
+        autos.add("Left Two Cycle", "leftTwoCycle", 6, false, AutoRoutines::leftTwoCycle);
     }
     
     @FunctionalInterface
