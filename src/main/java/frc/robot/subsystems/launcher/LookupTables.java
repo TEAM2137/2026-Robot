@@ -6,19 +6,19 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 
 public class LookupTables {
     public static final InterpolatingDoubleTreeMap flywheelRpmHub = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(1.09, 1910.0),
-        Map.entry(1.50, 1910.0),
-        Map.entry(2.00, 1910.0),
-        Map.entry(2.50, 1965.0),
-        Map.entry(3.00, 2020.0),
-        Map.entry(3.50, 2075.0),
-        Map.entry(4.00, 2180.0),
-        Map.entry(4.50, 2310.0),
-        Map.entry(5.00, 2440.0),
-        Map.entry(5.50, 2530.0),
-        Map.entry(6.00, 2650.0),
-        Map.entry(7.00, 2930.0),
-        Map.entry(8.00, 3185.0)
+        Map.entry(1.09, 2005.0),
+        Map.entry(1.50, 2005.0),
+        Map.entry(2.00, 2005.0),
+        Map.entry(2.50, 2060.0),
+        Map.entry(3.00, 2120.0),
+        Map.entry(3.50, 2180.0),
+        Map.entry(4.00, 2290.0),
+        Map.entry(4.50, 2425.0),
+        Map.entry(5.00, 2560.0),
+        Map.entry(5.50, 2655.0),
+        Map.entry(6.00, 2780.0),
+        Map.entry(7.00, 3075.0),
+        Map.entry(8.00, 3345.0)
     );
 
     public static final InterpolatingDoubleTreeMap hoodAngleHub = InterpolatingDoubleTreeMap.ofEntries(
@@ -48,11 +48,11 @@ public class LookupTables {
     );
 
     public static final InterpolatingDoubleTreeMap flywheelRpmPassing = InterpolatingDoubleTreeMap.ofEntries(
-        Map.entry(4.5, 2125.0),
-        Map.entry(7.5, 2835.0),
-        Map.entry(10.0, 3245.0),
-        Map.entry(12.5, 3820.0),
-        Map.entry(15.3, 4475.0)
+        Map.entry(4.5, 2230.0),
+        Map.entry(7.5, 3125.0),
+        Map.entry(10.0, 3410.0),
+        Map.entry(12.5, 4010.0),
+        Map.entry(15.3, 4700.0)
     );
 
     public static final InterpolatingDoubleTreeMap hoodAnglePassing = InterpolatingDoubleTreeMap.ofEntries(
