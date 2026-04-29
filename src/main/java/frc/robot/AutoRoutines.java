@@ -98,7 +98,7 @@ public class AutoRoutines {
 
         auto.active().onTrue(overBump1.resetOdometry().andThen(overBump1.cmd()));
         auto.active().onTrue(robot.intake.startIntakeSequence());
-        overBump1.doneDelayed(0.5).onTrue(intakePass.cmd());
+        overBump1.doneDelayed(0.2).onTrue(intakePass.cmd());
 
         intakePass.done().onTrue(returnFromIntaking.cmd());
         returnFromIntaking.done().onTrue(overBump2.cmd());

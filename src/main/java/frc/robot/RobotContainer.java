@@ -303,7 +303,7 @@ public class RobotContainer {
         operatorController.povRight().and(RobotModeTriggers.teleop()).onTrue(launcher.getTurret().decreaseTurretOffset());
         operatorController.back().and(RobotModeTriggers.teleop()).onTrue(launcher.getTurret().resetTurretOffset());
 
-        // controller rumble (TODO: test this, it doesn't seem to work in sim)
+        // controller rumble
         ShiftInfo.loseAutoTrigger().whileTrue(Commands.runEnd(() -> {
             driverController.setRumble(RumbleType.kBothRumble, 1);
             operatorController.setRumble(RumbleType.kBothRumble, 1);
