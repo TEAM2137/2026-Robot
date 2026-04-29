@@ -4,7 +4,7 @@
  "snapshot":{
   "waypoints":[
     {"x":3.6, "y":2.5, "heading":0.0, "intervals":30, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
-    {"x":5.7, "y":2.5, "heading":0.0, "intervals":41, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
+    {"x":5.7, "y":2.5, "heading":0.0, "intervals":41, "split":true, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":7.22298002243042, "y":1.9023036499, "heading":0.485034169482486, "intervals":38, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":7.893001556396484, "y":2.762, "heading":1.5707963267948966, "intervals":27, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":7.895374774932861, "y":3.69741244507, "heading":1.5707963267948966, "intervals":43, "split":true, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
@@ -766,7 +766,7 @@
     {"t":21.15271, "x":2.99973, "y":2.501, "heading":0.00497, "vx":0.00837, "vy":-0.03104, "omega":-0.1009, "ax":-0.13035, "ay":0.48255, "alpha":1.46505, "fx":[-5.9456,-5.92651,1.81943,1.77503], "fy":[11.2823,3.97825,4.05132,11.33123]},
     {"t":21.18487, "x":2.99993, "y":2.50025, "heading":0.00173, "vx":0.00418, "vy":-0.01552, "omega":-0.05378, "ax":-0.13002, "ay":0.48264, "alpha":1.67197, "fx":[-6.43771,-6.44082,2.32313,2.29891], "fy":[11.84894,3.43735,3.48625,11.87637]},
     {"t":21.21704, "x":3.0, "y":2.5, "heading":0.0, "vx":0.0, "vy":0.0, "omega":0.0, "ax":0.0, "ay":0.0, "alpha":0.0, "fx":[0.0,0.0,0.0,0.0], "fy":[0.0,0.0,0.0,0.0]}],
-  "splits":[0,136,220,277,332,391,470]
+  "splits":[0,30,136,220,277,332,391,470]
  },
  "events":[]
 }
