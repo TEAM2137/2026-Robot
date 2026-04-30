@@ -16,7 +16,7 @@ public class LookupTables {
         Map.entry(4.50, 2275.0),
         Map.entry(5.00, 2410.0),
         Map.entry(5.50, 2505.0),
-        Map.entry(6.00, 2630.0),
+        Map.entry(6.00, 2640.0),
         Map.entry(7.00, 2925.0),
         Map.entry(8.00, 3195.0)
     );
@@ -38,13 +38,13 @@ public class LookupTables {
         Map.entry(2.50, 0.92),
         Map.entry(3.00, 0.97),
         Map.entry(3.50, 0.97),
-        Map.entry(4.00, 1.05),
-        Map.entry(4.66, 1.10),
-        Map.entry(5.00, 1.23),
-        Map.entry(5.50, 1.30),
-        Map.entry(6.00, 1.35),
-        Map.entry(7.00, 1.55),
-        Map.entry(8.00, 1.72)
+        Map.entry(4.00, 1.02),
+        Map.entry(4.50, 1.02),
+        Map.entry(5.00, 1.12),
+        Map.entry(5.50, 1.20),
+        Map.entry(6.00, 1.32),
+        Map.entry(7.00, 1.50),
+        Map.entry(8.00, 1.67)
     );
 
     public static final InterpolatingDoubleTreeMap flywheelRpmPassing = InterpolatingDoubleTreeMap.ofEntries(
