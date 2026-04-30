@@ -206,7 +206,7 @@ public class RobotContainer {
         launcher.isLaunching().and(RobotModeTriggers.autonomous().negate()).whileTrue(new SequentialCommandGroup(
             Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME),
             new SequentialCommandGroup(
-                indexer.run().asProxy(),
+                indexer.run().asProxy().onlyIf(indexerManualOverride.negate()),
                 Commands.waitUntil(launcher.getTurret().isAtTarget().negate().or(indexerManualOverride)),
                 Commands.either(Commands.waitUntil(indexerManualOverride.negate()), indexer.stop().asProxy(), indexerManualOverride)
             ).repeatedly()
@@ -284,7 +284,7 @@ public class RobotContainer {
         operatorController.a().onTrue(indexer.reverse());
         operatorController.a().onFalse(indexer.stop());
 
-        operatorController.x().whileTrue(indexer.stop().repeatedly());
+        operatorController.x().onTrue(indexer.stop());
 
         operatorController.rightTrigger(0.98).whileTrue(Commands.runEnd(
             () -> launcher.getHood().setVoltage(-3),
