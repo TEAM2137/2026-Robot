@@ -25,7 +25,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
         public static final double kP = 16.0;
         public static final double kD = 0.1;
-        public static final double holdVoltage = 0.1;
+        public static final double holdVoltage = 0.5;
 
         public static final double rollerKP = 0.15;//0.25;
         public static final double rollerKV = 0.117;//0.19;
@@ -105,7 +105,7 @@ public class IntakeIOTalonFX implements IntakeIO {
     @Override
     public void setPosition(double position) {
         this.targetPositionRotations = position;
-        this.pivot.setControl(new MotionMagicVoltage(position));
+        this.pivot.setControl(new MotionMagicVoltage(position).withSlot(0));
     }
 
     @Override
