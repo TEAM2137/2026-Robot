@@ -25,7 +25,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
         public static final double kP = 16.0;
         public static final double kD = 0.1;
-        public static final double holdVoltage = 0.7;
+        public static final double holdVoltage = 0.0;
 
         public static final double rollerKP = 0.15;//0.25;
         public static final double rollerKV = 0.117;//0.19;
