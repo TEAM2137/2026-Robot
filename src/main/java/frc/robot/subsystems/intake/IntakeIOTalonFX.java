@@ -47,7 +47,7 @@ public class IntakeIOTalonFX implements IntakeIO {
         this.leader = new TalonFX(Constants.rollerLeaderId);
         this.leader.getConfigurator().apply(new MotorOutputConfigs()
             .withNeutralMode(NeutralModeValue.Brake)
-            .withInverted(InvertedValue.CounterClockwise_Positive));
+            .withInverted(InvertedValue.Clockwise_Positive));
 
         this.leader.getConfigurator().apply(new Slot0Configs()
             .withKP(Constants.rollerKP).withKV(Constants.rollerKV));
@@ -59,7 +59,7 @@ public class IntakeIOTalonFX implements IntakeIO {
         this.follower = new TalonFX(Constants.rollerFollowerId);
         this.follower.getConfigurator().apply(new MotorOutputConfigs()
             .withNeutralMode(NeutralModeValue.Brake)
-            .withInverted(InvertedValue.CounterClockwise_Positive));
+            .withInverted(InvertedValue.Clockwise_Positive));
         
         this.follower.getConfigurator().apply(new CurrentLimitsConfigs()
             .withSupplyCurrentLimit(25)
