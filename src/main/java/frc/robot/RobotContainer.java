@@ -284,7 +284,7 @@ public class RobotContainer {
         operatorController.a().onTrue(indexer.reverse());
         operatorController.a().onFalse(indexer.stop());
 
-        operatorController.x().onTrue(indexer.stop());
+        operatorController.x().whileTrue(indexer.stop().repeatedly());
 
         operatorController.rightTrigger(0.98).whileTrue(Commands.runEnd(
             () -> launcher.getHood().setVoltage(-3),
