@@ -129,6 +129,33 @@ public class AutoRoutines {
         return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
     }
 
+    public static UnregisteredAuto leftSingleSweep(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
+        AutoTrajectory overBump1 = trajectories[0];
+        AutoTrajectory intakePass = trajectories[1];
+        AutoTrajectory returnFromIntaking = trajectories[2];
+        AutoTrajectory overBump2 = trajectories[3];
+
+        auto.active().onTrue(overBump1.resetOdometry().andThen(overBump1.cmd()));
+        auto.active().onTrue(robot.intake.startIntakeSequence());
+        overBump1.done().onTrue(intakePass.cmd());
+
+        intakePass.done().onTrue(returnFromIntaking.cmd());
+        returnFromIntaking.done().onTrue(overBump2.cmd());
+
+        overBump2.doneDelayed(0.2).onTrue(new SequentialCommandGroup(
+            robot.launcher.setState(LaunchState.LAUNCH),
+            Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME),
+            robot.intake.runRollers(),
+            new SequentialCommandGroup(
+                robot.indexer.run().repeatedly().onlyWhile(robot.launcher.getTurret().isAtTarget()),
+                robot.indexer.stop()
+            ).repeatedly()
+        ));
+        overBump2.doneDelayed(Flywheel.Constants.SPIN_UP_TIME + 1.0).onTrue(robot.intake.agitate());
+
+        return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
+    }
+
     public static UnregisteredAuto rightDoubleSweep(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
         AutoTrajectory overBump1 = trajectories[0];
         AutoTrajectory intakePass = trajectories[1];
@@ -216,6 +243,7 @@ public class AutoRoutines {
         autos.add("Left Depot", "leftDepot", 8, false, AutoRoutines::leftDepot);
         autos.add("Left Depot (No Mid)", "leftDepotNoMid", 4, false, AutoRoutines::leftDepotNoMid);
         autos.add("Left Depot (Follow)", "leftDepotFollow", 8, false, AutoRoutines::leftDepotFollow);
+        autos.add("Left Single Sweep", "leftSingleSweep", 4, false, AutoRoutines::leftSingleSweep);
         autos.add("Right Depot", "rightDepot", 8, false, AutoRoutines::rightDepot);
         autos.add("Right Double Sweep", "rightDoubleSweep", 6, false, AutoRoutines::rightDoubleSweep);
     }
