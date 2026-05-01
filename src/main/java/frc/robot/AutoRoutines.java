@@ -182,7 +182,7 @@ public class AutoRoutines {
                     robot.indexer.stop()
                 ).repeatedly(),
                 robot.intake.agitate()
-            ).withTimeout(7.0),
+            ).withTimeout(9.5),
             robot.launcher.setState(LaunchState.AUTOMATIC),
             robot.intake.deploy(),
             robot.intake.runRollers(),

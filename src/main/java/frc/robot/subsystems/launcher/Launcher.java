@@ -40,6 +40,7 @@ public class Launcher extends SubsystemBase {
     private final Trigger inAllianceZoneDebounced;
     private final Trigger inNeutralZone;
     private final Trigger inNeutralZoneDebounced;
+    private final Trigger inValidFireZone;
 
     private LaunchState state = LaunchState.AUTOMATIC;
     private boolean autofire = false;
@@ -65,6 +66,12 @@ public class Launcher extends SubsystemBase {
 
         this.inNeutralZone = this.inAllianceZone.negate();
         this.inNeutralZoneDebounced = this.inNeutralZone.debounce(1.6);
+
+        this.inValidFireZone = new Trigger(() -> {
+            Translation2d turretPos = turret.getFieldSpacePose().getTranslation();
+            Translation2d flipped = AllianceFlipUtil.shouldFlip() ? AllianceFlipUtil.flip(turretPos) : turretPos;
+            return !FieldConstants.noFireZoneTower.contains(flipped) && !FieldConstants.noFireZoneNet.contains(flipped);
+        });
 
         RobotModeTriggers.disabled().onTrue(this.runOnce(() -> this.state = LaunchState.AUTOMATIC).ignoringDisable(true));
     }
@@ -128,6 +135,7 @@ public class Launcher extends SubsystemBase {
         Logger.recordOutput("Launcher/Triggers/InAllianceZoneDB", this.inAllianceZoneDebounced.getAsBoolean());
         Logger.recordOutput("Launcher/Triggers/InNeutralZone", this.inNeutralZone.getAsBoolean());
         Logger.recordOutput("Launcher/Triggers/InNeutralZoneDB", this.inNeutralZoneDebounced.getAsBoolean());
+        Logger.recordOutput("Launcher/Triggers/InValidFireZone", this.inValidFireZone.getAsBoolean());
 
         Utils.logActiveCommand("Launcher", this);
     }
@@ -137,12 +145,7 @@ public class Launcher extends SubsystemBase {
     }
 
     public Trigger inValidFireZone() {
-        // get flipped turret position
-        Translation2d turretPos = turret.getFieldSpacePose().getTranslation();
-        Translation2d flipped = AllianceFlipUtil.shouldFlip() ? AllianceFlipUtil.flip(turretPos) : turretPos;
-        
-        // compare turret position to no-fire zone rectangles
-        return new Trigger(() -> !FieldConstants.noFireZoneTower.contains(flipped) && !FieldConstants.noFireZoneNet.contains(flipped));
+        return this.inValidFireZone;
     }
 
     public Trigger shouldIndex() {
