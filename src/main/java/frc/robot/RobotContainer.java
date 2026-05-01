@@ -59,7 +59,6 @@ public class RobotContainer {
     private final Supplier<LimitingProfile> limitingProfileSupplier;
     private final Supplier<Translation2d> joystickSupplier;
     private final DoubleSupplier rotationSupplier;
-    private final Trigger indexerManualOverride;
 
     /** The container for the robot. Contains subsystems, IO devices, and commands. */
     public RobotContainer() {
@@ -172,7 +171,6 @@ public class RobotContainer {
         this.limitingProfileSupplier = () -> launcher.shouldLimitDrive() && !operatorController.x().getAsBoolean() ? LimitingProfile.SOTF : LimitingProfile.DEFAULT;
         this.joystickSupplier = () -> new Translation2d(-driverController.getLeftY(), -driverController.getLeftX());
         this.rotationSupplier = () -> -driverController.getRightX() * 0.87;
-        this.indexerManualOverride = operatorController.a().or(operatorController.x());
         
         // Configure the controller bindings
         configureControllerBindings();
@@ -188,11 +186,11 @@ public class RobotContainer {
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureControllerBindings() {
-        // Default command, normal field-relative drive
+        // default driver drive command
         drive.setDefaultCommand(DriveCommands.joystickDrive(drive, joystickSupplier, rotationSupplier, limitingProfileSupplier)
             .withName("Default Drive Command"));
 
-        // Reset gyro to 0°
+        // reset robot rotation
         driverController.start().onTrue(Commands.runOnce(() ->
             drive.setPose(new Pose2d(
                     drive.getPose().getTranslation(),
@@ -202,31 +200,33 @@ public class RobotContainer {
             )), drive)
             .ignoringDisable(true)
             .withName("Reset Gyro"));
-            
-        launcher.isLaunching().and(RobotModeTriggers.autonomous().negate()).whileTrue(new SequentialCommandGroup(
-            Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME),
-            new SequentialCommandGroup(
-                indexer.run().asProxy().onlyIf(indexerManualOverride.negate()),
-                Commands.waitUntil(launcher.getTurret().isAtTarget().negate().or(indexerManualOverride)),
-                Commands.either(Commands.waitUntil(indexerManualOverride.negate()), indexer.stop().asProxy(), indexerManualOverride)
-            ).repeatedly()
-        ).withName("Run Indexer"));
 
-        launcher.isLaunching().and(RobotModeTriggers.autonomous().negate()).whileTrue(Commands.either(
+        // define common triggers to avoid creating copies of the same ones
+        Trigger notAuto = RobotModeTriggers.autonomous().negate();
+        Trigger teleopOrTest = RobotModeTriggers.teleop().or(RobotModeTriggers.test());
+        Trigger isLaunching = launcher.isLaunching();
+        Trigger shouldIndex = launcher.shouldIndex();
+        Trigger overrideIndexer = operatorController.a().or(operatorController.x());
+
+        // global indexer logic
+        shouldIndex.and(notAuto).and(overrideIndexer.negate()).onTrue(indexer.run().withName("Run Indexer"));
+        shouldIndex.and(notAuto).onFalse(indexer.stop().onlyIf(overrideIndexer.negate()).withName("Stop Indexer"));
+        overrideIndexer.onFalse(indexer.stop().onlyIf(shouldIndex.negate()).withName("Stop Manual Indexer"));
+
+        // global intake logic
+        
+        isLaunching.and(notAuto).whileTrue(Commands.either(
             Commands.none(), intake.agitate(),
             driverController.leftBumper()
         ).withName("Intake Agitation"));
 
-        launcher.isLaunching().and(RobotModeTriggers.autonomous().negate()).onFalse(new SequentialCommandGroup(
-            indexer.stop(),
+        isLaunching.and(notAuto).onFalse(new SequentialCommandGroup(
             new ConditionalCommand(
                 Commands.none(),
                 intake.deploy().andThen(intake.stopRollers()),
                 driverController.leftBumper()
             )
-        ).withName("Stop Indexer"));
-
-        Trigger teleopOrTest = RobotModeTriggers.teleop().or(RobotModeTriggers.test());
+        ).withName("Deploy Intake After Agitation"));
 
         driverController.leftBumper().and(teleopOrTest).onTrue(new SequentialCommandGroup(
             intake.deploy(),
@@ -236,26 +236,30 @@ public class RobotContainer {
         driverController.leftBumper().and(teleopOrTest).onFalse(new ConditionalCommand(
             intake.agitate(),
             intake.stopIntakeSequence(),
-            launcher.isLaunching()
+            isLaunching
         ).withName("Stop Intaking"));
 
+        // configure mode-specific bindings
         this.configureTeleopBindings();
         this.configureTestBindings();
     }
 
     // configure teleop specific bindings here
     private void configureTeleopBindings() {
+        // driver utilities
         driverController.a().and(RobotModeTriggers.teleop()).whileTrue(DriveCommands.joystickDriveSnake(
             drive, joystickSupplier, limitingProfileSupplier));
         driverController.rightTrigger().and(RobotModeTriggers.teleop()).whileTrue(DriveCommands.joystickDriveCardinalLock(
             drive, joystickSupplier, rotationSupplier, limitingProfileSupplier));
         driverController.leftTrigger().and(RobotModeTriggers.teleop()).whileTrue(DriveCommands.joystickDriveBumpAlign(drive, joystickSupplier));
 
+        // driver "don't launch" button
         driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test()))
             .onTrue(launcher.setState(LaunchState.DONT_LAUNCH).withName("Don't Launch"));
         driverController.rightBumper().and(RobotModeTriggers.teleop().or(RobotModeTriggers.test()))
             .onFalse(launcher.setState(LaunchState.AUTOMATIC).withName("Re-enable Autofire"));
 
+        // x-locking
         Command xLockCommand = drive.xLockCommand().withName("X-Lock");
         Trigger xLock = launcher.isLaunching()
             .and(RobotModeTriggers.teleop())
@@ -263,52 +267,48 @@ public class RobotContainer {
             .and(() -> Math.abs(this.driverController.getRightX() * 0.75) < DriveCommands.DEADBAND)
             .and(() -> drive.getDefaultCommand().isScheduled() || xLockCommand.isScheduled())
             .debounce(0.25);
-
         xLock.whileTrue(xLockCommand);
         
-        Command retractIntake = new SequentialCommandGroup(
+        // operator intake controls
+        operatorController.y().whileTrue(intake.agitate());
+        operatorController.y().onFalse(new SequentialCommandGroup(
             intake.retract(),
             intake.runRollers(),
             Commands.waitSeconds(0.5),
             intake.stopRollers()
-        ).withName("Retract Intake");
-
-        // RobotModeTriggers.disabled().onFalse(retractIntake);
-
-        operatorController.y().whileTrue(intake.agitate());
-        operatorController.y().onFalse(retractIntake);
-
+        ).withName("Retract Intake"));
         operatorController.b().onTrue(intake.deploy().andThen(intake.setRollerVoltage(-12)));
         operatorController.b().onFalse(intake.runRollers());
 
+        // operator indexer controls
         operatorController.a().onTrue(indexer.reverse());
-        operatorController.a().onFalse(indexer.stop());
-
         operatorController.x().onTrue(indexer.stop());
 
-        operatorController.rightTrigger(0.98).whileTrue(Commands.runEnd(
-            () -> launcher.getHood().setVoltage(-3),
-            () -> launcher.getHood().resetPositionRaw()
-        ));
-
-        operatorController.leftTrigger(0.98).whileTrue(new SequentialCommandGroup(
-            intake.setPivotVoltage(-3),
-            Commands.runEnd(() -> {}, () -> intake.resetPosition().schedule())
-        ));
-
+        // operator turret controls
         operatorController.povLeft().and(launcher.getTurret().isNotZeroed()).onTrue(launcher.getTurret().setVoltage(-0.5));
         operatorController.povLeft().and(launcher.getTurret().isNotZeroed()).onFalse(launcher.getTurret().setVoltage(0));
         operatorController.povRight().and(launcher.getTurret().isNotZeroed()).onTrue(launcher.getTurret().setVoltage(0.5));
         operatorController.povRight().and(launcher.getTurret().isNotZeroed()).onFalse(launcher.getTurret().setVoltage(0));
         operatorController.start().onTrue(launcher.getTurret().markAsUnzeroed().ignoringDisable(true));
 
-        // operatorController.start().onTrue(launcher.getTurret().resetPosition().ignoringDisable(true));
-        operatorController.rightBumper().onTrue(launcher.getHood().resetPosition().ignoringDisable(true));
-        operatorController.leftBumper().onTrue(intake.resetPosition().ignoringDisable(true));
-
+        // operator turret offsets
         operatorController.povLeft().and(RobotModeTriggers.teleop()).onTrue(launcher.getTurret().increaseTurretOffset());
         operatorController.povRight().and(RobotModeTriggers.teleop()).onTrue(launcher.getTurret().decreaseTurretOffset());
         operatorController.back().and(RobotModeTriggers.teleop()).onTrue(launcher.getTurret().resetTurretOffset());
+
+        // operator zeroes (disabled)
+        operatorController.rightBumper().onTrue(launcher.getHood().resetPosition().ignoringDisable(true));
+        operatorController.leftBumper().onTrue(intake.resetPosition().ignoringDisable(true));
+
+        // operator zeroes (enabled)
+        operatorController.rightTrigger(0.98).whileTrue(Commands.runEnd(
+            () -> launcher.getHood().setVoltage(-3),
+            () -> launcher.getHood().resetPositionRaw()
+        ));
+        operatorController.leftTrigger(0.98).whileTrue(new SequentialCommandGroup(
+            intake.setPivotVoltage(-3),
+            Commands.runEnd(() -> {}, () -> intake.resetPosition().schedule())
+        ));
 
         // controller rumble
         ShiftInfo.loseAutoTrigger().whileTrue(Commands.runEnd(() -> {

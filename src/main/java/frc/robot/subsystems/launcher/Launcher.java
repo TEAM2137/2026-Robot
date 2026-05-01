@@ -69,10 +69,6 @@ public class Launcher extends SubsystemBase {
         RobotModeTriggers.disabled().onTrue(this.runOnce(() -> this.state = LaunchState.AUTOMATIC).ignoringDisable(true));
     }
 
-    public Trigger isLaunching() {
-        return this.isLaunching;
-    }
-
     public Command setState(LaunchState state) {
         return runOnce(() -> this.setLaunchState(state));
     }
@@ -135,24 +131,36 @@ public class Launcher extends SubsystemBase {
 
         Utils.logActiveCommand("Launcher", this);
     }
+    
+    public Trigger isLaunching() {
+        return this.isLaunching;
+    }
 
-    public boolean shouldAutofire(Translation2d robot, double timeOfFlight) {
-        if (DriverStation.isAutonomous() || DriverStation.isTestEnabled()) return false;
-
+    public Trigger inValidFireZone() {
         // get flipped turret position
         Translation2d turretPos = turret.getFieldSpacePose().getTranslation();
         Translation2d flipped = AllianceFlipUtil.shouldFlip() ? AllianceFlipUtil.flip(turretPos) : turretPos;
         
+        // compare turret position to no-fire zone rectangles
+        return new Trigger(() -> !FieldConstants.noFireZoneTower.contains(flipped) && !FieldConstants.noFireZoneNet.contains(flipped));
+    }
+
+    public Trigger shouldIndex() {
+        return this.isLaunching().debounce(Flywheel.Constants.SPIN_UP_TIME)
+            .and(this.turret.isAtTarget()).and(this.inValidFireZone());
+    }
+
+    public boolean shouldAutofire(Translation2d robot, double timeOfFlight) {
+        if (DriverStation.isAutonomous() || DriverStation.isTestEnabled()) return false;
+
         // should we try to score in the hub?
         if (this.inAllianceZone.getAsBoolean()) {
             if (!this.willFuelBeScored(timeOfFlight)) return false;
-            return this.inAllianceZoneDebounced.getAsBoolean()
-                && !FieldConstants.noFireZoneTower.contains(flipped);
+            return this.inAllianceZoneDebounced.getAsBoolean();
         }
 
         // should we try to pass?
-        return this.inNeutralZoneDebounced.getAsBoolean()
-            && !FieldConstants.noFireZoneNet.contains(flipped);
+        return this.inNeutralZoneDebounced.getAsBoolean();
     }
 
     public boolean willFuelBeScored(double timeOfFlight) {
