@@ -205,7 +205,7 @@ public class RobotContainer {
         Trigger notAuto = RobotModeTriggers.autonomous().negate();
         Trigger teleopOrTest = RobotModeTriggers.teleop().or(RobotModeTriggers.test());
         Trigger isLaunching = launcher.isLaunching();
-        Trigger shouldIndex = launcher.shouldIndex();
+        Trigger shouldIndex = launcher.shouldIndex().and(driverController.leftTrigger().negate());
         Trigger overrideIndexer = operatorController.a().or(operatorController.x());
 
         // global indexer logic
