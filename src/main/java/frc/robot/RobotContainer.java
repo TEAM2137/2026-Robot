@@ -177,6 +177,7 @@ public class RobotContainer {
 
         // necessary
         Alerts.add("Robot is too tall to fit under the trench!", AlertType.kInfo, () -> DriverStation.isDisabled());
+        Alerts.add("Make sure the hopper camera is on!!!!", AlertType.kInfo, () -> DriverStation.isDisabled());
     }
 
     /**

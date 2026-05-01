@@ -44,7 +44,7 @@ public class DriveCommands {
     public static final double WHEEL_RADIUS_RAMP_RATE = 0.5; // Rad/Sec^2
 
     public static final double MAX_LINEAR_ACCELERATION = 12.0; // Meters/Sec^2
-    public static final double MAX_ANGULAR_ACCELERATION = 9.0; // Rad/Sec^2
+    public static final double MAX_ANGULAR_ACCELERATION = 11.0; // Rad/Sec^2
 
     private DriveCommands() {}
 

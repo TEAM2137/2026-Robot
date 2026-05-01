@@ -14,8 +14,7 @@ public class IndexerIOTalonFX implements IndexerIO {
         public static final double feederGearing = 1.0;
 
         public static final double indexerStatorCurrentLimit = 35.0;
-        public static final double feederStatorCurrentLimit = 35.0;
-        public static final double reverserStatorCurrentLimit = 25.0;
+        public static final double feederStatorCurrentLimit = 45.0;
     }
 
     protected final TalonFX indexer;
