@@ -10,7 +10,7 @@ public record LimitingProfile(String name,
     );
 
     public static final LimitingProfile SOTF = new LimitingProfile("sotf",
-        1.0, 0.45, 0.7,
+        1.0, 0.45, 0.48,
         1.0, 0.2, 0.4
     );
 
