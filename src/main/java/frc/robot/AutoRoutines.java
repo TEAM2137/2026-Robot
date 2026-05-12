@@ -30,7 +30,7 @@ public class AutoRoutines {
         intakePass.done().onTrue(returnFromIntaking.cmd());
         returnFromIntaking.done().onTrue(overBump2.cmd());
 
-        overBump2.done().onTrue(new SequentialCommandGroup(
+        overBump2.doneDelayed(0.2).onTrue(new SequentialCommandGroup(
             robot.launcher.setState(LaunchState.LAUNCH),
             Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME),
             robot.intake.runRollers(),
@@ -98,12 +98,12 @@ public class AutoRoutines {
 
         auto.active().onTrue(overBump1.resetOdometry().andThen(overBump1.cmd()));
         auto.active().onTrue(robot.intake.startIntakeSequence());
-        overBump1.doneDelayed(0.5).onTrue(intakePass.cmd());
+        overBump1.done().onTrue(intakePass.cmd());
 
         intakePass.done().onTrue(returnFromIntaking.cmd());
         returnFromIntaking.done().onTrue(overBump2.cmd());
 
-        overBump2.done().onTrue(new SequentialCommandGroup(
+        overBump2.doneDelayed(0.4).onTrue(new SequentialCommandGroup(
             robot.launcher.setState(LaunchState.LAUNCH),
             Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME),
             robot.intake.runRollers(),
@@ -113,7 +113,6 @@ public class AutoRoutines {
             ).repeatedly()
         ));
         overBump2.done().onTrue(lineupForDepot.cmd());
-        overBump2.doneDelayed(Flywheel.Constants.SPIN_UP_TIME + 0.5).onTrue(robot.intake.agitate());
 
         lineupForDepot.done().onTrue(robot.intake.startIntakeSequence());
         lineupForDepot.done().onTrue(backupIntoDepot.cmd());
@@ -125,6 +124,33 @@ public class AutoRoutines {
             robot.intake.agitate()
         ));
         driveOverDepot.done().onTrue(driveOut.cmd());
+
+        return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
+    }
+
+    public static UnregisteredAuto leftSingleSweep(AutoRoutine auto, AutoTrajectory[] trajectories, RobotContainer robot) {
+        AutoTrajectory overBump1 = trajectories[0];
+        AutoTrajectory intakePass = trajectories[1];
+        AutoTrajectory returnFromIntaking = trajectories[2];
+        AutoTrajectory overBump2 = trajectories[3];
+
+        auto.active().onTrue(overBump1.resetOdometry().andThen(overBump1.cmd()));
+        auto.active().onTrue(robot.intake.startIntakeSequence());
+        overBump1.done().onTrue(intakePass.cmd());
+
+        intakePass.done().onTrue(returnFromIntaking.cmd());
+        returnFromIntaking.done().onTrue(overBump2.cmd());
+
+        overBump2.doneDelayed(0.2).onTrue(new SequentialCommandGroup(
+            robot.launcher.setState(LaunchState.LAUNCH),
+            Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME),
+            robot.intake.runRollers(),
+            new SequentialCommandGroup(
+                robot.indexer.run().repeatedly().onlyWhile(robot.launcher.getTurret().isAtTarget()),
+                robot.indexer.stop()
+            ).repeatedly()
+        ));
+        overBump2.doneDelayed(Flywheel.Constants.SPIN_UP_TIME + 1.0).onTrue(robot.intake.agitate());
 
         return new UnregisteredAuto(auto, () -> trajectories[0].getInitialPose().orElse(null));
     }
@@ -147,7 +173,7 @@ public class AutoRoutines {
         intakePass.done().onTrue(returnFromIntaking.cmd());
         returnFromIntaking.done().onTrue(overBump2.cmd());
 
-        overBump2.atTimeBeforeEnd(0.8).onTrue(new SequentialCommandGroup(
+        overBump2.doneDelayed(0.2).onTrue(new SequentialCommandGroup(
             robot.launcher.setState(LaunchState.LAUNCH),
             Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME),
             new ParallelCommandGroup(
@@ -156,7 +182,7 @@ public class AutoRoutines {
                     robot.indexer.stop()
                 ).repeatedly(),
                 robot.intake.agitate()
-            ).withTimeout(7.0),
+            ).withTimeout(9.5),
             robot.launcher.setState(LaunchState.AUTOMATIC),
             robot.intake.deploy(),
             robot.intake.runRollers(),
@@ -188,7 +214,7 @@ public class AutoRoutines {
         intakePass.done().onTrue(returnFromIntaking.cmd());
         returnFromIntaking.done().onTrue(overBump2.cmd());
 
-        overBump2.done().onTrue(new SequentialCommandGroup(
+        overBump2.doneDelayed(0.4).onTrue(new SequentialCommandGroup(
             robot.launcher.setState(LaunchState.LAUNCH),
             Commands.waitSeconds(Flywheel.Constants.SPIN_UP_TIME),
             robot.intake.runRollers(),
@@ -216,6 +242,7 @@ public class AutoRoutines {
         autos.add("Left Depot", "leftDepot", 8, false, AutoRoutines::leftDepot);
         autos.add("Left Depot (No Mid)", "leftDepotNoMid", 4, false, AutoRoutines::leftDepotNoMid);
         autos.add("Left Depot (Follow)", "leftDepotFollow", 8, false, AutoRoutines::leftDepotFollow);
+        autos.add("Left Single Sweep", "leftSingleSweep", 4, false, AutoRoutines::leftSingleSweep);
         autos.add("Right Depot", "rightDepot", 8, false, AutoRoutines::rightDepot);
         autos.add("Right Double Sweep", "rightDoubleSweep", 6, false, AutoRoutines::rightDoubleSweep);
     }

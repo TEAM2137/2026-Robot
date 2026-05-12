@@ -40,6 +40,7 @@ public class Launcher extends SubsystemBase {
     private final Trigger inAllianceZoneDebounced;
     private final Trigger inNeutralZone;
     private final Trigger inNeutralZoneDebounced;
+    private final Trigger inValidFireZone;
 
     private LaunchState state = LaunchState.AUTOMATIC;
     private boolean autofire = false;
@@ -66,11 +67,13 @@ public class Launcher extends SubsystemBase {
         this.inNeutralZone = this.inAllianceZone.negate();
         this.inNeutralZoneDebounced = this.inNeutralZone.debounce(1.6);
 
-        RobotModeTriggers.disabled().onTrue(this.runOnce(() -> this.state = LaunchState.AUTOMATIC).ignoringDisable(true));
-    }
+        this.inValidFireZone = new Trigger(() -> {
+            Translation2d turretPos = turret.getFieldSpacePose().getTranslation();
+            Translation2d flipped = AllianceFlipUtil.shouldFlip() ? AllianceFlipUtil.flip(turretPos) : turretPos;
+            return !FieldConstants.noFireZoneTower.contains(flipped) && !FieldConstants.noFireZoneNet.contains(flipped);
+        });
 
-    public Trigger isLaunching() {
-        return this.isLaunching;
+        RobotModeTriggers.disabled().onTrue(this.runOnce(() -> this.state = LaunchState.AUTOMATIC).ignoringDisable(true));
     }
 
     public Command setState(LaunchState state) {
@@ -132,27 +135,35 @@ public class Launcher extends SubsystemBase {
         Logger.recordOutput("Launcher/Triggers/InAllianceZoneDB", this.inAllianceZoneDebounced.getAsBoolean());
         Logger.recordOutput("Launcher/Triggers/InNeutralZone", this.inNeutralZone.getAsBoolean());
         Logger.recordOutput("Launcher/Triggers/InNeutralZoneDB", this.inNeutralZoneDebounced.getAsBoolean());
+        Logger.recordOutput("Launcher/Triggers/InValidFireZone", this.inValidFireZone.getAsBoolean());
 
         Utils.logActiveCommand("Launcher", this);
+    }
+    
+    public Trigger isLaunching() {
+        return this.isLaunching;
+    }
+
+    public Trigger inValidFireZone() {
+        return this.inValidFireZone;
+    }
+
+    public Trigger shouldIndex() {
+        return this.isLaunching().debounce(Flywheel.Constants.SPIN_UP_TIME)
+            .and(this.turret.isAtTarget()).and(this.inValidFireZone());
     }
 
     public boolean shouldAutofire(Translation2d robot, double timeOfFlight) {
         if (DriverStation.isAutonomous() || DriverStation.isTestEnabled()) return false;
 
-        // get flipped turret position
-        Translation2d turretPos = turret.getFieldSpacePose().getTranslation();
-        Translation2d flipped = AllianceFlipUtil.shouldFlip() ? AllianceFlipUtil.flip(turretPos) : turretPos;
-        
         // should we try to score in the hub?
         if (this.inAllianceZone.getAsBoolean()) {
             if (!this.willFuelBeScored(timeOfFlight)) return false;
-            return this.inAllianceZoneDebounced.getAsBoolean()
-                && !FieldConstants.noFireZoneTower.contains(flipped);
+            return this.inAllianceZoneDebounced.getAsBoolean();
         }
 
         // should we try to pass?
-        return this.inNeutralZoneDebounced.getAsBoolean()
-            && !FieldConstants.noFireZoneNet.contains(flipped);
+        return this.inNeutralZoneDebounced.getAsBoolean();
     }
 
     public boolean willFuelBeScored(double timeOfFlight) {

@@ -19,9 +19,7 @@ public class Utils {
         );
     }
 
-    /**
-     * @return true if the robot is running in sim, false otherwise
-     */
+    /** @return true if the robot is running in sim, false otherwise */
     public static boolean isSim() {
         return Constants.currentRobotType == RobotType.SIM;
     }
@@ -45,16 +43,12 @@ public class Utils {
         };
     }
     
-    /**
-     * @return A copy of the given translation vector with a magnitude of 1
-     */
+    /** @return A copy of the given translation vector with a magnitude of 1 */
     public static Translation2d normalize(Translation2d vector) {
         return vector.div(vector.getNorm());
     }
 
-    /**
-     * @return The dot product of translations a and b
-     */
+    /** @return The dot product of translations a and b */
     public static double dot(Translation2d a, Translation2d b) {
         return a.getX() * b.getX() + a.getY() * b.getY();
     }

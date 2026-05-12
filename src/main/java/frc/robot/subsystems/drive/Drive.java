@@ -114,7 +114,7 @@ public class Drive extends SubsystemBase {
         // Configure SysId
         sysId = new SysIdRoutine(
             new SysIdRoutine.Config(
-                Volts.of(1.0).per(Second), null, Seconds.of(4),
+                Volts.of(1.0).per(Second), Volts.of(12), Seconds.of(4),
                 (state) -> Logger.recordOutput("Drive/SysIdTestState", state.toString())
             ),
             new SysIdRoutine.Mechanism(
